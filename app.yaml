@@ -1,0 +1,25 @@
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: true
+application: connexus-yw
+
+# Handlers match in order, put above the default handler.
+handlers:
+- url: /scripts
+  static_dir: scripts
+
+- url: /stylesheets
+  static_dir: stylesheets
+  
+- url: /handlers
+  script: rounting.app
+
+- url: /.*
+  script: routing.app
+
+libraries:
+- name: webapp2
+  version: latest
+- name: jinja2
+  version: latest
