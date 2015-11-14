@@ -21,7 +21,7 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge", "size": 10 }]}]}]}';
+var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 //d3.json("/mbostock/raw/4063550/flare.json", function(error, flare) {
 //  if (error) throw error;
 
@@ -143,6 +143,7 @@ function click(d) {
     d._children = null;
   }
   update(d);
+  d3.select(".popup").remove()
 }
 
 function contextmenu(d) {

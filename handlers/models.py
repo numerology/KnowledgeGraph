@@ -25,5 +25,5 @@ class Node(ndb.Model):
 
 class User(ndb.Model):
     email = ndb.StringProperty()
-    root = ndb.StructuredProperty()
+    root = ndb.StructuredProperty(Node)
 
