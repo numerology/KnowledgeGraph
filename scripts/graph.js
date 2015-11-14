@@ -176,7 +176,7 @@ function expandAddMenu(d){
 
     popup.append("h2").text("Adding child to "+ currentClass);
     popup.append("form").attr("class", "from-horizontal")
-        .attr("action","/api/add")
+        .attr("action","/api/addChild/"+currentClass)
         .attr("method","post")
         .append("p")
         .append("input")
@@ -186,7 +186,7 @@ function expandAddMenu(d){
 
     d3.select("form").append("input")
         .attr("type", "text")
-        .attr("name","childrenName")
+        .attr("name","childName")
         .attr("placeholder", "Enter Children's Name");
 
 }
