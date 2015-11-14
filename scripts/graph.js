@@ -4,7 +4,7 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
-
+var currentClass;
 var i = 0,
     duration = 750,
     root;
@@ -21,13 +21,13 @@ var svg = d3.select("body").append("svg")
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
-//d3.json("/mbostock/raw/4063550/flare.json", function(error, flare) {
+//var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
+d3.json("/getJSON", function(flare) {
 //  if (error) throw error;
 
-//  root = flare;
+  root = flare;
 
-  root = JSON.parse(myjson);
+//  root = JSON.parse(myjson);
   root.x0 = height / 2;
   root.y0 = 0;
 
@@ -41,7 +41,7 @@ var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"
 
   root.children.forEach(collapse);
   update(root);
-//});
+});
 
 d3.select(self.frameElement).style("height", "800px");
 
@@ -143,7 +143,7 @@ function click(d) {
     d._children = null;
   }
   update(d);
-  d3.select(".popup").remove()
+  d3.selectAll(".popup").remove()
 }
 
 function contextmenu(d) {
@@ -151,12 +151,42 @@ function contextmenu(d) {
     if(contextMenuShowing){
         d3.select(".popup").remove()
     }
-
+    var _currentClass = d.name;
     popup = d3.select("body")
             .append("div")
             .attr("class", "popup")
             .style("left", (d.y)+"px")
             .style("top", (d.x+40)+"px");
     popup.append("h2").text(d.name);
+    popup.append("button").attr("class", "btn btn-primary")
+        .text("Add child")
+        .on("click", function(d){
+            currentClass = _currentClass;
+            expandAddMenu(d);
+        });
+
     contextMenuShowing = true;
+}
+
+function expandAddMenu(d){
+    d3.event.preventDefault();
+    popup = d3.select("body")
+            .append("div")
+            .attr("class", "popup");
+
+    popup.append("h2").text("Adding child to "+ currentClass);
+    popup.append("form").attr("class", "from-horizontal")
+        .attr("action","/api/add")
+        .attr("method","post")
+        .append("p")
+        .append("input")
+        .attr("class", "btn btn-primary")
+        .attr("type","submit")
+        .attr("value","Add");
+
+    d3.select("form").append("input")
+        .attr("type", "text")
+        .attr("name","childrenName")
+        .attr("placeholder", "Enter Children's Name");
+
 }
