@@ -6,7 +6,12 @@
     <link href="//bootswatch.com/flatly/bootstrap.min.css" rel="stylesheet">
 <title>Knowledge Graph</title>
 </head>
-<body></body>
+<body>
+<a class="btn btn-primary btn-lg" href="{{login_url}}"> Please Sign in or register</a>
+</body>
 <script src="//d3js.org/d3.v3.min.js"></script>
+<script>
+var userID = {{user_id}};
+</script>
 <script src="/scripts/graph.js" type = "text/javascript"></script>
 {% endautoescape %}

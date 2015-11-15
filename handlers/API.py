@@ -10,8 +10,12 @@ import jinja2
 import json
 
 def node_collapse(node):
+    '''
+    :param node: a Node obj
+    :return: formatted dict based on NDB data
+    '''
     if (len(node.childrenIDs)==0):
-        return {"name": node.name}
+        return {"name": node.name, "children" : []}
     else:
         children = []
         for childID in node.childrenIDs:
@@ -33,10 +37,25 @@ class AddChildHandler(webapp2.RequestHandler):
         self.redirect('/')
 
 
+class CreateRoot(webapp2.RequestHandler):
+    def post(self):
+        user_email = self.request.get('user_email')
+        root_name = self.request.get('root_name')
+        rt_node = Node(name = root_name, childrenIDs = [])
+        rt_node.put()
+
+        new_user_prof = User(email = user_email, rootID = str(rt_node.key.id()))
+        new_user_prof.put()
+        self.redirect('/graph')
+        return
+
+
 class ReturnJSON(webapp2.RequestHandler):
-    def get(self):
-        #current_user = User.query(User.email == user_email).get()
-        #root_node = current_user.root
+    def get(self,user_id):
+        current_user = User.get_by_id(int(user_id))
+        print(current_user.email)
+        root_node = Node.get_by_id(int(current_user.rootID))
+        '''
         cnode_list = Node.query(Node.name=='cvx optimization').fetch()
 
         if(len(cnode_list)==0):
@@ -54,10 +73,15 @@ class ReturnJSON(webapp2.RequestHandler):
             root_node = Node.query(Node.name=='cvx optimization').get()
         # the output json has the following format: (it is a dict)
         # {"name": name, "children": list of a dict, where each element has a name and a list of children}
-        out_dict = node_collapse(root_node)
+        '''
 
+
+        out_dict = node_collapse(root_node)
+        print(out_dict)
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(out_dict))
 
         return
+
+
 

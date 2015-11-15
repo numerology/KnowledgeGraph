@@ -22,7 +22,7 @@ var svg = d3.select("body").append("svg")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
-d3.json("/getJSON", function(flare) {
+d3.json("/getJSON/" + userID, function(flare) {
 //  if (error) throw error;
 
   root = flare;

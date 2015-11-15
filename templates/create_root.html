@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create your root</title>
+    <link href="//bootswatch.com/flatly/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <form class = "form_horizontal" action = "/api/createroot" method = "post">
+        <p><input class = "btn btn-primary" type = "submit" value = "Create Root"></p>
+        <input type = "hidden" name = "user_email" value = {{user_email}}>
+        <input type = "text" class="form-control" name = "root_name" placeholder = "input the name for your root">
+    </form>
+</body>
+</html>
