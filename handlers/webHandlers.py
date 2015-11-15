@@ -4,14 +4,11 @@ from google.appengine.ext import blobstore
 import webapp2
 import operator
 from models import *
+from constants import JINJA_ENVIRONMENT
 
 import jinja2
 import os
 
-JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__),'../templates')),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -22,10 +19,11 @@ class MainPage(webapp2.RequestHandler):
         else:
             url = users.create_login_url('/')
 
-        template_values = {'login_url':url}
+        template_values = {'login_url': url}
         template = JINJA_ENVIRONMENT.get_template('main.html')
 
         self.response.write(template.render(template_values))
+
 
 class GraphHandler(webapp2.RequestHandler):
     def get(self):
@@ -40,9 +38,10 @@ class GraphHandler(webapp2.RequestHandler):
             self.redirect('/createroot')
             return
 
+
 class CreateRootHandler(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
-        template_values = {'user_email':str(user.email())}
+        template_values = {'user_email': str(user.email())}
         template = JINJA_ENVIRONMENT.get_template('create_root.html')
         self.response.write(template.render(template_values))

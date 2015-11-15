@@ -17,7 +17,7 @@ def node_collapse(node):
     :param node: a Node obj
     :return: formatted dict based on NDB data
     '''
-    if (len(node.childrenIDs)==0):
+    if len(node.childrenIDs) == 0:
         return {"name": node.name}
     else:
         children = []
@@ -25,14 +25,14 @@ def node_collapse(node):
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
 
-        return {"name": node.name, "children":children}
+        return {"name": node.name, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
     def post(self, cname):
         child_name = self.request.get('childName')
         cnode = Node.query(Node.name == cname).get()
-        child_node = Node(name = child_name, childrenIDs = [])
+        child_node = Node(name=child_name, childrenIDs=[])
         child_node.put()
 
         cnode.childrenIDs.append(str(child_node.key.id()))

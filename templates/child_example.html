@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+<!-- 1. Head -->
+{% block title %} Child Example {% endblock title %} <!title of page>
+{% block script %}
+    {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
+    <! fill additional script herer>
+{% endblock script%}
+{% block style %}
+    {{ super() }} <! render autocomplete style>
+    <! additional style files>
+{% endblock style %}
+{% block head %}
+    {{super()}}
+{% endblock head%}
+
+<!-- 2. Body -->
+<!-- 2.1 nav bar -->
+{% block nav_items %}
+    {{super()}} <!render basic nav bar items>
+{% endblock nav_items %}
+{% block search %}
+    {{super()}} <!render search box in nav bar>
+{% endblock search %}
+{% block logout%}
+    {{super()}}
+{% endblock logout%}
+{% block navbar %}
+    {{super()}}
+{% endblock navbar %}
+<!-- 2.2 page header -->
+{% block page_header_string %}
+    Child Example
+{% endblock page_header_string %}
+{% block page_header_lead %}
+    This is the header of child example page
+{% endblock page_header_lead %}
+{% block page_header %}
+    {{super()}}
+{% endblock page_header%}
+<!-- 2.3 Content -->
+{% block content %}
+    <! fill in the content here>
+    <h1>Content ... </h1>
+{% endblock content %}
+
+<!-- 2.4 Footer -->
+{% block footer %}
+    {{super()}}
+{% endblock footer%}

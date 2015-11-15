@@ -7,10 +7,11 @@ from google.appengine.ext.webapp import blobstore_handlers
 import webapp2
 import jinja2
 
+
 class Reference(ndb.Model):
     type = ndb.StringProperty()
     blobkey = ndb.BlobKeyProperty()
-    adddate = ndb.DateTimeProperty(auto_now_add = True)
+    adddate = ndb.DateTimeProperty(auto_now_add=True)
     publishdate = ndb.DateTimeProperty()
     description = ndb.StringProperty()
 
@@ -18,10 +19,11 @@ class Reference(ndb.Model):
 class Node(ndb.Model):
     name = ndb.StringProperty()
     definition = ndb.StringProperty()
-    tags = ndb.StringProperty(repeated = True)
-    childrenIDs = ndb.StringProperty(repeated = True)
-    trending = ndb.IntegerProperty(repeated = True)
-    reference = ndb.StructuredProperty(Reference, repeated = True)
+    tags = ndb.StringProperty(repeated=True)
+    childrenIDs = ndb.StringProperty(repeated=True)
+    trending = ndb.IntegerProperty(repeated=True)
+    reference = ndb.StructuredProperty(Reference, repeated=True)
+
 
 class User(ndb.Model):
     email = ndb.StringProperty()

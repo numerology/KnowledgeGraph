@@ -2,7 +2,7 @@ version: 1
 runtime: python27
 api_version: 1
 threadsafe: true
-application: connexus-yw
+application: knowledge-graph
 
 # Handlers match in order, put above the default handler.
 handlers:
