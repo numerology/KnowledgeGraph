@@ -38,8 +38,9 @@ d3.json("/getJSON/" + userID, function(flare) {
       d.children = null;
     }
   }
-
-  root.children.forEach(collapse);
+  if(root.children){
+    root.children.forEach(collapse);
+  }
   update(root);
 });
 

@@ -5,6 +5,9 @@ from google.appengine.api import users, files, images
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 from models import *
+from constants import *
+from time import sleep as time_sleep
+
 import webapp2
 import jinja2
 import json
@@ -15,7 +18,7 @@ def node_collapse(node):
     :return: formatted dict based on NDB data
     '''
     if (len(node.childrenIDs)==0):
-        return {"name": node.name, "children" : []}
+        return {"name": node.name}
     else:
         children = []
         for childID in node.childrenIDs:
@@ -46,6 +49,7 @@ class CreateRoot(webapp2.RequestHandler):
 
         new_user_prof = User(email = user_email, rootID = str(rt_node.key.id()))
         new_user_prof.put()
+        time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
         return
 
