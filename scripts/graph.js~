@@ -157,7 +157,7 @@ function contextmenu(d) {
     var _currentClass = d.name;
     d3.select("#divNodeDetail").style("display","inline")
         //.style("left", (d.y)+"px")
-        .style("top", (d.x+200)+"px");
+        .style("top", (d.x-200)+"px");
         //.style("width", "500px")
         //.style("height", "450px");
     d3.select("#nodeTitle").text(d.name);

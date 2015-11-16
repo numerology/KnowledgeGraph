@@ -1,12 +1,26 @@
 {% extends "base.html" %}
 <!-- 1. Head -->
-{% block title %} Child Example {% endblock title %} <!title of page>
+{% block title %} My Graph {% endblock title %} <!title of page>
 {% block script %}
     {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
 {% endblock script%}
 {% block style %}
     {{ super() }} <! render autocomplete style>
     <! additional style files>
+    <style>
+    #divNodeDetail{
+        border-radius: 7px;
+        margin: 30px auto 0;
+        padding: 6px;
+        position: absolute;
+        width: 500px;
+        left: 50%;
+        margin-left: -250px;
+    }
+    #divAddChild {
+        position:relative;
+    }
+    </style>
 {% endblock style %}
 {% block head %}
     {{super()}}
@@ -42,6 +56,26 @@
 <!-- 2.3 Content -->
 {% block content %}
     <div class="col-lg-12" id="graphcanvas" >
+    </div>
+    <div id="divNodeDetail" class="popup" style="display:none">
+        <div class="container">
+        <p><h2 id="nodeTitle"></h2></p>
+	<div class="row" id="nodeTag"><p>Tags:</p></div>
+        <div class="row" id="nodeChildren">
+            <p>Children:</p>
+            <button id="btnAddChild" class="btn btn-primary" value="Add Child">Add Child</button>
+        </div>
+        <div class="row" id="divAddChild" style="display:none">
+            <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
+                <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
+                <button class="btn btn-primary" type="submit" value="Add">Add</button>
+            </form>
+            <button id="btnCancelAddChild" class="btn btn-primary" value="Cancle">Cancel</button>
+        </div>
+        <div class="row" id="nodeReference">
+            <p>References:</p>
+        </div>
+        </div>
     </div>
 {% endblock content %}
 
