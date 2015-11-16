@@ -1,25 +1,25 @@
 
-.node {
+#graphcanvas.node {
   cursor: pointer;
 }
 
-.node circle {
+#graphcanvas.node circle {
   fill: #fff;
   stroke: steelblue;
   stroke-width: 1.5px;
 }
 
-.node text {
+#graphcanvas.node text {
   font: 20px sans-serif;
 }
 
-.link {
+#graphcanvas.link {
   fill: none;
   stroke: #ccc;
   stroke-width: 1.5px;
 }
 
-.popup {
+#graphcanvas.popup {
     position: absolute;
     left: 0;
     top: 0;
@@ -31,7 +31,7 @@
     padding: 8px;
     font-family: arial, helvetica, sans-serif;
 }
-.popup h2 {
+#graphcanvas.popup h2 {
     margin: 0 0 1rem 0;
 }
 
