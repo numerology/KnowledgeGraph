@@ -144,85 +144,79 @@ function click(d) {
     d._children = null;
   }
   update(d);
-  closeContextMenu();
+  //d3.selectAll(".popup").remove()
+  d3.select("#divNodeDetail").style("display","none");
 }
 
 function contextmenu(d) {
     d3.event.preventDefault();
     if(contextMenuShowing){
-        closeContextMenu();
+        //d3.select(".popup").remove();
+        d3.select("#divNodeDetail").style("display","none");
     }
     var _currentClass = d.name;
     d3.select("#divNodeDetail").style("display","inline")
-        .style("top", (d.x+200)+"px");
+        //.style("left", (d.y)+"px")
+        .style("top", (d.x-200)+"px");
+        //.style("width", "500px")
+        //.style("height", "450px");
     d3.select("#nodeTitle").text(d.name);
-    d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
-    //Load tag section
-    loadTag(d); // load the Tags of d
-    loadDivAddTag(d);
-    //Show children
-    loadChild(d);
-    loadDivAddChild(d);
-    contextMenuShowing = true;
-}
-
-function closeContextMenu(){
-    d3.select("#divNodeDetail").style("display","none");
-    closeAddChild();
-    contextMenuShowing = false;
-}
-
-function loadTag(d){
-    pTag = d3.select("#pNodeTag");
-    pTag.empty();
-    var myTag = d.name + " tag1";
-    var tagUrl;
-    pTag.append("a").attr("class", "btn btn-default btn-sm").text(d.name).attr("href", "javascript:clickTag('"+tagUrl+"')"); // or add onclick
-    //Button for adding tag
-    pTag.append("a")
-        .attr("class", "btn btn-primary btn-sm")
-        .text("Add Tag")
-        .attr("href", "javascript: showDivAddTag()");
-}
-function loadDivAddTag(d){ // load the add Tag Div
-    var addTagUrl = "/api/addtag/"+d.name; //some encoding here?
-    d3.select("#formAddTag").attr("action", addTagUrl);
-    //d3.select("#btnAddTag").on("click", );//TODO: add action to add tag button
-    d3.select("#btnCancelAddTag").on("click", closeDivAddTag);
-}
-function clickTag(url){ //action when tag is clicked
-    // open window for searching ?
-}
-function showDivAddTag(){
-    d3.select("#divAddTag").style("display", "inline");
-    d3.select("#inputAddTag").property("value", "");
-}
-function closeDivAddTag(){
-    d3.select("#divAddTag").style("display", "none");
-    d3.select("#inputAddTag").property("value", "");
-}
-function loadChild(d){ // load children
-}
-function loadDivAddChild(d){
-    btnShowAddChild = d3.select("#btnShowAddChild");
-    currentClass = d.name;
-    btnShowAddChild.on("click", function(){
-            d3.select("#btnShowAddChild").style("display", "none");
+    btnAddChild = d3.select("#btnAddChild");
+    btnAddChild.on("click", function(){
+            currentClass = _currentClass;
+            btnAddChild.style("display", "none");
             d3.select("#divAddChild").style("display","inline");
+            d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
         });
-    d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
-    d3.select("#btnCancelAddChild").on("click", closeDivAddChild);
-}
-function closeDivAddChild(){
-    d3.select("#btnShowAddChild").style("display", "inline");
-    d3.select("#divAddChild").style("display","none");
-    d3.select("#inputAddChild").property("value","");
+    btnCancelAddChild = d3.select("#btnCancelAddChild").on("click", function(){
+            btnAddChild.style("display", "inline");
+            d3.select("#divAddChild").style("display","none");
+            d3.select("#inputAddChild").property("value","");
+        });
+    contextMenuShowing = true;
+    /*popup = d3.select("#graphcanvas")
+            .append("div")
+            .attr("class", "popup")
+            .style("left", (d.y)+"px")
+            .style("top", (d.x+40)+"px");
+    popup.append("h2").text(d.name);
+    popup.append("button").attr("class", "btn btn-primary")
+        .text("Add child")
+        .on("click", function(d){
+            currentClass = _currentClass;
+            expandAddMenu(d);
+        });
+
+    contextMenuShowing = true;*/
 }
 
+/*
+function expandAddMenu(d){
+    d3.event.preventDefault();
+    popup = d3.select("#graphcanvas")
+            .append("div")
+            .attr("class", "popup");
 
+    popup.append("h2").text("Adding child to "+ currentClass);
+    popup.append("form")
+        .attr("class", "form-horizontal")
+        .attr("id","addchildform")
+        .attr("action","/api/addChild/"+currentClass)
+        .attr("method","post")
+        .append("p")
+        .append("input")
+        .attr("class", "btn btn-primary")
+        .attr("type","submit")
+        .attr("value","Add");
+
+    d3.select("#addchildform").append("input")
+        .attr("type", "text")
+        .attr("name","childName")
+        .attr("placeholder", "Enter Children's Name");
+}*/
 
 // Hide Node div if clicking outside of the div
-/*$(document).mousedown(function (e) //Copied from Stack Overflow
+$(document).mousedown(function (e) //Copied from Stack Overflow
 {
     var container = $("#divNodeDetail");
 
@@ -232,4 +226,4 @@ function closeDivAddChild(){
     {
         container.hide();
     }
-});*/
+});
