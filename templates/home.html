@@ -3,7 +3,6 @@
 {% block title %} Child Example {% endblock title %} <!title of page>
 {% block script %}
     {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
-    <! fill additional script herer>
 {% endblock script%}
 {% block style %}
     {{ super() }} <! render autocomplete style>
@@ -32,18 +31,18 @@
 {% endblock navbar %}
 <!-- 2.2 page header -->
 {% block page_header_string %}
-    Child Example
+    My Knowledge Graph
 {% endblock page_header_string %}
 {% block page_header_lead %}
-    This is the header of child example page
+    View my personal knowledge graph
 {% endblock page_header_lead %}
 {% block page_header %}
     {{super()}}
 {% endblock page_header%}
 <!-- 2.3 Content -->
 {% block content %}
-    <! fill in the content here>
-    <h1>Content ... </h1>
+    <div class="col-lg-12" id="graphcanvas" >
+    </div>
 {% endblock content %}
 
 <!-- 2.4 Footer -->
@@ -53,4 +52,9 @@
 
 <!-- 3 JS scripts appended to the end of body-->
 {% block body_script %}
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script>
+        var userID = {{user_id}};
+    </script>
+    <script src="/scripts/graph.js" type = "text/javascript"></script>
 {% endblock body_script %}

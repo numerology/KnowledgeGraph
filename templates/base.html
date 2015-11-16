@@ -76,7 +76,9 @@
     	<nav class = "navbar navbar-default navbar-fixed-top">
 		<div class = "container-fluid">
             <div class="navbar-header">
+                {% block nav_brand%}
                 <a href="/management" class="navbar-brand">Knowledge Graph</a>
+                {% endblock nav_brand%}
             </div>
             <div class="collapse navbar-collapse" id="navbar-main" aria-expanded="true">
                 <ul class="nav navbar-nav">
@@ -139,5 +141,7 @@
             </footer>
         </div>
     </body>
+    {% block body_script %}
+    {% endblock body_script %}
 </html>
 {% endautoescape %}

@@ -30,8 +30,8 @@ class GraphHandler(webapp2.RequestHandler):
         user = users.get_current_user()
         user_prof = User.query(User.email == str(user.email())).get()
         if(user_prof):
-            template_values = {'user_id':str(user_prof.key.id())}
-            template = JINJA_ENVIRONMENT.get_template('index.html')
+            template_values = {'user_id': str(user_prof.key.id())}
+            template = JINJA_ENVIRONMENT.get_template('home.html')
             self.response.write(template.render(template_values))
             return
         else:

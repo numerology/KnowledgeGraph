@@ -1,4 +1,3 @@
-
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 960 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
@@ -15,10 +14,11 @@ var tree = d3.layout.tree()
 var diagonal = d3.svg.diagonal()
     .projection(function(d) { return [d.y, d.x]; });
 
-var svg = d3.select("body").append("svg")
+var svg = d3.select("#graphcanvas").append("svg")
+    .attr("style","outline: thin solid black;") //YW: copied from Stack Overflow
     .attr("width", width + margin.right + margin.left)
     .attr("height", height + margin.top + margin.bottom)
-  .append("g")
+    .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
@@ -153,7 +153,7 @@ function contextmenu(d) {
         d3.select(".popup").remove()
     }
     var _currentClass = d.name;
-    popup = d3.select("body")
+    popup = d3.select("#graphcanvas")
             .append("div")
             .attr("class", "popup")
             .style("left", (d.y)+"px")
@@ -171,12 +171,14 @@ function contextmenu(d) {
 
 function expandAddMenu(d){
     d3.event.preventDefault();
-    popup = d3.select("body")
+    popup = d3.select("#graphcanvas")
             .append("div")
             .attr("class", "popup");
 
     popup.append("h2").text("Adding child to "+ currentClass);
-    popup.append("form").attr("class", "from-horizontal")
+    popup.append("form")
+        .attr("class", "form-horizontal")
+        .attr("id","addchildform")
         .attr("action","/api/addChild/"+currentClass)
         .attr("method","post")
         .append("p")
@@ -185,9 +187,8 @@ function expandAddMenu(d){
         .attr("type","submit")
         .attr("value","Add");
 
-    d3.select("form").append("input")
+    d3.select("#addchildform").append("input")
         .attr("type", "text")
         .attr("name","childName")
         .attr("placeholder", "Enter Children's Name");
-
 }
