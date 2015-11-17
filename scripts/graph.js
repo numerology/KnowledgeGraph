@@ -1,3 +1,7 @@
+// Constants
+var TAG_MAX_SHOW_LENGTH = 20;
+var TITLE_MAX_SHOW_LENGTH = 50;
+
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 960 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
@@ -24,9 +28,7 @@ var svg = d3.select("#graphcanvas").append("svg")
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 d3.json("/getJSON/" + userID, function(flare) {
 //  if (error) throw error;
-
   root = flare;
-
 //  root = JSON.parse(myjson);
   root.x0 = height / 2;
   root.y0 = 0;
@@ -45,6 +47,8 @@ d3.json("/getJSON/" + userID, function(flare) {
 });
 
 d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight according to tree levels
+
+$("#divNodeDetail").draggable({addClasses:false});
 
 function update(source) {
 
@@ -168,20 +172,21 @@ function contextmenu(d) {
 
 function closeContextMenu(){
     d3.select("#divNodeDetail").style("display","none");
-    closeAddChild();
+    closeDivAddChild();
     contextMenuShowing = false;
 }
 
 function loadTag(d){
-    pTag = d3.select("#pNodeTag");
-    pTag.empty();
+    divTag = d3.select("#divNodeTag");
+    $("#divNodeTag").empty(); //jquery ...
     var myTag = d.name + " tag1";
     var tagUrl;
-    pTag.append("a").attr("class", "btn btn-default btn-sm").text(d.name).attr("href", "javascript:clickTag('"+tagUrl+"')"); // or add onclick
+    divTag.append("a").attr("class", "btn btn-default btn-sm").text(d.name).attr("href", "javascript:clickTag('"+tagUrl+"')"); // or add onclick
     //Button for adding tag
-    pTag.append("a")
+    divTag.append("a")
         .attr("class", "btn btn-primary btn-sm")
         .text("Add Tag")
+        .attr("id", "btnShowAddTag")
         .attr("href", "javascript: showDivAddTag()");
 }
 function loadDivAddTag(d){ // load the add Tag Div
@@ -196,10 +201,16 @@ function clickTag(url){ //action when tag is clicked
 function showDivAddTag(){
     d3.select("#divAddTag").style("display", "inline");
     d3.select("#inputAddTag").property("value", "");
+    d3.select("#btnShowAddTag").remove();
 }
 function closeDivAddTag(){
     d3.select("#divAddTag").style("display", "none");
     d3.select("#inputAddTag").property("value", "");
+    d3.select("#divNodeTag").append("a")
+        .attr("class", "btn btn-primary btn-sm")
+        .text("Add Tag")
+        .attr("id", "btnShowAddTag")
+        .attr("href", "javascript: showDivAddTag()");
 }
 function loadChild(d){ // load children
 }
@@ -219,7 +230,13 @@ function closeDivAddChild(){
     d3.select("#inputAddChild").property("value","");
 }
 
-
+function trimString(str, len){ // shorten
+    if(str.length <= len){
+        return str;
+    }
+    var trimmed = str.substring(0, len-3)+"...";
+    return trimmed;
+}
 
 // Hide Node div if clicking outside of the div
 /*$(document).mousedown(function (e) //Copied from Stack Overflow

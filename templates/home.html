@@ -2,25 +2,13 @@
 <!-- 1. Head -->
 {% block title %} My Graph {% endblock title %} <!title of page>
 {% block script %}
+    <link href="/stylesheets/graph.css" type="text/css" rel="stylesheet" />
+    <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
     {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
 {% endblock script%}
 {% block style %}
     {{ super() }} <! render autocomplete style>
     <! additional style files>
-    <style>
-    #divNodeDetail{
-        border-radius: 7px;
-        margin: 30px auto 0;
-        padding: 6px;
-        position: absolute;
-        width: 500px;
-        left: 50%;
-        margin-left: -250px;
-    }
-    #divAddChild {
-        position:relative;
-    }
-    </style>
 {% endblock style %}
 {% block head %}
     {{super()}}
@@ -58,37 +46,46 @@
     <div class="col-lg-12" id="graphcanvas" >
     </div>
     <div id="divNodeDetail" class="popup" style="display:none">
-        <div class="container">
-        <p><h2 id="nodeTitle"></h2></p>
-        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
-	    <div class="row" id="nodeTag">
-            <p><h4>Tags:</h4></p>
-            <p id="pNodeTag" class="bs-component"></p>
+        <div class="col-md-12">
+            <div class="row no-gutter">
+                <div class="col-md-10">
+                    <h2 id="nodeTitle"></h2>
+                </div>
+                <div class="col-md-2 text-right">
+                    <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
+                </div>
+            </div>
+        <div class="row" id="nodeTag">
+            <h4>Tags:</h4>
+            <div id="divNodeTag" class="bs-component" ></div>
         </div>
         <div class="row" id="divAddTag" style="display:none">
             <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
-                <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by ;" name="childName">
+                <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="childName">
                 <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
+                <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
             </form>
-            <button id="btnCancelAddTag" class="btn btn-primary" value="Cancel">Cancel</button>
         </div>
         <div class="row" id="nodeChildren">
-            <p><h4>Children:</h4></p>
-            <div id="divNodeChildren"></div>
-            <button id="btnShowAddChild" class="btn btn-primary" value="Add Child">Add Child</button>
+            <h4>Children:</h4>
+            <div id="divNodeChild"></div>
+            <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
         </div>
         <div class="row" id="divAddChild" style="display:none">
             <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
-                <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
-                <button class="btn btn-primary" type="submit" value="Add">Add</button>
+                <div class="row">
+                    <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
+                    <button class="btn btn-primary" type="submit" value="Add">Add</button>
+                    <button id="btnCancelAddChild" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                </div>
             </form>
-            <button id="btnCancelAddChild" class="btn btn-primary" value="Cancel">Cancel</button>
         </div>
         <div class="row" id="nodeReference">
-            <p><h4>References:</h4></p>
+            <h4>References:</h4>
             <div id="divReference"></div>
-            <button id="btnAddReference" class="btn btn-primary" value="Add Refrence">Add Reference</button>
+            <button id="btnAddReference" class="btn btn-primary btn-sm" value="Add Refrence">Add Reference</button>
             <div id="divUploadReference"></div>
+        </div>
         </div>
         </div>
     </div>
