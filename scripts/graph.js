@@ -168,13 +168,13 @@ function contextmenu(d) {
 
 function closeContextMenu(){
     d3.select("#divNodeDetail").style("display","none");
-    closeAddChild();
+    closeDivAddChild();
     contextMenuShowing = false;
 }
 
 function loadTag(d){
     pTag = d3.select("#pNodeTag");
-    pTag.empty();
+    $("#pNodeTag").empty(); //jquery ...
     var myTag = d.name + " tag1";
     var tagUrl;
     pTag.append("a").attr("class", "btn btn-default btn-sm").text(d.name).attr("href", "javascript:clickTag('"+tagUrl+"')"); // or add onclick
