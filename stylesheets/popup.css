@@ -1,8 +1,11 @@
 #divNodeDetail {
     margin: 30px auto 0;
-    padding: 15px;
+    padding: 0px;
     position: absolute;
     width: 500px;
+    height: auto;
+    overflow: hidden;
+    display: block;
     left: 50%;
     margin-left: -250px;
     background-color: #fff;
@@ -10,19 +13,16 @@
     border: 1px #ccc solid;
     border-radius: 6px;
     box-shadow: #333 2px 2px 4px;
-    padding: 8px;
+    padding: 15px;
     font-family: arial, helvetica, sans-serif;
 }
 #nodeTitle {
-    width: 450px;
-    word-wrap: break-word;
-    float:left;
+    -ms-word-break: break-all;
+    word-break: break-all;
 }
 #btnCloseNodeDetail {
-    align: right;
 }
 #nodeTag {
-    width: 440px;
 }
 #nodeTag a {
     margin-right: 3px;
@@ -37,4 +37,10 @@
     width: 300px;
     float: left;
     margin-right: 5px;
+}
+.no-gutter [class*="col-"] {
+    padding-left: 0;
+    padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
 }

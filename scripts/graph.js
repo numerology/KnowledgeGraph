@@ -1,3 +1,7 @@
+// Constants
+var TAG_MAX_SHOW_LENGTH = 20;
+var TITLE_MAX_SHOW_LENGTH = 50;
+
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 960 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
@@ -226,7 +230,13 @@ function closeDivAddChild(){
     d3.select("#inputAddChild").property("value","");
 }
 
-
+function trimString(str, len){ // shorten
+    if(str.length <= len){
+        return str;
+    }
+    var trimmed = str.substring(0, len-3)+"...";
+    return trimmed;
+}
 
 // Hide Node div if clicking outside of the div
 /*$(document).mousedown(function (e) //Copied from Stack Overflow

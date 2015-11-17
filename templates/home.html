@@ -46,22 +46,24 @@
     <div class="col-lg-12" id="graphcanvas" >
     </div>
     <div id="divNodeDetail" class="popup" style="display:none">
-        <div class="container">
-        <div class="row">
-            <h2 id="nodeTitle"></h2>
-            <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
-        </div>
-	    <div class="row" id="nodeTag">
+        <div class="col-md-12">
+            <div class="row no-gutter">
+                <div class="col-md-10">
+                    <h2 id="nodeTitle"></h2>
+                </div>
+                <div class="col-md-2 text-right">
+                    <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
+                </div>
+            </div>
+        <div class="row" id="nodeTag">
             <h4>Tags:</h4>
             <div id="divNodeTag" class="bs-component" ></div>
         </div>
         <div class="row" id="divAddTag" style="display:none">
             <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
-                <div class="row">
-                    <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="childName">
-                    <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
-                    <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-                </div>
+                <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="childName">
+                <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
+                <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
             </form>
         </div>
         <div class="row" id="nodeChildren">
@@ -83,6 +85,7 @@
             <div id="divReference"></div>
             <button id="btnAddReference" class="btn btn-primary btn-sm" value="Add Refrence">Add Reference</button>
             <div id="divUploadReference"></div>
+        </div>
         </div>
         </div>
     </div>
