@@ -1,0 +1,40 @@
+#divNodeDetail {
+    margin: 30px auto 0;
+    padding: 15px;
+    position: absolute;
+    width: 500px;
+    left: 50%;
+    margin-left: -250px;
+    background-color: #fff;
+
+    border: 1px #ccc solid;
+    border-radius: 6px;
+    box-shadow: #333 2px 2px 4px;
+    padding: 8px;
+    font-family: arial, helvetica, sans-serif;
+}
+#nodeTitle {
+    width: 450px;
+    word-wrap: break-word;
+    float:left;
+}
+#btnCloseNodeDetail {
+    align: right;
+}
+#nodeTag {
+    width: 440px;
+}
+#nodeTag a {
+    margin-right: 3px;
+    margin-bottom: 5px;
+}
+#inputAddTag {
+    width: 300px;
+    float: left;
+    margin-right: 5px;
+}
+#inputAddChild {
+    width: 300px;
+    float: left;
+    margin-right: 5px;
+}
