@@ -10,6 +10,7 @@ import jinja2
 
 class Reference(ndb.Model):
     type = ndb.StringProperty()
+    url = ndb.StringProperty()
     blobkey = ndb.BlobKeyProperty()
     adddate = ndb.DateTimeProperty(auto_now_add=True)
     publishdate = ndb.DateTimeProperty()

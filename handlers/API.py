@@ -18,14 +18,14 @@ def node_collapse(node):
     :return: formatted dict based on NDB data
     '''
     if len(node.childrenIDs) == 0:
-        return {"name": node.name}
+        return {"name": node.name, "tags":node.tags}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
 
-        return {"name": node.name, "children": children}
+        return {"name": node.name, "tags":node.tags, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -36,6 +36,17 @@ class AddChildHandler(webapp2.RequestHandler):
         child_node.put()
 
         cnode.childrenIDs.append(str(child_node.key.id()))
+        cnode.put()
+        self.redirect('/')
+
+class AddTag(webapp2.RequestHandler):
+    def post(self, node_name):
+        cnode = Node.query(Node.name == node_name).get()
+        tagstring = self.request.get('tagString')
+        tag_list = tagstring.split(';')
+        for tag in tag_list:
+            cnode.tags.append(tag)
+
         cnode.put()
         self.redirect('/')
 
@@ -53,6 +64,72 @@ class CreateRoot(webapp2.RequestHandler):
         self.redirect('/graph')
         return
 
+class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
+    def post(self):
+       # try:
+            print ("PhotoUploadHandler: upload handler is running")
+            upload = self.get_uploads()[0]
+            print ("PhotoUploadHandler: upload resized")
+            node_name = self.request.get("node_name")
+
+            user_file = Reference(type = IN_TYPE,
+                                   blobkey=upload.key())
+            user_file.put()
+            queried_node = Node.query(Node.name == node_name).get()
+            if queried_node:
+                queried_node.reference.insert(0,user_file)
+
+                queried_node.put()
+            else:
+                print ("PhotoUploadHander: No stream found matching "+node_name)
+            self.redirect('/graph')
+       # except:
+       #     self.error(500)
+
+class GenerateUploadUrlHandler(webapp2.RequestHandler):
+      #
+    def get(self, node_name):
+        self.response.headers['Content-Type'] = 'text/plain'
+        cnode = Node.query(Node.name == node_name).get()
+       # bkey = cnode.reference[0].blob_key
+
+        self.response.out.write(json.dumps({'upload_url':blobstore.create_upload_url('/upload_file')}))
+
+class MiniDeleteFigHandler(webapp2.RequestHandler):
+    def get(self, id, fig_key):
+        user = users.get_current_user()
+        if user is None:
+        # go to login page
+            print("View Stream Handler: Not logged in")
+            self.redirect(users.create_login_page(self.request.uri))
+            return
+
+
+'''
+        current_stream = stream.get_by_id(int(id))
+        if(not current_stream):
+            self.redirect("/error/" + 'Wrong stream or page number')
+            return
+
+        flag = False
+        if current_stream:
+            #delete all the imgs, because they are huge
+            for i in current_stream.figures:
+                if str(i.blob_key) == fig_key:
+                    blobstore.delete(i.blob_key)
+                    current_stream.figures.remove(i)
+                    flag = True
+                    break
+
+        if(not flag):
+            self.redirect("/error/" + 'Designated fig does not exist')
+            return
+        current_stream.num_of_pics -= 1
+        current_stream.put()
+        time_sleep(NDB_UPDATE_SLEEP_TIME)
+
+        return
+'''
 
 class ReturnJSON(webapp2.RequestHandler):
     def get(self,user_id):

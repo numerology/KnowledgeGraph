@@ -4,7 +4,13 @@
 {% block script %}
     <link href="/stylesheets/graph.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
+    <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
+    <script>
+        var uploadUrl = "{{upload_url}}";
+
+    </script>
+    <script src="https://rawgit.com/enyo/dropzone/master/dist/dropzone.js"></script>
 {% endblock script%}
 {% block style %}
     {{ super() }} <! render autocomplete style>
@@ -61,14 +67,14 @@
         </div>
         <div class="row" id="divAddTag" style="display:none">
             <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
-                <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="childName">
+                <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="tagString">
                 <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
                 <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
             </form>
         </div>
         <div class="row" id="nodeChildren">
             <h4>Children:</h4>
-            <div id="divNodeChild"></div>
+            <div class = "row" id="divNodeChild"></div>
             <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
         </div>
         <div class="row" id="divAddChild" style="display:none">
@@ -83,8 +89,19 @@
         <div class="row" id="nodeReference">
             <h4>References:</h4>
             <div id="divReference"></div>
-            <button id="btnAddReference" class="btn btn-primary btn-sm" value="Add Refrence">Add Reference</button>
-            <div id="divUploadReference"></div>
+            <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+            <div id="divUploadReference" style="display:none">
+                <form class="dropzone" method = "POST" enctype="multipart/form-data" id="uploader">
+                    <div class="dropzone-previews"></div>
+                    <div class="dz-message">
+                        <h2>Drop files here or click to upload.</h2>
+                    </div>
+                    <input id="nodeNameInput" type="hidden" name="node_name" value = "">
+
+                </form>
+                <button id = "uploadBtn" class="btn btn-default">Upload</button>
+                <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+            </div>
         </div>
         </div>
         </div>

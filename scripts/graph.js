@@ -3,11 +3,13 @@ var TAG_MAX_SHOW_LENGTH = 20;
 var TITLE_MAX_SHOW_LENGTH = 50;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
-    width = 960 - margin.right - margin.left,
+    width = 9600 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
 var currentClass;
+var currentNode;
+
 var i = 0,
     duration = 750,
     root;
@@ -24,6 +26,97 @@ var svg = d3.select("#graphcanvas").append("svg")
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    var key_dict = [];
+	var _this = null;
+	var flag = true;
+	var uploaded = []
+
+	function sleep(milliseconds) {
+		var start = new Date().getTime();
+		for (var i = 0; i < 1e7; i++) {
+			if ((new Date().getTime() - start) > milliseconds){
+				break;
+			}
+		}
+	}
+
+	$(document).ready(function() {
+		var cache = {};
+
+		$("#uploadBtn").click(function() {
+			flag = false;
+			console.log('refreshing');
+			sleep(200);
+			if(this!=null){
+				_this.removeAllFiles();
+			}
+			uploaded = [];
+			key_dict = [];
+			$('#content').load('/refresh/{{stream.key.id()}}/1');
+			flag = true; //the flag is used to prevent the backend actually deleting my img
+		});
+	});
+
+	Dropzone.options.uploader = {
+		url: uploadUrl,
+		autoProcessQueue: true,
+		uploadMultiple: true,
+		parallelUploads: 1,
+		addRemoveLinks: true,
+		dictRemoveFile: 'Remove file',
+		acceptedFiles: 'image/*',
+		maxFiles: 10,
+		init: function() {
+			flag = true;
+			this.on("complete", function(file) {
+				var upurl = '0';
+		    	console.log('Triggering');
+			    $.ajax({
+			    	type: 'get',
+				    url: '/generate_upload_url/' + currentNode.name,
+    				async: false,
+	    			success: function(data) {
+	    				console.log(data['upload_url']);
+		    			//$('#uploader').attr("action",data);
+		    			var jsdata = JSON.parse(data);
+		    			upurl = jsdata['upload_url'];
+		    			console.log("set");
+		    			console.log(jsdata['blob_key']);
+		    			uploaded.push(file);
+		    			key_dict.push(jsdata['blob_key']);
+				    },
+			    });
+			    this.options.url = upurl;
+		    });
+			this.on("removedfile", function(file) {
+    			console.log('removing');
+				var index = 0;
+				for (i=0; i<uploaded.length;i++){
+					if(uploaded[i] == file){
+							index = i;
+							break;
+					}
+
+				}
+				console.log(index);
+				console.log(flag);
+				if(flag==true){
+					$.ajax({
+						type: 'get',
+						url: '/api/delete_fig_partial/{{stream.key.id()}}/'+key_dict[index],
+						async: false,
+						success: function(data) {
+
+						},
+					});
+					}
+				});
+
+			_this = this;
+		}
+	};
+
 
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 d3.json("/getJSON/" + userID, function(flare) {
@@ -156,6 +249,7 @@ function contextmenu(d) {
     if(contextMenuShowing){
         closeContextMenu();
     }
+    currentNode = d;
     var _currentClass = d.name;
     d3.select("#divNodeDetail").style("display","inline")
         .style("top", (d.x+200)+"px");
@@ -167,6 +261,7 @@ function contextmenu(d) {
     //Show children
     loadChild(d);
     loadDivAddChild(d);
+    loadDivRef(d);
     contextMenuShowing = true;
 }
 
@@ -183,11 +278,19 @@ function loadTag(d){
     var tagUrl;
     divTag.append("a").attr("class", "btn btn-default btn-sm").text(d.name).attr("href", "javascript:clickTag('"+tagUrl+"')"); // or add onclick
     //Button for adding tag
+    d.tags.forEach(function(tag){
+        divTag.append("a")
+            .attr("class", "btn btn-primary btn-sm")
+            .text(tag);
+    });
+
     divTag.append("a")
         .attr("class", "btn btn-primary btn-sm")
         .text("Add Tag")
         .attr("id", "btnShowAddTag")
         .attr("href", "javascript: showDivAddTag()");
+
+
 }
 function loadDivAddTag(d){ // load the add Tag Div
     var addTagUrl = "/api/addtag/"+d.name; //some encoding here?
@@ -228,6 +331,22 @@ function closeDivAddChild(){
     d3.select("#btnShowAddChild").style("display", "inline");
     d3.select("#divAddChild").style("display","none");
     d3.select("#inputAddChild").property("value","");
+}
+
+function loadDivRef(d){
+    d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
+    d3.select("#btnCancelUpload").on("click", closeDivAddRef);
+    d3.select("#nodeNameInput").attr("value", d.name);
+}
+
+function closeDivAddRef(){
+    d3.select("#btnAddReference").style("display", "inline");
+    d3.select("#divUploadReference").style("display","none");
+}
+
+function showAddRef(){
+    d3.select("#divUploadReference").style("display", "inline");
+    d3.select("#btnAddReference").style("display","none");
 }
 
 function trimString(str, len){ // shorten
