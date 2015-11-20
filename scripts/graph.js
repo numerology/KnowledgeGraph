@@ -65,8 +65,17 @@ var svg = d3.select("#graphcanvas").append("svg")
 		parallelUploads: 1,
 		addRemoveLinks: true,
 		dictRemoveFile: 'Remove file',
-		acceptedFiles: 'image/*',
+		acceptedFiles: 'image/*, application/pdf',
 		maxFiles: 10,
+		accept: function(file){
+		    var ext = file.name.substr((fileName.lastIndexOf('.') + 1));
+		    if (ext == "pdf"){
+		        $("#typeInput").attr("value","PDF");
+		    }
+		    else{
+                $("#typeInput").attr("value","IMG");
+		    }
+		},
 		init: function() {
 			flag = true;
 			this.on("complete", function(file) {
@@ -268,6 +277,7 @@ function contextmenu(d) {
 function closeContextMenu(){
     d3.select("#divNodeDetail").style("display","none");
     closeDivAddChild();
+    closeDivRef();
     contextMenuShowing = false;
 }
 
@@ -337,6 +347,19 @@ function loadDivRef(d){
     d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeNameInput").attr("value", d.name);
+    divRef = d3.select("#divReference");
+    d.thumbnails.forEach(function(thumb){
+        console.log("adding");
+        divRef.append("a").attr("class", "thumbnail")
+            .append("img").attr("src", thumb)
+            .attr("style", "height:100px");
+    });
+
+}
+
+function closeDivRef(){
+    d3.select("#divReference").empty();
+    console.log("cleaning");
 }
 
 function closeDivAddRef(){

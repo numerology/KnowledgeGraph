@@ -18,6 +18,7 @@ routes = [
     webapp2.Route(r'/api/delete_fig_partial/<id:[\w-]+>/<fig_key:[\S-]+>', handler = MiniDeleteFigHandler, name = 'delete_api'),
     webapp2.Route(r'/generate_upload_url/<node_name:[\s\S-]+>', handler = GenerateUploadUrlHandler),
     webapp2.Route(r'/upload_file', handler = FileUploadHandler),
+    webapp2.Route(r'/getpdf/([^/]+)?', handler = getPDF),
     # test for Jinja template system
     webapp2.Route(r'/test/jinja', handler=JinjaHandler),
 ]

@@ -4,6 +4,9 @@ from google.appengine.ext import ndb
 from google.appengine.api import users, files, images
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
+
+
+
 from models import *
 from constants import *
 from time import sleep as time_sleep
@@ -17,15 +20,24 @@ def node_collapse(node):
     :param node: a Node obj
     :return: formatted dict based on NDB data
     '''
+    current_url = []
+    for r in node.reference:
+        if r.type == IN_TYPE_IMG:
+            current_url.append(images.get_serving_url(r.blobkey) + '=s' + str(THUMBNAIL_SIZE))
+        if r.type == IN_TYPE_PDF:
+            return
+        if r.type == EXT_TYPE:
+            current_url.append(r.url)
+
     if len(node.childrenIDs) == 0:
-        return {"name": node.name, "tags":node.tags}
+        return {"name": node.name, "tags":node.tags, "thumbnails": current_url}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
 
-        return {"name": node.name, "tags":node.tags, "children": children}
+        return {"name": node.name, "tags":node.tags, "thumbnails": current_url, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -69,10 +81,14 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
        # try:
             print ("PhotoUploadHandler: upload handler is running")
             upload = self.get_uploads()[0]
+            print(self.get_uploads()[0])
             print ("PhotoUploadHandler: upload resized")
             node_name = self.request.get("node_name")
-
-            user_file = Reference(type = IN_TYPE,
+            if(self.request.get("type_name") == "PDF"):
+                user_file = Reference(type = IN_TYPE_PDF,
+                                   blobkey=upload.key())
+            else:
+                user_file = Reference(type = IN_TYPE_IMG,
                                    blobkey=upload.key())
             user_file.put()
             queried_node = Node.query(Node.name == node_name).get()
@@ -83,6 +99,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             else:
                 print ("PhotoUploadHander: No stream found matching "+node_name)
             self.redirect('/graph')
+            assert(1 == 0)
        # except:
        #     self.error(500)
 
@@ -94,6 +111,13 @@ class GenerateUploadUrlHandler(webapp2.RequestHandler):
        # bkey = cnode.reference[0].blob_key
 
         self.response.out.write(json.dumps({'upload_url':blobstore.create_upload_url('/upload_file')}))
+
+class getPDF(blobstore_handlers.BlobstoreDownloadHandler):
+    def get(self, key):
+        if not blobstore.get(key):
+            self.error(404)
+        else:
+            self.send_blob(key)
 
 class MiniDeleteFigHandler(webapp2.RequestHandler):
     def get(self, id, fig_key):
