@@ -3,7 +3,6 @@
 {% block title %} My Graph {% endblock title %} <!title of page>
 {% block script %}
     <link href="/stylesheets/graph.css" type="text/css" rel="stylesheet" />
-    <link href="/stylesheets/graphtab.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
@@ -62,10 +61,6 @@
                     <svg width="100" height="100">
                         <circle cx="50" cy="50" r="50" style="fill: lightsteelblue">
                         <text x="0" dy=".35em" text-anchor="middle" style="fill-opacity: 1e-6">
-                    </svg> 
-                    <svg width="100" height="100" id="svgAddRoot">
-                        <circle cx="50" cy="50" r="50" style="fill: lightsteelblue">
-                        <text x="0" dy=".35em" text-anchor="middle" style="fill-opacity: 1e-6"></text>
                     </svg> 
                 </div>
             </div>

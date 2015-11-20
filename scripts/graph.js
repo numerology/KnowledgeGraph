@@ -3,7 +3,7 @@ var TAG_MAX_SHOW_LENGTH = 20;
 var TITLE_MAX_SHOW_LENGTH = 50;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
-    width = 9600 - margin.right - margin.left,
+    width = 900 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
