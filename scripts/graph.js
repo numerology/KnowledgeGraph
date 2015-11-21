@@ -3,7 +3,7 @@ var TAG_MAX_SHOW_LENGTH = 20;
 var TITLE_MAX_SHOW_LENGTH = 50;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
-    width = 9600 - margin.right - margin.left,
+    width = 900 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
@@ -27,130 +27,180 @@ var svg = d3.select("#graphcanvas").append("svg")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    var key_dict = [];
-	var _this = null;
-	var flag = true;
-	var uploaded = []
+var key_dict = [];
+var _this = null;
+var flag = true;
+var uploaded = []
 
-	function sleep(milliseconds) {
-		var start = new Date().getTime();
-		for (var i = 0; i < 1e7; i++) {
-			if ((new Date().getTime() - start) > milliseconds){
-				break;
-			}
-		}
-	}
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds){
+            break;
+        }
+    }
+}
 
-	$(document).ready(function() {
-		var cache = {};
+$(document).ready(function() {
+    var cache = {};
 
-		$("#uploadBtn").click(function() {
-			flag = false;
-			console.log('refreshing');
-			sleep(200);
-			if(this!=null){
-				_this.removeAllFiles();
-			}
-			uploaded = [];
-			key_dict = [];
-			$('#content').load('/refresh/{{stream.key.id()}}/1');
-			flag = true; //the flag is used to prevent the backend actually deleting my img
-		});
-	});
+    $("#uploadBtn").click(function() {
+        flag = false;
+        console.log('refreshing');
+        sleep(200);
+        if(this!=null){
+            _this.removeAllFiles();
+        }
+        uploaded = [];
+        key_dict = [];
+        $('#content').load('/refresh/{{stream.key.id()}}/1');
+        flag = true; //the flag is used to prevent the backend actually deleting my img
+    });
+});
 
-	Dropzone.options.uploader = {
-		url: uploadUrl,
-		autoProcessQueue: true,
-		uploadMultiple: true,
-		parallelUploads: 1,
-		addRemoveLinks: true,
-		dictRemoveFile: 'Remove file',
-		acceptedFiles: 'image/*, application/pdf',
-		maxFiles: 10,
-		accept: function(file){
-		    var ext = file.name.substr((fileName.lastIndexOf('.') + 1));
-		    if (ext == "pdf"){
-		        $("#typeInput").attr("value","PDF");
-		    }
-		    else{
-                $("#typeInput").attr("value","IMG");
-		    }
-		},
-		init: function() {
-			flag = true;
-			this.on("complete", function(file) {
-				var upurl = '0';
-		    	console.log('Triggering');
-			    $.ajax({
-			    	type: 'get',
-				    url: '/generate_upload_url/' + currentNode.name,
-    				async: false,
-	    			success: function(data) {
-	    				console.log(data['upload_url']);
-		    			//$('#uploader').attr("action",data);
-		    			var jsdata = JSON.parse(data);
-		    			upurl = jsdata['upload_url'];
-		    			console.log("set");
-		    			console.log(jsdata['blob_key']);
-		    			uploaded.push(file);
-		    			key_dict.push(jsdata['blob_key']);
-				    },
-			    });
-			    this.options.url = upurl;
-		    });
-			this.on("removedfile", function(file) {
-    			console.log('removing');
-				var index = 0;
-				for (i=0; i<uploaded.length;i++){
-					if(uploaded[i] == file){
-							index = i;
-							break;
-					}
+Dropzone.options.uploader = {
+    url: uploadUrl,
+    autoProcessQueue: true,
+    uploadMultiple: true,
+    parallelUploads: 1,
+    addRemoveLinks: true,
+    dictRemoveFile: 'Remove file',
+    acceptedFiles: 'image/*, application/pdf',
+    maxFiles: 10,
+    accept: function(file){
+        var ext = file.name.substr((fileName.lastIndexOf('.') + 1));
+        if (ext == "pdf"){
+            $("#typeInput").attr("value","PDF");
+        }
+        else{
+            $("#typeInput").attr("value","IMG");
+        }
+    },
+    init: function() {
+        flag = true;
+        this.on("complete", function(file) {
+            var upurl = '0';
+            console.log('Triggering');
+            $.ajax({
+                type: 'get',
+                url: '/generate_upload_url/' + currentNode.name,
+                async: false,
+                success: function(data) {
+                    console.log(data['upload_url']);
+                    //$('#uploader').attr("action",data);
+                    var jsdata = JSON.parse(data);
+                    upurl = jsdata['upload_url'];
+                    console.log("set");
+                    console.log(jsdata['blob_key']);
+                    uploaded.push(file);
+                    key_dict.push(jsdata['blob_key']);
+                },
+            });
+            this.options.url = upurl;
+        });
+        this.on("removedfile", function(file) {
+            console.log('removing');
+            var index = 0;
+            for (i=0; i<uploaded.length;i++){
+                if(uploaded[i] == file){
+                        index = i;
+                        break;
+                }
 
-				}
-				console.log(index);
-				console.log(flag);
-				if(flag==true){
-					$.ajax({
-						type: 'get',
-						url: '/api/delete_fig_partial/{{stream.key.id()}}/'+key_dict[index],
-						async: false,
-						success: function(data) {
+            }
+            console.log(index);
+            console.log(flag);
+            if(flag==true){
+                $.ajax({
+                    type: 'get',
+                    url: '/api/delete_fig_partial/{{stream.key.id()}}/'+key_dict[index],
+                    async: false,
+                    success: function(data) {
 
-						},
-					});
-					}
-				});
+                    },
+                });
+                }
+            });
 
-			_this = this;
-		}
-	};
+        _this = this;
+    }
+};
 
 
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 d3.json("/getJSON/" + userID, function(flare) {
-//  if (error) throw error;
-  root = flare;
-//  root = JSON.parse(myjson);
-  root.x0 = height / 2;
-  root.y0 = 0;
 
-  function collapse(d) {
+  //  if (error) throw error;
+    root = flare;
+    //  root = JSON.parse(myjson);
+    root.x0 = height / 2;
+    root.y0 = 0;
+
+    function collapse(d) {
     if (d.children) {
       d._children = d.children;
       d._children.forEach(collapse);
       d.children = null;
     }
-  }
-  if(root.children){
+    }
+    if(root.children){
     root.children.forEach(collapse);
-  }
-  update(root);
+    }
+    update(root);
+
+    loadGraphTab();
 });
 
 d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight according to tree levels
 
 $("#divNodeDetail").draggable({addClasses:false});
+
+function loadGraphTab(){ // call the json function to load the roots for graph tab
+    myData = {"msg":"MSG: ADD"};
+    $("#svgAddRoot").click(myData, addRoot);
+    $("#svgAddRoot").hover(showBriefNodeInfo,closeBriefNodeInfo);
+    // generate graph for each node
+    myData = {"title":"Data - Title", "msg": "Data Msg"};
+    tempNode = d3.select("#contentMyGraph").append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+             .attr("class", "node")
+             .style("cursor", "pointer")
+             .on("click", updateGraph)
+             .on("mouseover", showBriefNodeInfo);
+    tempNode.data([myData], 0);   
+    console.log(myData);   
+    console.log(tempNode.__data__);
+    tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
+             .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
+    tempNode.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
+             .text("Node1")
+             .style({"font":"20px sans-serif"});
+    console.log("data of node"+d3.select("#contentMyGraph g .node").data);
+}
+
+function addRoot(e){
+    console.log(e.title);
+    console.log(e.type);
+    console.log(e.target);
+//    window.alert(e);
+}
+
+function updateGraph(e){ // TODO:retrieve content from server
+    console.log(e.title);
+}
+
+function showBriefNodeInfo(e){
+    console.log(e);
+    console.log(e.type);
+    console.log(e.target);
+//    console.log(d3.mouse());
+//    window.alert("show brief info about node" + d);
+}
+
+function closeBriefNodeInfo(e){
+    console.log(e.data);
+    console.log(e.type);
+    console.log(e.target);
+}
 
 function update(source) {
 
@@ -299,8 +349,6 @@ function loadTag(d){
         .text("Add Tag")
         .attr("id", "btnShowAddTag")
         .attr("href", "javascript: showDivAddTag()");
-
-
 }
 function loadDivAddTag(d){ // load the add Tag Div
     var addTagUrl = "/api/addtag/"+d.name; //some encoding here?
