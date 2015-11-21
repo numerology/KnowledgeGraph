@@ -156,9 +156,15 @@ d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight acco
 $("#divNodeDetail").draggable({addClasses:false});
 
 function loadGraphTab(){ // call the json function to load the roots for graph tab
-    myData = {"msg":"MSG: ADD"};
-    $("#svgAddRoot").click(myData, addRoot);
-    $("#svgAddRoot").hover(showBriefNodeInfo,closeBriefNodeInfo);
+    addRootData = {"msg":"MSG: ADD"}; // cannot use jquery on d3 object ...
+    nodeaddroot = d3.select("#nodeAddRoot")
+                    .on("click", addRoot)
+                    .on("mouseover", showBriefNodeInfo);
+    nodeaddroot.data([addRootData], 0);
+    console.log("Log: nodeaddroot data: " + d3.select(nodeaddroot).__data__);
+    
+    //$("#nodeAddRoot").click(addRoot);
+    //$("#nodeAddRoot").hover(showBriefNodeInfo,closeBriefNodeInfo);
     // generate graph for each node
     myData = {"title":"Data - Title", "msg": "Data Msg"};
     tempNode = d3.select("#contentMyGraph").append("svg").attr({"width":"110px", "height": "110px"}).append("g")
@@ -178,14 +184,15 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 }
 
 function addRoot(e){
-    console.log(e.title);
+    console.log(e);
+    console.log(e.data);
     console.log(e.type);
     console.log(e.target);
 //    window.alert(e);
 }
 
 function updateGraph(e){ // TODO:retrieve content from server
-    console.log(e.data);
+    console.log(e.title);
 }
 
 function showBriefNodeInfo(e){
