@@ -171,7 +171,8 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
              .attr("class", "node")
              .style("cursor", "pointer")
              .on("click", updateGraph)
-             .on("mouseover", showBriefNodeInfo);
+             .on("mouseover", showBriefNodeInfo)
+             .on("mouseleave", closeBriefNodeInfo);
     tempNode.data([myData], 0);   
     console.log(myData);   
     console.log(tempNode.__data__);

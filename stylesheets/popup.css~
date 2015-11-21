@@ -51,7 +51,7 @@
     left: 50%;
     margin-left: -125px;
     background-color: #fff;
-    border: 2px #ccc solid;
+    border: 1.5px #ccc solid;
     border-radius: 3px;
     box-shadow: #333 2px 2px 4px;
     font-family: arial, helvetica, sans-serif;

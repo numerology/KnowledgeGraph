@@ -3,10 +3,10 @@
 {% block title %} My Graph {% endblock title %} <!title of page>
 {% block script %}
     <link href="/stylesheets/graph.css" type="text/css" rel="stylesheet" />
+    <link href="/stylesheets/graphtab.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
-    <script src="/scripts/tab.js" type="text/javascript"></script>
     <script>
         var uploadUrl = "{{upload_url}}";
     </script>
@@ -49,7 +49,7 @@
 {% endblock page_header%}
 <!-- 2.3 Content -->
 {% block content %}
-    <div id="navtab" class="col-lg-12">
+    <div id="navTab" class="col-lg-12">
         <ul class="nav nav-tabs">
             <li class="active"><a href="#mygraph" data-toggle="tab" aria-expanded="true">My Graph</a></li>
             <li class=""><a href="#sharedgraph" data-toggle="tab" aria-expanded="false">Shared Graph</a></li>
@@ -58,9 +58,12 @@
             <div class="tab-pane fade active in" id="mygraph">
                 <h2>Div My Graphs</h2>
                 <div class="row" id="contentMyGraph">
-                    <svg width="100" height="100">
-                        <circle cx="50" cy="50" r="50" style="fill: lightsteelblue">
-                        <text x="0" dy=".35em" text-anchor="middle" style="fill-opacity: 1e-6">
+                    <svg width="110" height="110" id="svgAddRoot" >
+                        <g class="node" id="nodeAddRoot">
+                            <circle cx="50" cy="50" r="50"/>
+                            <line x1="30" y1="50" x2="70" y2="50"/>
+                            <line x1="50" y1="30" x2="50" y2="70"/>
+                        </g>
                     </svg> 
                 </div>
             </div>
@@ -72,6 +75,11 @@
         </div>
     </div>
     <div class="col-lg-12" id="graphcanvas">
+    </div>
+    <div id="divNodeTooltip" class="popup" style="display:inline-block">
+        <h2>POPUP for Tooltip!</h2>
+        <div class="tip1">
+        </div>
     </div>
     <div id="divNodeDetail" class="popup" style="display:none">
         <div class="col-md-12">
