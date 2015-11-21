@@ -161,32 +161,31 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     $("#svgAddRoot").hover(showBriefNodeInfo,closeBriefNodeInfo);
     // generate graph for each node
     myData = {"title":"Data - Title", "msg": "Data Msg"};
-    tempGraph = d3.select("#contentMyGraph").append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+    tempNode = d3.select("#contentMyGraph").append("svg").attr({"width":"110px", "height": "110px"}).append("g")
              .attr("class", "node")
              .style("cursor", "pointer")
-             .on("click", showBriefNodeInfo)
+             .on("click", updateGraph)
              .on("mouseover", showBriefNodeInfo);
-    tempGraphEnter = tempGraph.selectAll("g.node").data(myData, function(d){return d;}).enter();
-    //tempGraphEnter = tempGraphData.enter().append("g");
-    tempGraphEnter.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
+    tempNode.data([myData], 0);   
+    console.log(myData);   
+    console.log(tempNode.__data__);
+    tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
              .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
-    tempGraphEnter.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
+    tempNode.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
              .text("Node1")
              .style({"font":"20px sans-serif"});
+    console.log("data of node"+d3.select("#contentMyGraph g .node").data);
 }
 
 function addRoot(e){
-    console.log(e.data);
+    console.log(e.title);
     console.log(e.type);
     console.log(e.target);
 //    window.alert(e);
 }
 
 function updateGraph(e){ // TODO:retrieve content from server
-    console.log(e.data);
-    console.log(e.type);
-    console.log(e.target);
-//    window.alert("Update and show new graph"+ e.msg);
+    console.log(e.title);
 }
 
 function showBriefNodeInfo(e){
