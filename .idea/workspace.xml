@@ -25,11 +25,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="graph.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="graph.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scripts/graph.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="2.4118896">
-              <caret line="356" column="0" selection-start-line="356" selection-start-column="0" selection-end-line="356" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="370" column="22" selection-start-line="370" selection-start-column="22" selection-end-line="370" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -60,7 +60,7 @@
       <file leaf-file-name="home.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/templates/home.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-18.285715">
+            <state vertical-scroll-proportion="0.0">
               <caret line="99" column="32" selection-start-line="99" selection-start-column="32" selection-end-line="99" selection-end-column="32" />
               <folding>
                 <element signature="n#style#0;n#div#1;n#!!top" expanded="true" />
@@ -92,11 +92,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="API.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="API.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/handlers/API.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="91" column="49" selection-start-line="91" selection-start-column="49" selection-end-line="91" selection-end-column="49" />
+            <state vertical-scroll-proportion="0.7165605">
+              <caret line="25" column="44" selection-start-line="25" selection-start-column="44" selection-end-line="25" selection-end-column="44" />
               <folding>
                 <element signature="e#30#66#0" expanded="true" />
               </folding>
@@ -189,8 +189,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="Scope" />
-      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -267,6 +265,8 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -720,7 +720,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="11" column="0" selection-start-line="11" selection-start-column="0" selection-end-line="11" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -782,27 +781,16 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/handlers/API.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="91" column="49" selection-start-line="91" selection-start-column="49" selection-end-line="91" selection-end-column="49" />
-          <folding>
-            <element signature="e#30#66#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/routing.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.5386064">
           <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/templates/home.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-18.285715">
+        <state vertical-scroll-proportion="0.0">
           <caret line="99" column="32" selection-start-line="99" selection-start-column="32" selection-end-line="99" selection-end-column="32" />
           <folding>
             <element signature="n#style#0;n#div#1;n#!!top" expanded="true" />
@@ -821,6 +809,14 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/handlers/webHandlers.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="16" column="11" selection-start-line="16" selection-start-column="11" selection-end-line="16" selection-end-column="11" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/handlers/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -831,19 +827,21 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/handlers/webHandlers.py">
+    <entry file="file://$PROJECT_DIR$/scripts/graph.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="16" column="11" selection-start-line="16" selection-start-column="11" selection-end-line="16" selection-end-column="11" />
+          <caret line="370" column="22" selection-start-line="370" selection-start-column="22" selection-end-line="370" selection-end-column="22" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/graph.js">
+    <entry file="file://$PROJECT_DIR$/handlers/API.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="2.4118896">
-          <caret line="356" column="0" selection-start-line="356" selection-start-column="0" selection-end-line="356" selection-end-column="0" />
-          <folding />
+        <state vertical-scroll-proportion="0.7165605">
+          <caret line="25" column="44" selection-start-line="25" selection-start-column="44" selection-end-line="25" selection-end-column="44" />
+          <folding>
+            <element signature="e#30#66#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
