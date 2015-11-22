@@ -1,0 +1,10 @@
+/* YW: this css defines style for helper div in base.html
+helper div is used to place tspan and measure textwidth*/
+.helper {
+    position: absolute;
+    visibility: hidden;
+    z-index: -500;
+    top: 50%;
+    left: 50%;
+    background-color: transparent;
+}

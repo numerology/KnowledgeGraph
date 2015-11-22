@@ -43,13 +43,15 @@
     margin margin: 10px auto 0;
     padding: 5px;
     position: absolute;
-    width: 200px;
+    width: auto;
+    min-width: 150px;
+    max-width: 450px;
     height: auto;
+    min-height: 50px;
     /*overflow: hidden; no hidden for tips ... */
     display: block;
     top: 50%;
     left: 50%;
-    margin-left: -125px;
     background-color: #fff;
     border: 2px #ccc solid;
     border-radius: 3px;
