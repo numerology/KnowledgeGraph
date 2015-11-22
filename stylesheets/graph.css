@@ -1,4 +1,7 @@
-
+#graphcanvas {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
 #graphcanvas .node {
   cursor: pointer;
 }

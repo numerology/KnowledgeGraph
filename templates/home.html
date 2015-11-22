@@ -54,12 +54,12 @@
             <li class="active"><a href="#mygraph" data-toggle="tab" aria-expanded="true">My Graph</a></li>
             <li class=""><a href="#sharedgraph" data-toggle="tab" aria-expanded="false">Shared Graph</a></li>
         </ul>
-        <div id="myTabContent" class="tab-content">
+        <div id="myTabContent" class="tab-content myTabContent">
             <div class="tab-pane fade active in" id="mygraph">
                 <h2>Div My Graphs</h2>
                 <div class="row" id="contentMyGraph">
                     <svg width="110" height="110" id="svgAddRoot" >
-                        <g class="node">
+                        <g class="node" id="nodeAddRoot">
                             <circle cx="50" cy="50" r="50"/>
                             <line x1="30" y1="50" x2="70" y2="50"/>
                             <line x1="50" y1="30" x2="50" y2="70"/>
@@ -75,6 +75,13 @@
         </div>
     </div>
     <div class="col-lg-12" id="graphcanvas">
+    </div>
+    <div id="divNodeTooltip" class="popup" style="display:none">
+        <div id="tooltipContent">
+            <h2>POPUP for Tooltip!</h2>
+        </div>
+        <div class="tip1"></div>
+        <div class="tip2"></div>
     </div>
     <div id="divNodeDetail" class="popup" style="display:none">
         <div class="col-md-12">

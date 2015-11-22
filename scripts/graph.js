@@ -32,6 +32,12 @@ var _this = null;
 var flag = true;
 var uploaded = []
 
+//YW: used to place tspan and measure text width
+var helperTspan = d3.select(".helper").append("div").attr("class", "myTabContent")
+                  .append("svg").attr({"height": 100, "width": 100})
+                  .append("g").attr("class","node").append("text").append("tspan");
+
+
 function sleep(milliseconds) {
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
@@ -156,50 +162,131 @@ d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight acco
 $("#divNodeDetail").draggable({addClasses:false});
 
 function loadGraphTab(){ // call the json function to load the roots for graph tab
-    myData = {"msg":"MSG: ADD"};
-    $("#svgAddRoot").click(myData, addRoot);
-    $("#svgAddRoot").hover(showBriefNodeInfo,closeBriefNodeInfo);
+    addRootData = {"msg": "Click to add new Root"}; // cannot use jquery on d3 object ...
+    nodeaddroot = d3.select("#nodeAddRoot")
+                    .on("click", addRoot)
+                    .on("mouseover", showBriefNodeInfo)
+                    .on("mouseout", closeBriefNodeInfo);
+    nodeaddroot.data([addRootData], 0);
+    //console.log("Log: nodeaddroot data: " + d3.select(nodeaddroot).__data__);
+    
     // generate graph for each node
-    myData = {"title":"Data - Title", "msg": "Data Msg"};
-    tempNode = d3.select("#contentMyGraph").append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+    nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
+    tabContentSelector = d3.select("#contentMyGraph");
+    addSingleNode(tabContentSelector, nodeData);
+    nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
+    addSingleNode(d3.select("#contentSharedGraph"), nodeData);
+    //console.log(helperTspan.node().textContent);
+    //console.log(helperTspan.node().getComputedTextLength());
+}
+
+
+function wrap(text, width) { // function copied from bl.ocks.org/mbostock/7555321
+    //TODO: apply this to all node text
+    //TODO: place this function somewhere else in the graph.js file
+    var MAX_LINE_NUM = 3; // allow most 3 lines
+    var MAX_WORD_WIDTH = 0.9*width; // max width of a word 
+    var TRIMMED_WORD_LENGTH = 8; // length of word for trimed word, point inclued in length "FOO."
+    text.each(function(){
+        var text = d3.select(this),
+            words = text.text().split(/\s+/).reverse(),
+            word,
+            line = [],
+            lineNumber = 0,
+            lineHeight = 1.1,
+            y = text.attr("y"),
+            dy = parseFloat(text.attr("dy")),
+            tspan = text.text(null).append("tspan")
+                        .attr("x", 50)
+                        .attr("text-anchor", "middle")
+                        .attr("y", y)
+                        .attr("dy", dy + "em"),
+            dy_set = [dy];
+        helperTspan.text(tspan.node().textContent);
+        //console.log("words: "+words);
+        while (word = words.pop()) {
+            helperTspan.text(word);
+            if (helperTspan.node().getComputedTextLength()> MAX_WORD_WIDTH){
+                word = trimString(word, TRIMMED_WORD_LENGTH, ".");
+            }
+            line.push(word);
+            tspan.text(line.join(" "));
+            helperTspan.text(tspan.node().textContent);
+            //console.log(tspan);
+            //console.log(tspan.node());
+            //console.log(tspan.node().textContent);
+            //console.log("span width: "+helperTspan.node().getComputedTextLength());
+            if (helperTspan.node().getComputedTextLength() > width) {
+                line.pop();
+                tspan.text(line.join(" "));
+                lineNumber++;
+                if (lineNumber == MAX_LINE_NUM){
+                   tspan.text(trimString(line.join(" ")+"...", 8, "..."));
+                   lineNumber--;
+                   break;
+                }
+                line = [word];
+                tspan = text.append("tspan").attr("x", 50).attr("y", y).attr("text-anchor", "middle")
+                            .attr("dy", lineNumber*lineHeight + dy + "em").text(word);
+                helperTspan.text(tspan.node().textContent);
+                dy_set.push(parseFloat(tspan.attr("dy")));
+            }
+        }
+        //console.log("dy set: "+ dy_set);
+        var dy_offset = - (dy_set[dy_set.length-1] - dy_set[0])/2;
+        //console.log(dy_offset);
+        d3.select(this).selectAll("tspan").each(function(){
+            var my_dy = parseFloat(d3.select(this).attr("dy"));
+            //console.log(my_dy);
+            d3.select(this).attr("dy", my_dy + dy_offset + "em");
+            //console.log(my_dy + dy_offset);
+        }); 
+    });
+}
+
+function addSingleNode(div_selector, data){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
              .attr("class", "node")
+             //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
              .on("click", updateGraph)
-             .on("mouseover", showBriefNodeInfo);
-    tempNode.data([myData], 0);   
-    console.log(myData);   
-    console.log(tempNode.__data__);
+             .on("mouseover", showBriefNodeInfo)
+             .on("mouseout", closeBriefNodeInfo);
+    tempNode.data([data.node_data], 0);   
+    //console.log(data.node_data);   
+    //console.log(tempNode.__data__);
     tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
              .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
     tempNode.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
-             .text("Node1")
-             .style({"font":"20px sans-serif"});
-    console.log("data of node"+d3.select("#contentMyGraph g .node").data);
+             .text(data.node_text)
+             .style({"font":"20px sans-serif"})
+             .call(wrap, 80);
+    //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
 }
 
 function addRoot(e){
-    console.log(e.title);
-    console.log(e.type);
-    console.log(e.target);
-//    window.alert(e);
+    console.log(e);
 }
 
 function updateGraph(e){ // TODO:retrieve content from server
-    console.log(e.title);
+    console.log(e);
 }
 
 function showBriefNodeInfo(e){
-    console.log(e);
-    console.log(e.type);
-    console.log(e.target);
-//    console.log(d3.mouse());
-//    window.alert("show brief info about node" + d);
+    $("#tooltipContent").empty();
+    offs = $(this).offset();
+    pos = $(this)[0].getBoundingClientRect();
+    new_pos = {"top": offs.top+pos.width/2, "left": offs.left + pos.width}
+    placeDivTooltip(new_pos);
+    d3.select("#tooltipContent").append("h4").text(e.msg);
+    //console.log(pos);   
+    $("#divNodeTooltip").css("display","inline");
+    console.log("Show triggered");
 }
 
 function closeBriefNodeInfo(e){
-    console.log(e.data);
-    console.log(e.type);
-    console.log(e.target);
+    $("#divNodeTooltip").css("display", "none");
+    console.log("Close triggered");
 }
 
 function update(source) {
@@ -211,7 +298,7 @@ function update(source) {
   // Normalize for fixed-depth.
   nodes.forEach(function(d) { d.y = d.depth * 180; });
 
-  // Update the nodes¡­
+  // Update the nodes
   var node = svg.selectAll("g.node")
       .data(nodes, function(d) { return d.id || (d.id = ++i); });
 
@@ -257,7 +344,7 @@ function update(source) {
   nodeExit.select("text")
       .style("fill-opacity", 1e-6);
 
-  // Update the links¡­
+  // Update the links
   var link = svg.selectAll("path.link")
       .data(links, function(d) { return d.target.id; });
 
@@ -421,12 +508,18 @@ function showAddRef(){
     d3.select("#btnAddReference").style("display","none");
 }
 
-function trimString(str, len){ // shorten
+function trimString(str, len, str_omit_sign){ // shorten
     if(str.length <= len){
         return str;
     }
-    var trimmed = str.substring(0, len-3)+"...";
+    var trimmed = str.substring(0, len-str_omit_sign.length)+str_omit_sign;
     return trimmed;
+}
+
+function placeDivTooltip(position){ // move divNodeTooltip pointer to new location
+    var y = position.top - 25;
+    var x = position.left + 12;
+    $("#divNodeTooltip").css({"top": y + "px", "left": x + "px"}); 
 }
 
 // Hide Node div if clicking outside of the div
