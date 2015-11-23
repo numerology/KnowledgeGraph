@@ -62,6 +62,12 @@ $(document).ready(function() {
         $('#content').load('/refresh/{{stream.key.id()}}/1');
         flag = true; //the flag is used to prevent the backend actually deleting my img
     });
+
+    $('#backTop').backTop({
+        'position': 400, //scroll position in px from the top
+        'speed': 1200, // animation speed, not scroll speed ...
+        'color': 'blue', // configured for light steel blue
+    });
 });
 
 Dropzone.options.uploader = {

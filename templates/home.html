@@ -6,7 +6,7 @@
     <link href="/stylesheets/graphtab.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
-    {{ super() }} <!render bootswatch, jquery-ui and autocomplete>
+    {{ super() }} <!render bootswatch, jquery-ui, backtop>
     <script>
         var uploadUrl = "{{upload_url}}";
     </script>
@@ -148,6 +148,7 @@
 
 <!-- 3 JS scripts appended to the end of body-->
 {% block body_script %}
+    {{ super() }}
     <script src="//d3js.org/d3.v3.min.js"></script>
     <script>
         var userID = {{user_id}};

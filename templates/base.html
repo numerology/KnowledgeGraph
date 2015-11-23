@@ -9,8 +9,10 @@
 	    <link href="//bootswatch.com/flatly/bootstrap.min.css" rel="stylesheet"/>
         <link href="/stylesheets/autocomplete.css" type="text/css" rel="stylesheet"/>
         <link href="/stylesheets/helper.css" type="text/css" rel="stylesheet"/>
+        <link href="/stylesheets/backTop.css" type="text/css" rel="stylesheet"/>
 	    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
 	    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <script src="/scripts/jquery.backTop.min.js" type="text/javascript"></script>
         <script src="/scripts/bootstrap.min.js" type="text/javascript"></script>
 	    <script type="text/javascript" src="/scripts/autocomplete.js"></script>
         {% endblock script %}
@@ -84,13 +86,14 @@
                     <a>
                         &copy; Copyright 2015 by JZ & YW
                     </a>
-                    <a href="#top" class="pull-right">Back to top</a>
+                    <!--a href="#top" class="pull-right">Back to top</a-->
                 </div>
                 {% endblock footer%}
             </footer>
         </div>
         <div id="helperDiv" class="helper">
         </div>
+        <a id="backTop">Back To Top</a>
     </body>
     {% block body_script %}
     {% endblock body_script %}

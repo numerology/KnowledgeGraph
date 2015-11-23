@@ -6,6 +6,9 @@ application: knowledge-graph
 
 # Handlers match in order, put above the default handler.
 handlers:
+- url: /img
+  static_dir: img
+
 - url: /scripts
   static_dir: scripts
 
