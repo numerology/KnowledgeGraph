@@ -33,9 +33,14 @@
             <div class="navbar-header">
                 {% block nav_brand%}
                 <a href="/management" class="navbar-brand">Knowledge Graph</a>
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-main" aria-expanded="false">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
                 {% endblock nav_brand%}
             </div>
-            <div class="collapse navbar-collapse" id="navbar-main" aria-expanded="true">
+            <div class="navbar-collapse collapse" id="navbar-main" aria-expanded="false" style="height: 1px;">
                 <ul class="nav navbar-nav">
                     {% block nav_items%}
                     <li>
@@ -50,11 +55,11 @@
                     {% endblock nav_items%}
                 </ul>
                 {% block search %}
-                <form class="navbar-form navbar-left" action="/stream_search"  method="get" autocomplete="off">
-                    <div class="form-group" align = "left">
-                            <input type="text" class="form-control" placeholder="Type in keywords" name="search_keywords" id="search_keywords">
+                <form class="navbar-form navbar-left" action="/stream_search" role="search" method="get" autocomplete="off">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Search" name="search_keywords" id="search_keywords">
                     </div>
-                    <button class = "btn btn-primary" type = "submit" value = "Search">Submit</button>
+                    <button class = "btn btn-default" type = "submit" value = "Search">Submit</button>
                 </form>
                 {% endblock search %}
                 {% block logout %}
@@ -100,6 +105,7 @@
         <a id="backTop">Back To Top</a>
     </body>
     {% block body_script %}
+    <script type="text/javascript" src="/scripts/base.js"></script>
     {% endblock body_script %}
 </html>
 {% endautoescape %}
