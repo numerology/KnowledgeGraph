@@ -176,6 +176,8 @@ d3.json("/get_root_list/" + userID, function(result) {
         console.log(d);
         nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
         addSingleNode(tabContentSelector, nodeData);
+
+
     });
 
 
@@ -185,6 +187,7 @@ d3.json("/get_root_list/" + userID, function(result) {
 d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight according to tree levels
 
 $("#divNodeDetail").draggable({addClasses:false});
+$("#divAddRoot").draggable({addClasses:false});
 
 function loadGraphTab(){ // call the json function to load the roots for graph tab
     addRootData = {"msg": "Click to add new Root"}; // cannot use jquery on d3 object ...
@@ -198,7 +201,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     // generate graph for each node
     nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
-    addSingleNode(tabContentSelector, nodeData);
+ //   addSingleNode(tabContentSelector, nodeData);
     nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
     addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
@@ -298,8 +301,8 @@ function addRoot(e){
     }
 
     d3.select("#divAddRoot").style("display","inline")
-        .style("top", (e.x+200)+"px");
-
+        .style("top", (e.x + 200)+"px");
+    console.log(e);
     d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
     //Load tag section
     d3.select("#formAddRoot").attr("action", addRootUrl);
@@ -314,6 +317,28 @@ function closeAddRoot(){
 
 function updateGraph(e){ // TODO:retrieve content from server
     console.log(e);
+    //update graph with new root
+    d3.json("/update_rooted_data/" + e.id, function(result){
+        root = result;
+    //  root = JSON.parse(myjson);
+        root.x0 = height / 2;
+        root.y0 = 0;
+
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }
+        if(root.children){
+            root.children.forEach(collapse);
+        }
+        update(root);
+
+    });
+
+
 }
 
 function showBriefNodeInfo(e){

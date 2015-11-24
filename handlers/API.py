@@ -54,8 +54,16 @@ class AddChildHandler(webapp2.RequestHandler):
 
 class AddRoot(webapp2.RequestHandler):
     def post(self, user_id):
+        cuser = User.get_by_id(int(user_id))
+        root_name = self.request.get('root_name')
+        title = self.request.get('title')
+        new_root = Node(name = root_name, childrenIDs = [])
+        new_root.put()
+        cuser.rootID.append(str(new_root.key.id()))
+        cuser.titles.append(title)
+        cuser.put()
 
-        return
+        self.redirect('/')
 
 
 class AddTag(webapp2.RequestHandler):
@@ -70,24 +78,7 @@ class AddTag(webapp2.RequestHandler):
         self.redirect('/')
 
 
-class UpdateTag(webapp2.RequestHandler):
-    def post(self):
-        node_name = self.request.get("name")
-        new_tags = json.loads(self.request.get("new_tags"))
-        # print "updata tag for " + node_name
-        # print new_tags
-        if not new_tags:
-            new_tags = []
-        cnode = Node.query(Node.name == node_name).get()
-        response = {"status": "success", "message": "added"}
-        if cnode:
-            # print "node found"
-            cnode.tags = new_tags
-            cnode.put()
-        else:
-            response["status"] = "error"
-            response["message"] = "Node not found"
-        self.response.out.write(json.dumps(response))
+
 
 
 class CreateRoot(webapp2.RequestHandler):
@@ -236,5 +227,33 @@ class ReturnRoots(webapp2.RequestHandler):
         self.response.out.write(json.dumps({'root_list':out_list}))
         return
 
+class UpdateRoot(webapp2.RequestHandler):
+    def get(self,root_id):
+        root_node = Node.get_by_id(int(root_id))
+
+        out_dict = node_collapse(root_node)
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(out_dict))
+
+        return
 
 
+
+class UpdateTag(webapp2.RequestHandler):
+    def post(self):
+        node_name = self.request.get("name")
+        new_tags = json.loads(self.request.get("new_tags"))
+        # print "updata tag for " + node_name
+        # print new_tags
+        if not new_tags:
+            new_tags = []
+        cnode = Node.query(Node.name == node_name).get()
+        response = {"status": "success", "message": "added"}
+        if cnode:
+            # print "node found"
+            cnode.tags = new_tags
+            cnode.put()
+        else:
+            response["status"] = "error"
+            response["message"] = "Node not found"
+        self.response.out.write(json.dumps(response))
