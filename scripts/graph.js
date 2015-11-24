@@ -139,6 +139,7 @@ Dropzone.options.uploader = {
 };
 
 
+
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 d3.json("/getJSON/" + userID, function(flare) {
 
