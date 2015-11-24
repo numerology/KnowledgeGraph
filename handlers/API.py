@@ -228,6 +228,19 @@ class ReturnRoots(webapp2.RequestHandler):
         self.response.out.write(json.dumps({'root_list':out_list}))
         return
 
+class ReturnShares(webapp2.RequestHandler):
+    def get(self, user_id):
+        current_user = User.get_by_id(int(user_id))
+        out_list = []
+        for r in current_user.sharedID:
+            current_root = Node.get_by_id(int(r))
+            pair = {'msg': current_user.sharedtitles[current_user.sharedID.index(r)], 'rootID':r, 'root_name':current_root.name}
+            out_list.append(pair)
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps({'shared_list':out_list}))
+        return
+
 class UpdateRoot(webapp2.RequestHandler):
     def get(self,root_id,user_id):
         root_node = Node.get_by_id(int(root_id))
@@ -240,7 +253,16 @@ class UpdateRoot(webapp2.RequestHandler):
 
         return
 
-
+class ShareRoot(webapp2.RequestHandler):
+    def post(self,root_id,user_id):
+        target_mail = self.request.get("target_mail")
+        cuser = User.get_by_id(int(user_id))
+        target_user = User.query(User.email == target_mail).get()
+        target_user.sharedID.append(root_id)
+        target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
+        target_user.put()
+        self.redirect('/')
+        return
 
 class UpdateTag(webapp2.RequestHandler):
     def post(self):

@@ -31,7 +31,7 @@ class GraphHandler(webapp2.RequestHandler):
         user_prof = User.query(User.email == str(user.email())).get()
         upload_url = blobstore.create_upload_url('/upload_file')
         if(user_prof):
-            template_values = {'user_id': str(user_prof.key.id()), 'upload_url': str(upload_url)}
+            template_values = {'user_id': str(user_prof.key.id()), 'upload_url': str(upload_url), 'logout_url': users.create_logout_url("/")}
             template = JINJA_ENVIRONMENT.get_template('home.html')
             self.response.write(template.render(template_values))
             return
