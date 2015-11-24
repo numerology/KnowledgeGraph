@@ -37,7 +37,6 @@ var helperTspan = d3.select(".helper").append("div").attr("class", "myTabContent
                   .append("svg").attr({"height": 100, "width": 100})
                   .append("g").attr("class","node").append("text").append("tspan");
 
-
 function sleep(milliseconds) {
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
@@ -64,9 +63,10 @@ $(document).ready(function() {
     });
 
     $('#backTop').backTop({
-        'position': 400, //scroll position in px from the top
-        'speed': 1200, // animation speed, not scroll speed ...
+        'position': 400, // min distance scrolled before btn is shown
+        'speed': 800, // animation speed, not scroll speed ...
         'color': 'blue', // configured for light steel blue
+        'duration': 800, // total time of scrolling
     });
 });
 
@@ -409,7 +409,7 @@ function contextmenu(d) {
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
     //Load tag section
     loadTag(d); // load the Tags of d
-    loadDivAddTag(d);
+    //loadDivAddTag(d);
     //Show children
     loadChild(d);
     loadDivAddChild(d);
@@ -425,6 +425,34 @@ function closeContextMenu(){
 }
 
 function loadTag(d){
+    // New tag editor to display tags
+    $("#nodeTag .tag-editor").remove();
+    $("#tagEditor").empty();
+    $("#tagEditor").tagEditor({
+        initialTags:d.tags,
+        maxTags: 10,
+        removeDuplicates: true,
+        placeholder: "Add a tag",
+        autocomplete: null, // { 'source': '/url/', minLength: 3 }
+        onChange: function(original_field, current_editor, new_tags){
+            console.log(new_tags);
+            $.ajax({
+                    type: 'post',
+                    url: '/api/update_tag',
+                    data: {"name": d.name, "new_tags": JSON.stringify(new_tags)},
+                    dataType: "json",
+                    success: function(response){
+                        //console.log(response.status);
+                        if(response.status === "success"){
+                            d.tags = new_tags;
+                        }else if(response.status === "error"){
+                            window.alert(response.message);
+                        }},
+                    failure: function(){window.alert("ajax error in updating tags")},
+            }); //TODO: show alert if failed? sequence of ajax?
+        },
+    });
+    /*
     divTag = d3.select("#divNodeTag");
     $("#divNodeTag").empty(); //jquery ...
     var myTag = d.name + " tag1";
@@ -441,14 +469,14 @@ function loadTag(d){
         .attr("class", "btn btn-primary btn-sm")
         .text("Add Tag")
         .attr("id", "btnShowAddTag")
-        .attr("href", "javascript: showDivAddTag()");
+        .attr("href", "javascript: showDivAddTag()");*/
 }
-function loadDivAddTag(d){ // load the add Tag Div
+/*function loadDivAddTag(d){ // load the add Tag Div
     var addTagUrl = "/api/addtag/"+d.name; //some encoding here?
     d3.select("#formAddTag").attr("action", addTagUrl);
     //d3.select("#btnAddTag").on("click", );//TODO: add action to add tag button
     d3.select("#btnCancelAddTag").on("click", closeDivAddTag);
-}
+}*/
 function clickTag(url){ //action when tag is clicked
     // open window for searching ?
 }

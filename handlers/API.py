@@ -51,6 +51,7 @@ class AddChildHandler(webapp2.RequestHandler):
         cnode.put()
         self.redirect('/')
 
+
 class AddTag(webapp2.RequestHandler):
     def post(self, node_name):
         cnode = Node.query(Node.name == node_name).get()
@@ -61,6 +62,26 @@ class AddTag(webapp2.RequestHandler):
 
         cnode.put()
         self.redirect('/')
+
+
+class UpdateTag(webapp2.RequestHandler):
+    def post(self):
+        node_name = self.request.get("name")
+        new_tags = json.loads(self.request.get("new_tags"))
+        # print "updata tag for " + node_name
+        # print new_tags
+        if not new_tags:
+            new_tags = []
+        cnode = Node.query(Node.name == node_name).get()
+        response = {"status": "success", "message": "added"}
+        if cnode:
+            # print "node found"
+            cnode.tags = new_tags
+            cnode.put()
+        else:
+            response["status"] = "error"
+            response["message"] = "Node not found"
+        self.response.out.write(json.dumps(response))
 
 
 class CreateRoot(webapp2.RequestHandler):
@@ -75,6 +96,7 @@ class CreateRoot(webapp2.RequestHandler):
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
         return
+
 
 class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
@@ -103,6 +125,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
        # except:
        #     self.error(500)
 
+
 class GenerateUploadUrlHandler(webapp2.RequestHandler):
       #
     def get(self, node_name):
@@ -112,12 +135,14 @@ class GenerateUploadUrlHandler(webapp2.RequestHandler):
 
         self.response.out.write(json.dumps({'upload_url':blobstore.create_upload_url('/upload_file')}))
 
+
 class getPDF(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self, key):
         if not blobstore.get(key):
             self.error(404)
         else:
             self.send_blob(key)
+
 
 class MiniDeleteFigHandler(webapp2.RequestHandler):
     def get(self, id, fig_key):
