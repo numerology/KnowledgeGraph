@@ -7,11 +7,13 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
+var addRootShowing = false;
 var currentClass;
 var currentNode;
 
 var i = 0,
     duration = 750,
+    list,
     root;
 
 var tree = d3.layout.tree()
@@ -62,6 +64,8 @@ $(document).ready(function() {
         $('#content').load('/refresh/{{stream.key.id()}}/1');
         flag = true; //the flag is used to prevent the backend actually deleting my img
     });
+
+
 });
 
 Dropzone.options.uploader = {
@@ -134,7 +138,7 @@ Dropzone.options.uploader = {
 
 
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
-d3.json("/getJSON/" + userID, function(flare) {
+d3.json("/get_rooted_data/" + userID, function(flare) {
 
   //  if (error) throw error;
     root = flare;
@@ -156,6 +160,21 @@ d3.json("/getJSON/" + userID, function(flare) {
 
     loadGraphTab();
 });
+
+//write out the root list
+d3.json("/get_root_list/" + userID, function(result) {
+    list = result;
+
+    tabContentSelector =d3.select("#contentMyGraph");
+    list.root_list.forEach(function(d){
+        console.log(d);
+        nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
+        addSingleNode(tabContentSelector, nodeData);
+    });
+
+
+
+})
 
 d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight according to tree levels
 
@@ -265,7 +284,26 @@ function addSingleNode(div_selector, data){ // add single node to selected div
 }
 
 function addRoot(e){
+
+    var addRootUrl = "/addroot/" + String(userID);
     console.log(e);
+    if(addRootShowing){
+        closeAddRoot();
+    }
+
+    d3.select("#divAddRoot").style("display","inline")
+        .style("top", (e.x+200)+"px");
+
+    d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
+    //Load tag section
+    d3.select("#formAddRoot").attr("action", addRootUrl);
+    addRootShowing = true;
+
+}
+
+function closeAddRoot(){
+    d3.select("#divAddRoot").style("display","none");
+    addRootShowing = false;
 }
 
 function updateGraph(e){ // TODO:retrieve content from server

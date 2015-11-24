@@ -51,6 +51,11 @@ class AddChildHandler(webapp2.RequestHandler):
         cnode.put()
         self.redirect('/')
 
+class AddRoot(webapp2.RequestHandler):
+    def post(self, user_id):
+
+        return
+
 class AddTag(webapp2.RequestHandler):
     def post(self, node_name):
         cnode = Node.query(Node.name == node_name).get()
@@ -67,10 +72,12 @@ class CreateRoot(webapp2.RequestHandler):
     def post(self):
         user_email = self.request.get('user_email')
         root_name = self.request.get('root_name')
+        title_name = self.request.get('title_name')
         rt_node = Node(name = root_name, childrenIDs = [])
         rt_node.put()
-
-        new_user_prof = User(email = user_email, rootID = str(rt_node.key.id()))
+        rtIDlist = [str(rt_node.key.id())]
+        titlelist = [title_name]
+        new_user_prof = User(email = user_email, rootID = rtIDlist, titles = titlelist)
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
@@ -159,7 +166,7 @@ class ReturnJSON(webapp2.RequestHandler):
     def get(self,user_id):
         current_user = User.get_by_id(int(user_id))
         print(current_user.email)
-        root_node = Node.get_by_id(int(current_user.rootID))
+        root_node = Node.get_by_id(int(current_user.rootID[0]))
         '''
         cnode_list = Node.query(Node.name=='cvx optimization').fetch()
 
@@ -186,6 +193,21 @@ class ReturnJSON(webapp2.RequestHandler):
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(out_dict))
 
+        return
+
+class ReturnRoots(webapp2.RequestHandler):
+    def get(self, user_id):
+        current_user = User.get_by_id(int(user_id))
+        out_list = []
+# return the list of roots, containing the id of root and
+        for r in current_user.rootID:
+            current_root = Node.get_by_id(int(r))
+            pair = {'msg': current_user.titles[current_user.rootID.index(r)], 'rootID':r , 'root_name':current_root.name}
+
+            out_list.append(pair)
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps({'root_list':out_list}))
         return
 
 
