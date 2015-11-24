@@ -76,7 +76,7 @@ $(document).ready(function() {
 });
 
 Dropzone.options.uploader = {
-    url: '/test',
+    url: '/upload_file',
     autoProcessQueue: true,
     uploadMultiple: true,
     parallelUploads: 1,
@@ -113,6 +113,17 @@ Dropzone.options.uploader = {
                 },
             });
             this.options.url = upurl;
+        });
+        this.on("addedFile", function(file) {
+            var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
+            console.log("accepted");
+            if (ext == "pdf"){
+                $("#typeInput").attr("value","PDF");
+            }
+            else{
+                $("#typeInput").attr("value","IMG");
+                console.log(ext);
+            }
         });
         this.on("removedfile", function(file) {
             console.log('removing');
