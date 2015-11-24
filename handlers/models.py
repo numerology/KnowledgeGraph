@@ -30,4 +30,5 @@ class User(ndb.Model):
     email = ndb.StringProperty()
     rootID = ndb.StringProperty(repeated = True)
     titles = ndb.StringProperty(repeated = True)
+    currentrootID = ndb.StringProperty()
 

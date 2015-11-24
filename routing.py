@@ -13,7 +13,7 @@ routes = [
     webapp2.Route(r'/graph', handler=GraphHandler),
     webapp2.Route(r'/createroot', handler=CreateRootHandler),
     webapp2.Route(r'/addroot/<user_id:[\w-]+>', handler = AddRoot),
-    webapp2.Route(r'/update_rooted_data/<root_id:[\w-]+>', handler = UpdateRoot),
+    webapp2.Route(r'/update_rooted_data/<root_id:[\w-]+>/<user_id:[\w-]+>', handler = UpdateRoot),
 
     webapp2.Route(r'/api/addChild/<cname:[\s\S-]+>', handler=AddChildHandler),
     webapp2.Route(r'/api/createroot', handler=CreateRoot),

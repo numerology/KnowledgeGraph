@@ -90,7 +90,7 @@ class CreateRoot(webapp2.RequestHandler):
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
         titlelist = [title_name]
-        new_user_prof = User(email = user_email, rootID = rtIDlist, titles = titlelist)
+        new_user_prof = User(email = user_email, rootID = rtIDlist, titles = titlelist, currentrootID = rtIDlist[0])
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
@@ -183,7 +183,8 @@ class ReturnJSON(webapp2.RequestHandler):
     def get(self,user_id):
         current_user = User.get_by_id(int(user_id))
         print(current_user.email)
-        root_node = Node.get_by_id(int(current_user.rootID[0]))
+        root_node = Node.get_by_id(int(current_user.currentrootID))
+
         '''
         cnode_list = Node.query(Node.name=='cvx optimization').fetch()
 
@@ -228,9 +229,11 @@ class ReturnRoots(webapp2.RequestHandler):
         return
 
 class UpdateRoot(webapp2.RequestHandler):
-    def get(self,root_id):
+    def get(self,root_id,user_id):
         root_node = Node.get_by_id(int(root_id))
-
+        cuser = User.get_by_id(int(user_id))
+        cuser.currentrootID = root_id
+        cuser.put()
         out_dict = node_collapse(root_node)
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(out_dict))

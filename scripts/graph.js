@@ -318,7 +318,7 @@ function closeAddRoot(){
 function updateGraph(e){ // TODO:retrieve content from server
     console.log(e);
     //update graph with new root
-    d3.json("/update_rooted_data/" + e.id, function(result){
+    d3.json("/update_rooted_data/" + e.id + "/" + userID, function(result){
         root = result;
     //  root = JSON.parse(myjson);
         root.x0 = height / 2;
