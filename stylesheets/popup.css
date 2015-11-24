@@ -87,3 +87,10 @@
     margin-left: 0;
     margin-right: 0;
 }
+
+#btnCloseNodeDetail {
+    display: inline-block;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
