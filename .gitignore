@@ -1,9 +1,8 @@
 # Python compiled files
 *.pyc
 .idea/*
+*.xml
 *.swp
 stylesheets/*~
 templates/*~
 scripts/*~
-*.xml
-*.xml

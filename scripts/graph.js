@@ -558,7 +558,8 @@ function loadDivRef(d){
 }
 
 function closeDivRef(){
-    d3.select("#divReference").empty();
+    $("#divReference").empty();
+    console.log(d3.select("#divReference"));
     console.log("cleaning");
 }
 
