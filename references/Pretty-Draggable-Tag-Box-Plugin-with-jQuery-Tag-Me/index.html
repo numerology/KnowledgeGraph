@@ -1,0 +1,247 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>jQuery Tag Me Demo</title>
+<link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+<link rel='stylesheet' href='http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css'>
+<style>
+*:after,
+*:before,
+* {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  font-family: arial;
+}
+
+body {
+  padding: 15px;
+  margin: 0;
+  background: #374954;
+  font-family: 'roboto', arial;
+}
+
+h1 {
+  margin: 150px auto;
+  text-align: center;
+  color: #fff;
+}
+
+/*==========================================================================*/
+
+.tagarea { display: none; }
+
+.tag-box {
+  list-style: none;
+  padding: 3px;
+  margin: 0;
+  display: inline-block;
+  font-family: arial;
+  width: 100%;
+  border: 1px solid #F44336;
+  border-radius: 4px;
+}
+
+.tag-box * {
+  -webkit-transition-property: all;
+  transition-property: all;
+  -webkit-transition-duration: 0.3s;
+  transition-duration: 0.3s;
+}
+
+.tag-box li {
+  padding: 4px 6px;
+  float: left;
+  display: inline-block;
+}
+
+.tag-box li.tags {
+  background: #2196F3;
+  color: #fff;
+  border-radius: 4px;
+  margin: 4px 3px;
+  position: relative;
+}
+
+.tag-box li.tags .close {
+  display: inline-block;
+  position: absolute;
+  color: #BBDEFB;
+  overflow: hidden;
+  width: 0;
+  right: 0;
+  height: 18px;
+  cursor: pointer;
+  top: 4px;
+}
+
+.tag-box li.tags .close:after { content: 'x'; }
+
+.tag-box li.tags.edit {
+  background: none;
+  border: 1px solid #2196F3;
+  color: #2196F3;
+}
+
+.tag-box li.tags.edit .input-tag { height: auto; }
+
+.tag-box li.tags.edit:hover { padding: 4px 6px; }
+
+.tag-box li.tags.danger {
+  background: #F00;
+  opacity: 0.8;
+}
+
+.tag-box li.tags:hover { padding-right: 18px; }
+
+.tag-box li.tags:hover .close { width: 14px; }
+
+.tag-box li .input-tag {
+  color: #fff;
+  height: 24px;
+  vertical-align: middle;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+.tag-box li .input-tag:hover,
+.tag-box li .input-tag:focus {
+  outline: none;
+  border: none;
+}
+</style>
+</head>
+
+<body>
+<div id="jquery-script-menu">
+<div class="jquery-script-center">
+<ul>
+<li><a href="http://www.jqueryscript.net/form/Pretty-Draggable-Tag-Box-Plugin-with-jQuery-Tag-Me.html">Download This Plugin</a></li>
+<li><a href="http://www.jqueryscript.net/">Back To jQueryScript.Net</a></li>
+</ul>
+<div class="jquery-script-ads"><script type="text/javascript"><!--
+google_ad_client = "ca-pub-2783044520727903";
+/* jQuery_demo */
+google_ad_slot = "2780937993";
+google_ad_width = 728;
+google_ad_height = 90;
+//-->
+</script>
+<script type="text/javascript"
+src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script></div>
+<div class="jquery-script-clear"></div>
+</div>
+</div>
+<h1>jQuery Tag Me Demo</h1>
+<textarea class="tagarea">
+  jQuery JavaScript Ruby Python PHP
+</textarea>
+<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script> 
+<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script> 
+<script>
+var backSpace;
+var close = '<a class="close"></a>'; 
+var PreTags = $('.tagarea').val().trim().split(" ");
+
+$('.tagarea').after('<ul class="tag-box"></ul>');
+
+for (i=0 ; i < PreTags.length; i++ ){
+  $('.tag-box').append('<li class="tags">'+PreTags[i]+close+'</li>');
+}
+
+$('.tag-box').append('<li class="new-tag"><input class="input-tag" type="text"></li>');
+
+// Taging 
+$('.input-tag').bind("keydown", function (kp) {
+    var tag = $('.input-tag').val().trim();
+  	$(".tags").removeClass("danger");
+      if(tag.length > 0){
+        backSpace = 0;
+        if(kp.keyCode  == 13){
+          $(".new-tag").before('<li class="tags">'+tag+close+'</li>');
+           $(this).val('');
+      }}
+  		
+      else {if(kp.keyCode == 8 ){
+         $(".new-tag").prev().addClass("danger");
+         backSpace++;
+         if(backSpace == 2 ){
+           $(".new-tag").prev().remove(); 
+           backSpace = 0;
+         }
+      }
+   }
+});
+  //Delete tag
+$(".tag-box").on("click", ".close", function()  {
+  $(this).parent().remove();
+});
+$(".tag-box").click(function(){
+ 	$('.input-tag').focus();
+});
+// Edit
+$('.tag-box').on("dblclick" , ".tags", function(cl){
+  var tags = $(this); 
+  var tag = tags.text().trim();
+  $('.tags').removeClass('edit');
+  tags.addClass('edit');
+  tags.html('<input class="input-tag" value="'+tag+'" type="text">')
+  $(".new-tag").hide();
+  tags.find('.input-tag').focus();
+  
+ tag = $(this).find('.input-tag').val() ;
+ $('.tags').dblclick(function(){ 
+    tags.html(tag + close);
+   	$('.tags').removeClass('edit');
+    $(".new-tag").show();
+  });
+  
+  tags.find('.input-tag').bind("keydown", function (edit) {
+    	tag = $(this).val() ;
+      if(edit.keyCode  == 13){
+          $(".new-tag").show();
+          $('.input-tag').focus();
+          $('.tags').removeClass('edit');
+          if(tag.length > 0){
+            tags.html(tag + close);
+          }
+          else{
+            tags.remove();
+          }
+      }
+	});  
+});
+// sorting
+$(function() {
+$( ".tag-box" ).sortable({
+items: "li:not(.new-tag)",
+  containment: "parent",
+  scrollSpeed: 100
+});
+$( ".tag-box" ).disableSelection();
+});
+
+</script>
+<script type="text/javascript">
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-36251023-1']);
+  _gaq.push(['_setDomainName', 'jqueryscript.net']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+
+</body>
+</html>

@@ -16,14 +16,18 @@
     font-family: arial, helvetica, sans-serif;
 }
 #nodeTitle {
+    margin-top: 0px;
     -ms-word-break: break-all;
     word-break: break-all;
 }
 #btnCloseNodeDetail {
 }
-#nodeTag {
+#nodeTag .tag-editor {
+    margin-bottom: 0px;
+    margin-left: 5px;
+    margin-right: 5px;
 }
-#nodeTag a {
+/*#nodeTag a {
     margin-right: 3px;
     margin-bottom: 5px;
 }
@@ -31,7 +35,7 @@
     width: 300px;
     float: left;
     margin-right: 5px;
-}
+}*/
 #inputAddChild {
     width: 300px;
     float: left;
@@ -86,4 +90,11 @@
     padding-right: 0;
     margin-left: 0;
     margin-right: 0;
+}
+
+#btnCloseNodeDetail {
+    display: inline-block;
+    position: absolute;
+    top: 15px;
+    right: 15px;
 }
