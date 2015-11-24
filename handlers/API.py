@@ -12,6 +12,7 @@ import os, sys
 import webapp2
 import jinja2
 import json
+import StringIO
 from cloudinary.uploader import upload
 from cloudinary.utils import cloudinary_url
 from cloudinary.api import delete_resources_by_tag, resources_by_tag
@@ -103,16 +104,27 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
        # try:
             print ("PhotoUploadHandler: upload handler is running")
-            upload = self.get_uploads()[0]
             print(self.get_uploads()[0])
             print ("PhotoUploadHandler: upload resized")
             node_name = self.request.get("node_name")
+
+            image_url = None
+            thumbnail_url1 = None
+            thumbnail_url2 = None
+            file = self.request.get('file')
+
             if(self.request.get("type_name") == "PDF"):
+                str_file = StringIO.StringIO(file)
+                str_file.name = 'file'
+                upload_result = upload(str_file)
+                image_url = upload_result['url']
+                thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format = "jpg", crop = "fill", width = 100, height = 100)
+                thumbnail_url2, options = cloudinary_url(upload_result['public_id'], format = "jpg", crop = "fill", width = 200, height = 100, radius = 20, effect = "sepia")
                 user_file = Reference(type = IN_TYPE_PDF,
-                                   blobkey=upload.key())
+                                   blobkey=image_url)
             else:
                 user_file = Reference(type = IN_TYPE_IMG,
-                                   blobkey=upload.key())
+                                   blobkey=image_url)
             user_file.put()
             queried_node = Node.query(Node.name == node_name).get()
             if queried_node:
@@ -134,7 +146,7 @@ class GenerateUploadUrlHandler(webapp2.RequestHandler):
         cnode = Node.query(Node.name == node_name).get()
        # bkey = cnode.reference[0].blob_key
 
-        self.response.out.write(json.dumps({'upload_url':blobstore.create_upload_url('/upload_file')}))
+        self.response.out.write(json.dumps({'upload_url':'/upload_file'}))
 
 
 class getPDF(blobstore_handlers.BlobstoreDownloadHandler):

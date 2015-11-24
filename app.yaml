@@ -14,7 +14,10 @@ handlers:
 
 - url: /stylesheets
   static_dir: stylesheets
-  
+
+- url: /cloudinary
+  script: routing.app
+
 - url: /handlers
   script: rounting.app
 

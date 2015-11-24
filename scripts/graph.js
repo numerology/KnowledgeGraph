@@ -76,7 +76,7 @@ $(document).ready(function() {
 });
 
 Dropzone.options.uploader = {
-    url: uploadUrl,
+    url: '/test',
     autoProcessQueue: true,
     uploadMultiple: true,
     parallelUploads: 1,
@@ -85,7 +85,8 @@ Dropzone.options.uploader = {
     acceptedFiles: 'image/*, application/pdf',
     maxFiles: 10,
     accept: function(file){
-        var ext = file.name.substr((fileName.lastIndexOf('.') + 1));
+        var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
+        console.log("accepted");
         if (ext == "pdf"){
             $("#typeInput").attr("value","PDF");
         }
@@ -108,9 +109,7 @@ Dropzone.options.uploader = {
                     var jsdata = JSON.parse(data);
                     upurl = jsdata['upload_url'];
                     console.log("set");
-                    console.log(jsdata['blob_key']);
-                    uploaded.push(file);
-                    key_dict.push(jsdata['blob_key']);
+
                 },
             });
             this.options.url = upurl;
