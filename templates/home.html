@@ -84,59 +84,58 @@
         <div class="tip2"></div>
     </div>
     <div id="divNodeDetail" class="popup" style="display:none">
-        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
         <div class="col-md-12">
             <div class="row no-gutter">
                 <div class="col-md-10">
                     <h2 id="nodeTitle"></h2>
                 </div>
             </div>
-        <div class="row" id="nodeTag">
-            <h4>Tags:</h4>
-            <textarea id="tagEditor"></textarea>
-            <!--div id="divNodeTag" class="bs-component" ></div-->
-        </div>
-        <div class="row" id="divAddTag" style="display:none">
-            <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
-                <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="tagString">
-                <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
-                <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-            </form>
-        </div>
-        <div class="row" id="nodeChildren">
-            <h4>Children:</h4>
-            <div class = "row" id="divNodeChild"></div>
-            <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
-        </div>
-        <div class="row" id="divAddChild" style="display:none">
-            <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
-                <div class="row">
-                    <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
-                    <button class="btn btn-primary" type="submit" value="Add">Add</button>
-                    <button id="btnCancelAddChild" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-                </div>
-            </form>
-        </div>
-        <div class="row" id="nodeReference">
-            <h4>References:</h4>
-            <div class = "row" id="divReference"></div>
-            <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
-            <div id="divUploadReference" style="display:none">
-                <form class="dropzone" method = "POST" enctype="multipart/form-data" id="uploader">
-                    <div class="dropzone-previews"></div>
-                    <div class="dz-message">
-                        <h2>Drop files here or click to upload.</h2>
-                    </div>
-                    <input id="nodeNameInput" type="hidden" name="node_name" value = "">
-                    <input id="typeInput" type="hidden" name="type_name" value = "">
-
+            <div class="row" id="nodeTag">
+                <h4>Tags:</h4>
+                <textarea id="tagEditor"></textarea>
+                <!--div id="divNodeTag" class="bs-component" ></div-->
+            </div>
+            <div class="row" id="divAddTag" style="display:none">
+                <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
+                    <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="tagString">
+                    <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
+                    <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
                 </form>
-                <button id = "uploadBtn" class="btn btn-default">Upload</button>
-                <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+            </div>
+            <div class="row" id="nodeChildren">
+                <h4>Children:</h4>
+                <div class = "row" id="divNodeChild"></div>
+                <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
+            </div>
+            <div class="row" id="divAddChild" style="display:none">
+                <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
+                    <div class="row">
+                        <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
+                        <button class="btn btn-primary" type="submit" value="Add">Add</button>
+                        <button id="btnCancelAddChild" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                    </div>
+                </form>
+            </div>
+            <div class="row" id="nodeReference">
+                <h4>References:</h4>
+                <div class = "row" id="divReference"></div>
+                <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+                <div id="divUploadReference" style="display:none">
+                    <form class="dropzone" method = "POST" enctype="multipart/form-data" id="uploader">
+                        <div class="dropzone-previews"></div>
+                        <div class="dz-message">
+                            <h2>Drop files here or click to upload.</h2>
+                        </div>
+                        <input id="nodeNameInput" type="hidden" name="node_name" value = "">
+                        <input id="typeInput" type="hidden" name="type_name" value = "">
+
+                    </form>
+                    <button id = "uploadBtn" class="btn btn-default">Upload</button>
+                    <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                </div>
             </div>
         </div>
-        </div>
-        </div>
+        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
     </div>
 {% endblock content %}
 
