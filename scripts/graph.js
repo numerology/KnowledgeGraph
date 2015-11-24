@@ -8,11 +8,14 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
+var addRootShowing = false;
+var shareShowing = false;
 var currentClass;
 var currentNode;
 
 var i = 0,
     duration = 750,
+    list,
     root;
 
 var tree = d3.layout.tree()
@@ -136,7 +139,7 @@ Dropzone.options.uploader = {
 
 
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
-d3.json("/getJSON/" + userID, function(flare) {
+d3.json("/get_rooted_data/" + userID, function(flare) {
 
   //  if (error) throw error;
     root = flare;
@@ -159,9 +162,56 @@ d3.json("/getJSON/" + userID, function(flare) {
     loadGraphTab();
 });
 
+//write out the root list
+d3.json("/get_root_list/" + userID, function(result) {
+    list = result;
+
+    tabContentSelector =d3.select("#contentMyGraph");
+    list.root_list.forEach(function(d){
+        console.log(d);
+        nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
+        addNodeWithContext(tabContentSelector, nodeData, shareMenu);
+    });
+})
+
+d3.json("/get_shared_list/" + userID, function(result) {
+    list = result;
+    console.log("getting shared list");
+    tabContentSelector =d3.select("#contentSharedGraph");
+    list.shared_list.forEach(function(d){
+        console.log(d);
+        nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
+        addSingleNode(tabContentSelector, nodeData);
+    });
+})
+
+function shareMenu(e){
+    var shareUrl = "/shareroot/" + e.id + '/' + String(userID);
+    d3.event.preventDefault();
+    console.log(e);
+    if(shareShowing){
+        closeShare();
+    }
+
+    d3.select("#divShare").style("display","inline")
+        .style("top", (e.x + 200)+"px");
+
+    d3.select("#btnCancelShareRoot").attr("href", "javascript: closeShare();");
+    //Load tag section
+    d3.select("#formShareRoot").attr("action", shareUrl);
+    addRootShowing = true;
+}
+
+function closeShare(){
+    d3.select("#divShare").style("display","none");
+    shareShowing = false;
+}
+
 d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight according to tree levels
 
 $("#divNodeDetail").draggable({addClasses:false});
+$("#divAddRoot").draggable({addClasses:false});
+$("#divShare").draggable({addClasses:false});
 
 $("#btnEditNodeTitle").tooltip();
 
@@ -177,7 +227,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     // generate graph for each node
     nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
-    addSingleNode(tabContentSelector, nodeData);
+ //   addSingleNode(tabContentSelector, nodeData);
     nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
     addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
@@ -189,7 +239,7 @@ function wrap(text, width) { // function copied from bl.ocks.org/mbostock/755532
     //TODO: apply this to all node text
     //TODO: place this function somewhere else in the graph.js file
     var MAX_LINE_NUM = 3; // allow most 3 lines
-    var MAX_WORD_WIDTH = 0.9*width; // max width of a word 
+    var MAX_WORD_WIDTH = 0.9*width; // max width of a word
     var TRIMMED_WORD_LENGTH = 8; // length of word for trimed word, point inclued in length "FOO."
     text.each(function(){
         var text = d3.select(this),
@@ -268,12 +318,75 @@ function addSingleNode(div_selector, data){ // add single node to selected div
     //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
 }
 
+function addNodeWithContext(div_selector, data, contextFunction){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+             .attr("class", "node")
+             //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
+             .style("cursor", "pointer")
+             .on("click", updateGraph)
+             .on("mouseover", showBriefNodeInfo)
+             .on("mouseout", closeBriefNodeInfo)
+             .on("contextmenu", contextFunction);
+    tempNode.data([data.node_data], 0);
+    //console.log(data.node_data);
+    //console.log(tempNode.__data__);
+    tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
+             .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
+    tempNode.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
+             .text(data.node_text)
+             .style({"font":"20px sans-serif"})
+             .call(wrap, 80);
+    //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
+}
+
+
 function addRoot(e){
+
+    var addRootUrl = "/addroot/" + String(userID);
     console.log(e);
+    if(addRootShowing){
+        closeAddRoot();
+    }
+
+    d3.select("#divAddRoot").style("display","inline")
+        .style("top", (e.x + 200)+"px");
+    console.log(e);
+    d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
+    //Load tag section
+    d3.select("#formAddRoot").attr("action", addRootUrl);
+    addRootShowing = true;
+
+}
+
+function closeAddRoot(){
+    d3.select("#divAddRoot").style("display","none");
+    addRootShowing = false;
 }
 
 function updateGraph(e){ // TODO:retrieve content from server
     console.log(e);
+    //update graph with new root
+    d3.json("/update_rooted_data/" + e.id + "/" + userID, function(result){
+        root = result;
+    //  root = JSON.parse(myjson);
+        root.x0 = height / 2;
+        root.y0 = 0;
+
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }
+        if(root.children){
+            root.children.forEach(collapse);
+        }
+        update(root);
+
+    });
+
+
 }
 
 function showBriefNodeInfo(e){

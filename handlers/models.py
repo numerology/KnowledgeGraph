@@ -28,5 +28,9 @@ class Node(ndb.Model):
 
 class User(ndb.Model):
     email = ndb.StringProperty()
-    rootID = ndb.StringProperty()
+    rootID = ndb.StringProperty(repeated = True)
+    sharedID = ndb.StringProperty(repeated = True)
+    titles = ndb.StringProperty(repeated = True)
+    sharedtitles = ndb.StringProperty(repeated=True)
+    currentrootID = ndb.StringProperty()
 

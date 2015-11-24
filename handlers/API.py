@@ -52,6 +52,20 @@ class AddChildHandler(webapp2.RequestHandler):
         self.redirect('/')
 
 
+class AddRoot(webapp2.RequestHandler):
+    def post(self, user_id):
+        cuser = User.get_by_id(int(user_id))
+        root_name = self.request.get('root_name')
+        title = self.request.get('title')
+        new_root = Node(name = root_name, childrenIDs = [])
+        new_root.put()
+        cuser.rootID.append(str(new_root.key.id()))
+        cuser.titles.append(title)
+        cuser.put()
+
+        self.redirect('/')
+
+
 class AddTag(webapp2.RequestHandler):
     def post(self, node_name):
         cnode = Node.query(Node.name == node_name).get()
@@ -63,7 +77,7 @@ class AddTag(webapp2.RequestHandler):
         cnode.put()
         self.redirect('/')
 
-
+		
 class UpdateTag(webapp2.RequestHandler):
     def post(self):
         node_name = self.request.get("name")
@@ -109,10 +123,12 @@ class CreateRoot(webapp2.RequestHandler):
     def post(self):
         user_email = self.request.get('user_email')
         root_name = self.request.get('root_name')
+        title_name = self.request.get('title_name')
         rt_node = Node(name = root_name, childrenIDs = [])
         rt_node.put()
-
-        new_user_prof = User(email = user_email, rootID = str(rt_node.key.id()))
+        rtIDlist = [str(rt_node.key.id())]
+        titlelist = [title_name]
+        new_user_prof = User(email = user_email, rootID = rtIDlist, titles = titlelist, currentrootID = rtIDlist[0])
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
@@ -205,7 +221,8 @@ class ReturnJSON(webapp2.RequestHandler):
     def get(self,user_id):
         current_user = User.get_by_id(int(user_id))
         print(current_user.email)
-        root_node = Node.get_by_id(int(current_user.rootID))
+        root_node = Node.get_by_id(int(current_user.currentrootID))
+
         '''
         cnode_list = Node.query(Node.name=='cvx optimization').fetch()
 
@@ -234,5 +251,72 @@ class ReturnJSON(webapp2.RequestHandler):
 
         return
 
+class ReturnRoots(webapp2.RequestHandler):
+    def get(self, user_id):
+        current_user = User.get_by_id(int(user_id))
+        out_list = []
+# return the list of roots, containing the id of root and
+        for r in current_user.rootID:
+            current_root = Node.get_by_id(int(r))
+            pair = {'msg': current_user.titles[current_user.rootID.index(r)], 'rootID':r , 'root_name':current_root.name}
 
+            out_list.append(pair)
 
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps({'root_list':out_list}))
+        return
+
+class ReturnShares(webapp2.RequestHandler):
+    def get(self, user_id):
+        current_user = User.get_by_id(int(user_id))
+        out_list = []
+        for r in current_user.sharedID:
+            current_root = Node.get_by_id(int(r))
+            pair = {'msg': current_user.sharedtitles[current_user.sharedID.index(r)], 'rootID':r, 'root_name':current_root.name}
+            out_list.append(pair)
+
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps({'shared_list':out_list}))
+        return
+
+class UpdateRoot(webapp2.RequestHandler):
+    def get(self,root_id,user_id):
+        root_node = Node.get_by_id(int(root_id))
+        cuser = User.get_by_id(int(user_id))
+        cuser.currentrootID = root_id
+        cuser.put()
+        out_dict = node_collapse(root_node)
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(out_dict))
+
+        return
+
+class ShareRoot(webapp2.RequestHandler):
+    def post(self,root_id,user_id):
+        target_mail = self.request.get("target_mail")
+        cuser = User.get_by_id(int(user_id))
+        target_user = User.query(User.email == target_mail).get()
+        target_user.sharedID.append(root_id)
+        target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
+        target_user.put()
+        self.redirect('/')
+        return
+
+class UpdateTag(webapp2.RequestHandler):
+    def post(self):
+        node_name = self.request.get("name")
+        new_tags = json.loads(self.request.get("new_tags"))
+        # print "updata tag for " + node_name
+        # print new_tags
+        if not new_tags:
+            new_tags = []
+        cnode = Node.query(Node.name == node_name).get()
+        response = {"status": "success", "message": "added"}
+        if cnode:
+            # print "node found"
+            cnode.tags = new_tags
+            cnode.put()
+        else:
+            response["status"] = "error"
+            response["message"] = "Node not found"
+        self.response.out.write(json.dumps(response))
