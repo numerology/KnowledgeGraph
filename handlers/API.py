@@ -5,15 +5,17 @@ from google.appengine.api import users, files, images
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 
-
-
 from models import *
 from constants import *
 from time import sleep as time_sleep
-
+import os, sys
 import webapp2
 import jinja2
 import json
+from cloudinary.uploader import upload
+from cloudinary.utils import cloudinary_url
+from cloudinary.api import delete_resources_by_tag, resources_by_tag
+
 
 def node_collapse(node):
     '''
