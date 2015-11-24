@@ -94,14 +94,8 @@ class UpdateTitle(webapp2.RequestHandler):
             response["message"] = "New title is empty"
             print "Update title: empty title"
         else:
-            cnode = Node.query(Node.name == node_name).get()
-            if cnode:
-                print "Updata title: " + new_title
-                # TODO: change title here ...
-                # cnode.put()
-            else: 
-                response["status"] = "error"
-                response["message"] = "Node not found"
+            print "Updata title: " + new_title
+            # TODO: change title here ... change name will change the node ....
         self.response.write(json.dumps(response))
 
 

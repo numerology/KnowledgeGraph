@@ -1,6 +1,7 @@
 // Constants
 var TAG_MAX_SHOW_LENGTH = 20;
 var TITLE_MAX_SHOW_LENGTH = 50;
+var TITLE_MAX_LENGTH = 100;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 900 - margin.right - margin.left,
@@ -167,6 +168,8 @@ d3.json("/getJSON/" + userID, function(flare) {
 d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight according to tree levels
 
 $("#divNodeDetail").draggable({addClasses:false});
+
+$("#btnEditNodeTitle").tooltip();
 
 function loadGraphTab(){ // call the json function to load the roots for graph tab
     addRootData = {"msg": "Click to add new Root"}; // cannot use jquery on d3 object ...
@@ -406,8 +409,9 @@ function contextmenu(d) {
     var _currentClass = d.name;
     d3.select("#divNodeDetail").style("display","inline")
         .style("top", (d.x+200)+"px");
-    d3.select("#nodeTitle").text(d.name);
+    d3.select("#spanNodeTitle").text(d.name);
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
+    loadTitle(d);
     //Load tag section
     loadTag(d); // load the Tags of d
     //loadDivAddTag(d);
@@ -423,6 +427,38 @@ function closeContextMenu(){
     closeDivAddChild();
     closeDivRef();
     contextMenuShowing = false;
+}
+
+function loadTitle(d){
+    $("#spanNodeTitle").editable({trigger: $("#btnEditNodeTitle"), action:"click"},
+        function(e){
+            if (e.value === d.name){
+                //window.alert(e.value+"=="+d.name);
+                return;
+            }
+            if (e.value.length > TITLE_MAX_LENGTH){
+                window.alert("New title is too long, length >"+TITLE_MAX_LENGTH);
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '/api/update_title',
+                data: {"name": d.name, "new_title": e.value},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                        d.name = e.value;
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                        $("#spanNodeTitle").value(d.name);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in updating title");
+                    $("#spanNodeTitle").value(d.name);},
+            });
+            window.alert(e.value);
+        });
 }
 
 function loadTag(d){

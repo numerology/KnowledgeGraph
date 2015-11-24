@@ -15,10 +15,35 @@
     padding: 15px;
     font-family: arial, helvetica, sans-serif;
 }
-#nodeTitle {
+/*#nodeTitle {
     margin-top: 0px;
+    width: 100%;
     -ms-word-break: break-all;
     word-break: break-all;
+}*/
+#spanNodeTitle {
+    margin-top: 0px;
+    margin-bottom: 15px;
+    width: 100%;
+    display: inline-block;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    font-size: 25px;
+    font-family: helvetica;
+}
+#btnEditNodeTitle {
+    width: 24px;
+    height: 24px;
+    border: none;
+    margin-left: 10px;
+    padding: 0px;
+    cursor: pointer;
+    display: inline-block;
+}
+#btnEditNodeTitle img {
+    width: 100%;
+    height: auto;
+    background-color: #fff;
 }
 #btnCloseNodeDetail {
 }
