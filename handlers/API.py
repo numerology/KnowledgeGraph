@@ -15,6 +15,7 @@ import webapp2
 import jinja2
 import json
 
+
 def node_collapse(node):
     '''
     :param node: a Node obj
@@ -102,7 +103,7 @@ class UpdateTitle(webapp2.RequestHandler):
     def post(self):
         node_name = self.request.get("name")
         new_title = self.request.get("new_title")
-        response = {"status":"success", "message": "title changed"}
+        response = {"status": "success", "message": "title changed"}
         if not new_title:
             response["status"] = "error"
             response["message"] = "New title is empty"
@@ -116,6 +117,29 @@ class UpdateTitle(webapp2.RequestHandler):
             else: 
                 response["status"] = "error"
                 response["message"] = "Node not found"
+        self.response.write(json.dumps(response))
+
+
+class UpdateRootList(webapp2.RequestHandler):
+    def post(self):
+        user_id = int(self.request.get("userID"))
+        root_type = self.request.get("type")
+        response = {"status": "success", "message": root_type+" root list changed"}
+        user = User.get_by_id(user_id)
+        if not user:
+            response["status"] = "error"
+            response["message"] = "User not found"
+        else:
+            new_my_node_list = json.loads(self.request.get("new_root_list"))
+            if root_type == "MY_ROOT":
+                user.rootID = new_my_node_list
+                user.put()
+            elif root_type == "SHARED_ROOT":
+                user.sharedID = new_my_node_list
+                user.put()
+            else:
+                response["status"] = "error"
+                response["message"] = "User not found"
         self.response.write(json.dumps(response))
 
 

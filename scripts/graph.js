@@ -232,6 +232,60 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
+    $("#contentMyGraph").sortable({
+        cancel: "#nodeAddRoot", //exclude add root node
+        update: function(event, ui){
+            var temp_node_list = [];
+            //console.log(event);
+            //console.log(ui);
+            d3.selectAll("#contentMyGraph .node")
+              .filter(function(d,i){return i!=0;}) // do not include first node, i.e., add root node
+              .each(function(e){
+                temp_node_list.push(e.id);
+                console.log(e);
+              });
+            $.ajax({
+                type: 'post',
+                url: '/api/update_root',
+                data: {"userID": userID,"type": "MY_ROOT", "new_root_list": JSON.stringify(temp_node_list)},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        }
+    });
+    $("#contentSharedGraph").sortable({
+        update: function(event, ui){
+            var temp_node_list = [];
+            //console.log(event);
+            //console.log(ui);
+            d3.selectAll("#contentSharedGraph .node")
+              .each(function(e){
+                temp_node_list.push(e.id);
+                console.log(e);
+              });
+            $.ajax({
+                type: 'post',
+                url: '/api/update_root',
+                data: {"userID": userID,"type": "SHARED_ROOT", "new_root_list": JSON.stringify(temp_node_list)},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in updating shared node list");},
+            });
+        }
+    });
 }
 
 
@@ -390,6 +444,7 @@ function updateGraph(e){ // TODO:retrieve content from server
 }
 
 function showBriefNodeInfo(e){
+    //console.log(e);
     $("#tooltipContent").empty();
     offs = $(this).offset();
     pos = $(this)[0].getBoundingClientRect();
@@ -398,12 +453,12 @@ function showBriefNodeInfo(e){
     d3.select("#tooltipContent").append("h4").text(e.msg);
     //console.log(pos);   
     $("#divNodeTooltip").css("display","inline");
-    console.log("Show triggered");
+    //console.log("Show triggered");
 }
 
 function closeBriefNodeInfo(e){
     $("#divNodeTooltip").css("display", "none");
-    console.log("Close triggered");
+    //console.log("Close triggered");
 }
 
 function update(source) {
