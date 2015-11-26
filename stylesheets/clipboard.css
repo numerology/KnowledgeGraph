@@ -1,0 +1,9 @@
+/*YW: contains css for clipboard*/
+.clipboard {
+    position: fixed;
+    bottom: 150px;
+    right: 150px;
+}
+.btn-clipboard {
+    background: url(/img/clipboard.png);
+}

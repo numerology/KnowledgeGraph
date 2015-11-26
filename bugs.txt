@@ -1,0 +1,3 @@
+11/25/2015: YW
+List the unsolved bugs:
+1. should update context menu if click root to switch root; or just close the context menu ...

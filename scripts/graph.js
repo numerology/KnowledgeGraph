@@ -212,6 +212,7 @@ d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight acco
 $("#divNodeDetail").draggable({addClasses:false});
 $("#divAddRoot").draggable({addClasses:false});
 $("#divShare").draggable({addClasses:false});
+$("#divClipboard").draggable({addClasses:false});
 
 $("#btnEditNodeTitle").tooltip();
 
