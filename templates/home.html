@@ -123,7 +123,7 @@
             </div>
         </div>
     </div>
-    <div id="divNodeDetail" class="popup" style="display:none">
+    <div id="divNodeDetail" class="popup popup-window" style="display:none">
         <div class="col-md-12">
             <div class="row no-gutter">
                 <div class="col-md-10">
@@ -178,9 +178,17 @@
         </div>
         <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
     </div>
-    <div id="divClipboard" class="popup clipboard" style="display:inline-block">
-        <div id="divExpandedClipboard" style="display:none"></div>
-        <button type="button" id="btnClipboard" class="btn btn-default btn-clipboard"></button>
+    <div id="divClipboard" class="draggable resizable popup-window clipboard clipboard-expanded" style="display:none">
+        <div id="divExpandedClipboard" class="col-md-12 no-gutter" style="display:inline-block">
+            <div class="row no-gutter">
+                <h3>Expanded Clipboard</h3>
+            </div>
+        </div>
+    </div>
+    <div id="divBtnClipboard" class="draggable" style="inline-display">
+        <button type="button" id="btnClipboard" class="image btn-clipboard">
+            <img class="icon-clipboard" src="/img/clipboard.png">
+        </button>
     </div>
 {% endblock content %}
 

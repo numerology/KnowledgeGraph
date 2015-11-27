@@ -1,9 +1,33 @@
 /*YW: contains css for clipboard*/
 .clipboard {
     position: fixed;
-    bottom: 150px;
+    bottom: 250px;
     right: 150px;
+    width: 450px;
+}
+.clipboard-expanded {
+    padding: 10px;
+    background-color: #fff;
+}
+#divExpandedClipboard {
+    width: 100%;
+    height: auto;
+    min-height: 200px;
 }
 .btn-clipboard {
-    background: url(/img/clipboard.png);
+    width: 45px;
+    height: 45px;
+    display: inline-block;
+    cursor: pointer;
+    padding: 0px;
+}
+.btn-clipboard img {
+    width: 100%;
+    height: auto;
+    background: #fff;
+}
+#divBtnClipboard {
+    position:fixed;
+    bottom: 150px;
+    right: 100px;
 }

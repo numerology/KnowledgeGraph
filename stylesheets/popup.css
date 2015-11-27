@@ -8,7 +8,9 @@
     left: 50%;
     margin-left: -250px;
     background-color: #fff;
+}
 
+.popup-window{
     border: 1px #ccc solid;
     border-radius: 6px;
     box-shadow: #333 2px 2px 4px;

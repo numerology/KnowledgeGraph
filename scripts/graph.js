@@ -41,6 +41,7 @@ var helperTspan = d3.select(".helper").append("div").attr("class", "myTabContent
                   .append("svg").attr({"height": 100, "width": 100})
                   .append("g").attr("class","node").append("text").append("tspan");
 
+
 function sleep(milliseconds) {
     var start = new Date().getTime();
     for (var i = 0; i < 1e7; i++) {
@@ -65,6 +66,8 @@ $(document).ready(function() {
         $('#content').load('/refresh/{{stream.key.id()}}/1');
         flag = true; //the flag is used to prevent the backend actually deleting my img
     });
+
+     
 });
 
 
@@ -212,7 +215,75 @@ d3.select(self.frameElement).style("height", "800px"); //TODO: Change hight acco
 $("#divNodeDetail").draggable({addClasses:false});
 $("#divAddRoot").draggable({addClasses:false});
 $("#divShare").draggable({addClasses:false});
-$("#divClipboard").draggable({addClasses:false});
+
+$(".draggable").draggable({
+    start:function(e, ui){
+        $(this).data('preventBehavior', true);
+    }
+});
+$("#divClipboard").resizable({
+    maxWidth: 450,
+    minWidth: 250,
+    maxHeight: 600,
+    minHeight: 300,
+});
+$("#divClipboard").css({"position": "fixed",
+                        "bottom": '200px',
+                        "right": '150px'});
+$("#btnClipboard").on("mousedown", function(e){
+    var mdown = document.createEvent("MouseEvents");
+    mdown.initMouseEvent("mousedown", true, true, 
+          window, 0, e.screenX, e.screenY, e.clientX, e.clientY,
+          true, false, false, true, 0, null);
+    $(this).closest(".draggable")[0].dispatchEvent(mdown);
+    //$("#divClipboard")[0].dispatchEvent(mdown);
+    //console.log('mousedown');
+}).on('click', function(e){
+    var $_this = $(this);
+    var $draggable = $(this).closest('.draggable');
+    if ($draggable.data("preventBehavior")){
+        //e.stopPropagation();
+        //console.log('default prevented?');
+        $draggable.data("preventBehavior", false);
+    }else {
+        $("#divClipboard").toggle();
+        /*changeDisplay({
+            "selector": $("#divExpandedClipboard"),
+            "showFunction": function(){
+                console.log($_this);
+                var $div = $("#divClipboard");
+                console.log($div.css('bottom'));
+                var oldOffset = windowOffset($_this);
+                console.log(oldOffset); 
+                $div.addClass("popup-window clipboard-expanded");
+                $div.css('width', '400px');
+                var newOffset = windowOffset($_this);
+                var divOffset = windowOffset($div);
+                $div.css('bottom', divOffset.bottom + oldOffset.bottom-newOffset.bottom +'px');
+                $div.css('right', divOffset.right + oldOffset.right - newOffset.right + 'px');
+                console.log(newOffset);
+                console.log($div.css('bottom'));
+                //$div.css({'bottom': +'px',});
+                //console.log("show function"+e);
+            },
+            "hideFunction": function(){
+                $div = $("#divClipboard");
+                $div.css('width', '45px')
+                $("#divClipboard").removeClass("popup-window clipboard-expanded");
+                //console.log("hide function"+e);
+            },
+        });*/
+    }
+});
+
+function windowOffset(selector){ // return offset relative to current window
+    var ans={};
+    ans.top = selector.offset().top - $(window).scrollTop();
+    ans.bottom = $(window).height() + $(window).scrollTop() - selector.offset().top - selector.height();
+    ans.left = selector.offset().left - $(window).scrollLeft();
+    ans.right = $(window).width() + $(window).scrollLeft() - selector.offset().left - selector.width();
+    return ans;
+}
 
 $("#btnEditNodeTitle").tooltip();
 
@@ -754,6 +825,24 @@ function placeDivTooltip(position){ // move divNodeTooltip pointer to new locati
     var y = position.top - 25;
     var x = position.left + 12;
     $("#divNodeTooltip").css({"top": y + "px", "left": x + "px"}); 
+}
+
+function changeDisplay(d){ //display or hide the selected element using jquery
+    $selector = d.selector;
+    //console.log("Change display");
+    if ($selector.css('display') === "none"){
+        console.log('Show');
+        $("#divClipboard").css('height', 'auto');
+        $selector.css("display", "inline-block");
+        if ('showFunction' in d){ // Callback function of show activity
+            d.showFunction();
+        }
+    }else{
+        $selector.css("display", "none");
+        if ('hideFunction' in d){ // Callback function
+            d.hideFunction();
+        }
+    }
 }
 
 // Hide Node div if clicking outside of the div
