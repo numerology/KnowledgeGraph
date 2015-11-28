@@ -38,13 +38,15 @@ def node_collapse(node):
         current_thumbs.append({"url": current_url, "msg": current_description})
 
     if len(node.childrenIDs) == 0:
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_thumbs}
+        return {"name": node.name, "title": node.title, "id": str(node.key.id()),
+                "tags": node.tags, "thumbnails": current_thumbs}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_thumbs, "children": children}
+        return {"name": node.name, "title": node.title, "id": str(node.key.id()),
+                "tags": node.tags, "thumbnails": current_thumbs, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -64,16 +66,16 @@ class AddRoot(webapp2.RequestHandler):
         cuser = User.get_by_id(int(user_id))
         root_name = self.request.get('root_name')
         title = self.request.get('title')
-        new_root = Node(name = root_name, childrenIDs = [])
+        new_root = Node(name=root_name, title=title ,childrenIDs=[])
         new_root.put()
         cuser.rootID.append(str(new_root.key.id()))
-        cuser.titles.append(title)
+        # cuser.titles.append(title)
         cuser.put()
 
         self.redirect('/')
 
 
-class AddTag(webapp2.RequestHandler):
+"""class AddTag(webapp2.RequestHandler):
     def post(self, node_name):
         cnode = Node.query(Node.name == node_name).get()
         tagstring = self.request.get('tagString')
@@ -83,8 +85,9 @@ class AddTag(webapp2.RequestHandler):
 
         cnode.put()
         self.redirect('/')
+"""
 
-
+"""
 class UpdateTag(webapp2.RequestHandler):
     def post(self):
         node_name = self.request.get("name")
@@ -103,8 +106,9 @@ class UpdateTag(webapp2.RequestHandler):
             response["status"] = "error"
             response["message"] = "Node not found"
         self.response.out.write(json.dumps(response))
-        
+"""
 
+"""
 class UpdateTitle(webapp2.RequestHandler):
     def post(self):
         node_name = self.request.get("name")
@@ -124,6 +128,7 @@ class UpdateTitle(webapp2.RequestHandler):
                 response["status"] = "error"
                 response["message"] = "Node not found"
         self.response.write(json.dumps(response))
+"""
 
 
 class UpdateRootList(webapp2.RequestHandler):
@@ -153,7 +158,7 @@ class UpdateNode(webapp2.RequestHandler):
     def post(self):
         node_id = int(self.request.get("nodeID"))
         response = {"status": "success", "message": "Node changed"}
-        cnode = User.get_by_id(node_id)
+        cnode = Node.get_by_id(node_id)
         if not cnode:
             response["status"] = "error"
             response["message"] = "Node not found"
@@ -164,7 +169,7 @@ class UpdateNode(webapp2.RequestHandler):
             new_reference_list = json.loads(self.request.get("new_reference_list"))
             if new_title:
                 print "new title: " + new_title
-                cnode.name = new_title
+                cnode.title = new_title
                 response["message"] += " name changed"
             if new_tag_list:
                 print "new tags: "
@@ -211,11 +216,13 @@ class CreateRoot(webapp2.RequestHandler):
         user_email = self.request.get('user_email')
         root_name = self.request.get('root_name')
         title_name = self.request.get('title_name')
-        rt_node = Node(name = root_name, childrenIDs = [])
+        rt_node = Node(name=root_name, title=title_name, ChildrenIDs=[])
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
-        titlelist = [title_name]
-        new_user_prof = User(email = user_email, rootID = rtIDlist, titles = titlelist, currentrootID = rtIDlist[0])
+        # titlelist = [title_name]
+        new_clipboard = Node(name="Clipboard", title="Clipboard Title", ChildrenIDs=[], reference=[])
+        new_clipboard.put()
+        new_user_prof = User(email=user_email, rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=new_clipboard.key.id())
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
@@ -314,8 +321,9 @@ class MiniDeleteFigHandler(webapp2.RequestHandler):
         return
 '''
 
+
 class ReturnJSON(webapp2.RequestHandler):
-    def get(self,user_id):
+    def get(self, user_id):
         current_user = User.get_by_id(int(user_id))
         print(current_user.email)
         root_node = Node.get_by_id(int(current_user.currentrootID))
@@ -339,8 +347,6 @@ class ReturnJSON(webapp2.RequestHandler):
         # the output json has the following format: (it is a dict)
         # {"name": name, "children": list of a dict, where each element has a name and a list of children}
         '''
-
-
         out_dict = node_collapse(root_node)
         print(out_dict)
         self.response.headers['Content-Type'] = 'text/plain'
@@ -348,20 +354,21 @@ class ReturnJSON(webapp2.RequestHandler):
 
         return
 
+
 class ReturnRoots(webapp2.RequestHandler):
     def get(self, user_id):
         current_user = User.get_by_id(int(user_id))
         out_list = []
-# return the list of roots, containing the id of root and
+        # return the list of roots, containing the id of root and
         for r in current_user.rootID:
             current_root = Node.get_by_id(int(r))
             pair = {'msg': current_user.titles[current_user.rootID.index(r)], 'rootID':r , 'root_name':current_root.name}
-
             out_list.append(pair)
 
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps({'root_list':out_list}))
         return
+
 
 class ReturnShares(webapp2.RequestHandler):
     def get(self, user_id):
@@ -376,8 +383,20 @@ class ReturnShares(webapp2.RequestHandler):
         self.response.out.write(json.dumps({'shared_list':out_list}))
         return
 
+
+class ReturnClipboard(webapp2.RequestHandler):
+    def get(self, user_id):
+        cuser = User.get_by_id(int(user_id))
+        if cuser:
+            root_node = Node.get_by_id(int(cuser.clipboardID))
+            out_dict = node_collapse(root_node)
+            self.response.headers['Content-Type'] = 'text/plain'
+            self.response.out.write(json.dumps(out_dict))
+        return
+
+
 class UpdateRoot(webapp2.RequestHandler):
-    def get(self,root_id,user_id):
+    def get(self, root_id, user_id):
         root_node = Node.get_by_id(int(root_id))
         cuser = User.get_by_id(int(user_id))
         cuser.currentrootID = root_id
@@ -387,6 +406,7 @@ class UpdateRoot(webapp2.RequestHandler):
         self.response.out.write(json.dumps(out_dict))
 
         return
+
 
 class ShareRoot(webapp2.RequestHandler):
     def post(self,root_id,user_id):
@@ -399,6 +419,7 @@ class ShareRoot(webapp2.RequestHandler):
         self.redirect('/')
         return
 
+"""
 class UpdateTag(webapp2.RequestHandler):
     def post(self):
         node_name = self.request.get("name")
@@ -417,3 +438,4 @@ class UpdateTag(webapp2.RequestHandler):
             response["status"] = "error"
             response["message"] = "Node not found"
         self.response.out.write(json.dumps(response))
+"""

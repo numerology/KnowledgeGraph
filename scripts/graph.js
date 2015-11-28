@@ -182,13 +182,39 @@ d3.json("/get_root_list/" + userID, function(result) {
 d3.json("/get_shared_list/" + userID, function(result) {
     list = result;
     console.log("getting shared list");
-    tabContentSelector =d3.select("#contentSharedGraph");
+    _selector =d3.select("#divClipboardNode");
     list.shared_list.forEach(function(d){
         console.log(d);
-        nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
+        nodeData = {"node_text":d.root_name, "node_data":{"msg": String(d.msg), "id": d.rootID}};
         addSingleNode(tabContentSelector, nodeData);
     });
 })
+
+d3.json("/get_clipboard/" + userID, function(result){
+    var children = result.children;
+    var thumbnails = result.thumbnails;
+    children.forEach(function(d){
+        nodeData = {"node_text": d.name, "node_data":{"msg": String(d.title), "id": d.id}};
+        addSingleNodeNoclick(d3.select("#divClipboardNode"),nodeData);
+    });
+    thumbnails.forEach(function(thumb){
+        //console.log("adding");
+        divRef.append("a").attr("class", "thumbnail")
+			.append("img").attr("src", thumb.url)
+            .attr("alt", thumb.msg)
+            .attr("style", "height:100px")
+            .on("mouseover",function(){
+                $("#tooltipContent").empty();
+                pos = $(this).offset();
+                console.log(pos);
+                placeDivTooltip(pos);
+                d3.select("#tooltipContent").append("h4").text(thumb.msg);
+                $("#divNodeTooltip").attr("style","display:inline");
+                console.log("Show triggered");
+            })
+            .on("mouseout",closeMsgCase);
+	});
+});
 
 function shareMenu(e){
     var shareUrl = "/shareroot/" + e.id + '/' + String(userID);
@@ -238,8 +264,7 @@ $("#divClipboardReference").sortable({
     },
     update: function(event, ui){
         var new_reference_list = [];
-        d3.selectAll("#contentMyGraph .node")
-          .filter(function(d,i){return i!=0;}) // do not include first node, i.e., add root node
+        d3.selectAll("#divClipboardReference .thumbnail")
           .each(function(e){
             new_reference_list.push(e.id);
             console.log(e);
@@ -247,7 +272,37 @@ $("#divClipboardReference").sortable({
         $.ajax({
             type: 'post',
             url: '/api/update_clipboard',
-            data: {"userID": userID, "new_node_list": JSON.stringify(new_reference_list)},
+            data: {"userID": userID, "new_reference_list": JSON.stringify(new_reference_list)},
+            dataType: "json",
+            success: function(response){
+                //console.log(response.status);
+                if(response.status === "success"){
+                }else if(response.status === "error"){
+                    window.alert(response.message);
+                }},
+            failure: function(){
+                window.alert("ajax error in updating my node list");},
+        });
+    },
+});
+$("#divClipboardNode").sortable({
+    appendTo: document.body,
+    items: 'svg',
+    connectWith: "#divNodeChild, #contentMyGraph, #contentSharedGraph",
+    receive: function (event, ui){
+        //ui.sender.sortable('cancel');
+    },
+    update: function(event, ui){
+        var new_child_list = [];
+        d3.selectAll("#contentMyGraph .node")
+          .each(function(e){
+            new_child_list.push(e.id);
+            console.log(e);
+          });
+        $.ajax({
+            type: 'post',
+            url: '/api/update_clipboard',
+            data: {"userID": userID, "new_child_list": JSON.stringify(new_child_list)},
             dataType: "json",
             success: function(response){
                 //console.log(response.status);
@@ -472,6 +527,25 @@ function addSingleNode(div_selector, data){ // add single node to selected div
              .on("mouseout", closeBriefNodeInfo);
     tempNode.data([data.node_data], 0);   
     //console.log(data.node_data);   
+    //console.log(tempNode.__data__);
+    tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
+             .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
+    tempNode.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
+             .text(data.node_text)
+             .style({"font":"20px sans-serif"})
+             .call(wrap, 80);
+    //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
+}
+
+function addSingleNodeNoclick(div_selector, data){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+             .attr("class", "node")
+             //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
+             .style("cursor", "pointer")
+             .on("mouseover", showBriefNodeInfo)
+             .on("mouseout", closeBriefNodeInfo);
+    tempNode.data([data.node_data], 0);
+    //console.log(data.node_data);
     //console.log(tempNode.__data__);
     tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
              .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
