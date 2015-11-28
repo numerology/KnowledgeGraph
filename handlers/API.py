@@ -11,33 +11,43 @@ from models import *
 from constants import *
 from time import sleep as time_sleep
 
+import sys
+sys.path.append('C:\Python27\Lib\site-packages')
+
 import webapp2
 import jinja2
 import json
+
+
+
 
 def node_collapse(node):
     '''
     :param node: a Node obj
     :return: formatted dict based on NDB data
     '''
-    current_url = []
+    current_thumbs = []
     for r in node.reference:
-        if r.type == IN_TYPE_IMG:
-            current_url.append(images.get_serving_url(r.blobkey) + '=s' + str(THUMBNAIL_SIZE))
-        if r.type == IN_TYPE_PDF:
-            return
-        if r.type == EXT_TYPE:
-            current_url.append(r.url)
+        ref = Reference.get_by_id(int(r))
+        current_description = ref.description
+        if ref.type == IN_TYPE_IMG:
+            current_url=images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
+        if ref.type == IN_TYPE_PDF:
+            current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
+        if ref.type == EXT_TYPE:
+            current_url=r.url
+
+        current_thumbs.append({"url": current_url, "msg": current_description})
 
     if len(node.childrenIDs) == 0:
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_url}
+        return {"name": node.name, "tags":node.tags, "thumbnails": current_thumbs}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
 
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_url, "children": children}
+        return {"name": node.name, "tags":node.tags, "thumbnails": current_thumbs, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -105,22 +115,32 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             print(self.get_uploads()[0])
             print ("PhotoUploadHandler: upload resized")
             node_name = self.request.get("node_name")
+            descriptionstr = self.request.get("description")
+            key = upload.key()
+
             if(self.request.get("type_name") == "PDF"):
                 user_file = Reference(type = IN_TYPE_PDF,
-                                   blobkey=upload.key())
+                                   blobkey=upload.key(),description = descriptionstr)
+
             else:
                 user_file = Reference(type = IN_TYPE_IMG,
-                                   blobkey=upload.key())
+                                   blobkey=upload.key(), description = descriptionstr)
             user_file.put()
             queried_node = Node.query(Node.name == node_name).get()
             if queried_node:
-                queried_node.reference.insert(0,user_file)
+                queried_node.reference.insert(0,str(user_file.key.id()))
 
                 queried_node.put()
             else:
                 print ("PhotoUploadHander: No stream found matching "+node_name)
+
+
+            #preprocessing, generating thumbnail
+
+
+
             self.redirect('/graph')
-            assert(1 == 0)
+
        # except:
        #     self.error(500)
 

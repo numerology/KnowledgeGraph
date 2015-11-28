@@ -84,14 +84,15 @@ Dropzone.options.uploader = {
     dictRemoveFile: 'Remove file',
     acceptedFiles: 'image/*, application/pdf',
     maxFiles: 10,
-    accept: function(file){
-        var ext = file.name.substr((fileName.lastIndexOf('.') + 1));
+    accept: function(file, done){
+        var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
         if (ext == "pdf"){
             $("#typeInput").attr("value","PDF");
         }
         else{
             $("#typeInput").attr("value","IMG");
         }
+        done();
     },
     init: function() {
         flag = true;
@@ -143,7 +144,9 @@ Dropzone.options.uploader = {
     }
 };
 
-
+function done(){
+ console.log("accepted called");
+}
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 d3.json("/get_rooted_data/" + userID, function(flare) {
 
@@ -635,10 +638,41 @@ function loadDivRef(d){
     d.thumbnails.forEach(function(thumb){
         console.log("adding");
         divRef.append("a").attr("class", "thumbnail")
-            .append("img").attr("src", thumb)
-            .attr("style", "height:100px");
+            .append("img").attr("src", thumb.url)
+            .attr("alt", thumb.msg)
+            .attr("style", "height:100px")
+            .on("mouseover",function(){
+                $("#tooltipContent").empty();
+                pos = $(this).offset();
+                console.log(pos);
+                placeDivTooltip(pos);
+                d3.select("#tooltipContent").append("h4").text(thumb.msg);
+    //console.log(pos);
+                $("#divNodeTooltip").attr("style","display:inline");
+                console.log("Show triggered");
+            })
+            .on("mouseout",closeMsgCase);
     });
 
+}
+
+function showMsgCase(e){
+    console.log(e);
+    $("#tooltipContent").empty();
+    offs = $(this).offset();
+    pos = $(this)[0].getBoundingClientRect();
+    new_pos = {"top": offs.top+pos.width/2, "left": offs.left + pos.width}
+
+    d3.select("#tooltipContent").append("h4").text(e.attr("alt"));
+    //console.log(pos);
+    placeDivTooltip(new_pos);
+    $("#divNodeTooltip").css("display","inline");
+    console.log("Show triggered");
+}
+
+function closeMsgCase(e){
+    $("#divNodeTooltip").css("display", "none");
+    console.log("Close triggered");
 }
 
 function closeDivRef(){
@@ -667,8 +701,10 @@ function trimString(str, len, str_omit_sign){ // shorten
 
 function placeDivTooltip(position){ // move divNodeTooltip pointer to new location
     var y = position.top - 25;
-    var x = position.left + 12;
-    $("#divNodeTooltip").css({"top": y + "px", "left": x + "px"}); 
+    var x = position.left + 15;
+    console.log("x = " + x + " y = " +y);
+    $("#divNodeTooltip").css({"top": y , "left": x });
+    console.log("changed");
 }
 
 // Hide Node div if clicking outside of the div
