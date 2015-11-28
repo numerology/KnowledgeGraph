@@ -192,6 +192,7 @@ d3.json("/get_shared_list/" + userID, function(result) {
 
 d3.json("/get_clipboard/" + userID, function(result){
     //console.log(result)
+    var divClipRef = d3.select("#divClipboardReference");
     if ("children" in result){
         result.children.forEach(function(d){
             nodeData = {"node_text": d.name, "node_data":{"msg": String(d.title), "id": d.id}};
@@ -201,7 +202,7 @@ d3.json("/get_clipboard/" + userID, function(result){
     if ("thumbnails" in result){
         result.thumbnails.forEach(function(thumb){
             //console.log("adding");
-            divRef.append("a").attr("class", "thumbnail")
+            divClipRef.append("a").attr("class", "thumbnail")
 			    .append("img").attr("src", thumb.url)
                 .attr("alt", thumb.msg)
                 .attr("style", "height:100px")
@@ -216,6 +217,7 @@ d3.json("/get_clipboard/" + userID, function(result){
                 })
                 .on("mouseout",closeMsgCase);
 	    });
+	    divClipRef.selectAll("a").data(result.reference);
     }
 });
 
@@ -267,9 +269,9 @@ $("#divClipboardReference").sortable({
     },
     update: function(event, ui){
         var new_reference_list = [];
-        $("#divClipboardReference a").each(function(e){
-            console.log(e);        
-            new_reference_list.push(e.attr("src"));
+        d3.selectAll("#divClipboardReference a").each(function(d){
+            //console.log(d);        
+            new_reference_list.push(d.toString());
         });
         $.ajax({
             type: 'post',
@@ -900,6 +902,7 @@ function loadDivRef(d){
     d.thumbnails.forEach(function(thumb){
         //console.log("adding");
         divRef.append("a").attr("class", "thumbnail")
+			//.data([{"src": thumb.url}],0)
 			.append("img").attr("src", thumb.url)
             .attr("alt", thumb.msg)
             .attr("style", "height:100px")
@@ -911,10 +914,11 @@ function loadDivRef(d){
                 d3.select("#tooltipContent").append("h4").text(thumb.msg);
     //console.log(pos);
                 $("#divNodeTooltip").attr("style","display:inline");
-                console.log("Show triggered");
+                //console.log("Show triggered");
             })
             .on("mouseout",closeMsgCase);
 	});
+	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
         //cancel: "#nodeAddRoot", //exclude add root node
         connectWith: "#divClipboardReference",
@@ -924,10 +928,10 @@ function loadDivRef(d){
             var new_reference_list = [];
             //console.log(event);
             //console.log(ui);
-            $("#divReference .thumbnail .img").each(function(e){
-                new_reference_list.push(e.attr("src"));//TODO: change src to user id
-                console.log(e);
-              });
+            d3.selectAll("#divReference .thumbnail").each(function(d, i){
+                //console.log(d);
+                new_reference_list.push(d.toString());
+            });
             $.ajax({
                 type: 'post',
                 url: '/api/update_node',
@@ -962,7 +966,7 @@ function showMsgCase(e){
 
 function closeMsgCase(e){
     $("#divNodeTooltip").css("display", "none");
-    console.log("Close triggered");
+    //console.log("Close triggered");
 }
 
 function closeDivRef(){

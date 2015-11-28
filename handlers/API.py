@@ -34,26 +34,25 @@ def node_collapse(node):
             current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
         if ref.type == EXT_TYPE:
             current_url=r.url
-
         current_thumbs.append({"url": current_url, "msg": current_description})
 
     if len(node.childrenIDs) == 0:
         return {"name": node.name, "title": node.title, "id": str(node.key.id()),
-                "tags": node.tags, "thumbnails": current_thumbs}
+                "tags": node.tags, "thumbnails": current_thumbs, "reference": node.reference}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
         return {"name": node.name, "title": node.title, "id": str(node.key.id()),
-                "tags": node.tags, "thumbnails": current_thumbs, "children": children}
+                "tags": node.tags, "thumbnails": current_thumbs, "children": children, "reference": node.reference}
 
 
 class AddChildHandler(webapp2.RequestHandler):
     def post(self, cname):
         child_name = self.request.get('childName')
         cnode = Node.query(Node.name == cname).get()
-        child_node = Node(name=child_name, childrenIDs=[])
+        child_node = Node(name=child_name, childrenIDs=[], reference=[])
         child_node.put()
 
         cnode.childrenIDs.append(str(child_node.key.id()))
@@ -66,7 +65,7 @@ class AddRoot(webapp2.RequestHandler):
         cuser = User.get_by_id(int(user_id))
         root_name = self.request.get('root_name')
         title = self.request.get('title')
-        new_root = Node(name=root_name, title=title ,childrenIDs=[])
+        new_root = Node(name=root_name, title=title ,childrenIDs=[], reference=[])
         new_root.put()
         cuser.rootID.append(str(new_root.key.id()))
         # cuser.titles.append(title)
@@ -211,7 +210,8 @@ class UpdateClipboard(webapp2.RequestHandler):
                 response["message"] += " children updated"
             if "new_reference_list" in rqst_args:
                 new_reference_list = json.loads(self.request.get("new_reference_list"))
-                print "update clipboard reference list"
+                # print "update clipboard reference list"
+                # print clip_node.key.id()
                 clip_node.reference = new_reference_list
                 response["message"] += " reference updated"
             clip_node.put()
@@ -225,7 +225,7 @@ class CreateRoot(webapp2.RequestHandler):
         user_email = self.request.get('user_email')
         root_name = self.request.get('root_name')
         title_name = self.request.get('title_name')
-        rt_node = Node(name=root_name, title=title_name, childrenIDs=[])
+        rt_node = Node(name=root_name, title=title_name, childrenIDs=[], reference=[])
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
         # titlelist = [title_name]
