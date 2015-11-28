@@ -156,6 +156,7 @@ class UpdateRootList(webapp2.RequestHandler):
 
 class UpdateNode(webapp2.RequestHandler):
     def post(self):
+        print "update node id: "+self.request.get("nodeID")
         node_id = int(self.request.get("nodeID"))
         response = {"status": "success", "message": "Node changed"}
         cnode = Node.get_by_id(node_id)
@@ -163,33 +164,32 @@ class UpdateNode(webapp2.RequestHandler):
             response["status"] = "error"
             response["message"] = "Node not found"
         else:
-            new_title = str(self.request.get("new_title"))
-            new_tag_list = self.request.get("new_tag_list")
-            new_child_list = self.request.get("new_child_list")
-            new_reference_list = self.request.get("new_reference_list")
-            if new_title:
+            rqst_args = self.request.arguments()
+            if "new_title" in rqst_args:
+                new_title = str(self.request.get("new_title"))
                 print "new title: " + new_title
                 cnode.title = new_title
                 response["message"] += " name changed"
-            if new_tag_list:
-                new_tag_list = json.loads(new_tag_list)
+            if "new_tag_list" in rqst_args:
+                new_tag_list = json.loads(self.request.get("new_tag_list"))
+                print "node name: " + cnode.name
                 print "new tags: "
                 print new_tag_list
-                cnode.child = new_tag_list
+                cnode.tags = new_tag_list
                 response["message"] += " tag changed"
-            if new_child_list:
-                new_child_list = json.loads(new_child_list)
+            if "new_child_list" in rqst_args:
+                new_child_list = json.loads(self.request.get("new_child_list"))
                 print "new child list: "
                 print new_child_list
                 cnode.childrenIDs = new_child_list
                 response["message"] += " child changed"
-            if new_reference_list:
-                new_reference_list = json.loads(new_reference_list)
+            if "new_reference_list" in rqst_args:
+                new_reference_list = json.loads(self.request.get("new_reference_list"))
                 print "new reference list: "
                 print new_reference_list
                 cnode.reference = new_reference_list
                 response["message"] += " reference changed"
-            # cnode.put()
+            cnode.put()
         self.response.write(json.dumps(response))
 
 
@@ -197,18 +197,24 @@ class UpdateClipboard(webapp2.RequestHandler):
     def post(self):
         user_id = int(self.request.get("userID"))
         response = {"status": "success", "message": "Clipboard updated"}
-        user = User.get_by_id(user_id)
-        if not user:
+        cuser = User.get_by_id(user_id)
+        if not cuser:
             response["status"] = "error"
             response["message"] = "User not found"
         else:
-            new_node_list = json.loads(self.request.get("new_node_list"))
-            new_reference_list = json.loads(self.request.get("new_reference_list"))
-            print ("new ref list: " + new_node_list)
-            if new_node_list:
+            clip_node = Node.get_by_id(int(cuser.clipboardID))
+            rqst_args = self.request.arguments()
+            if "new_node_list" in rqst_args:
+                new_node_list = json.loads(self.request.get("new_load_list"))
                 print "update clipboard node list"
-            if new_reference_list:
+                clip_node.childrenIDs = new_node_list
+                response["message"] += " children updated"
+            if "new_reference_list" in rqst_args:
+                new_reference_list = json.loads(self.request.get("new_reference_list"))
                 print "update clipboard reference list"
+                clip_node.reference = new_reference_list
+                response["message"] += " reference updated"
+            clip_node.put()
             # user.rootID = new_reference_list
             # user.put()
         self.response.write(json.dumps(response))
@@ -391,6 +397,8 @@ class ReturnShares(webapp2.RequestHandler):
 class ReturnClipboard(webapp2.RequestHandler):
     def get(self, user_id):
         cuser = User.get_by_id(int(user_id))
+        print (cuser.key.id())
+        print (cuser.clipboardID)
         if cuser:
             root_node = Node.get_by_id(int(cuser.clipboardID))
             out_dict = node_collapse(root_node)

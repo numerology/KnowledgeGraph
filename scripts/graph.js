@@ -94,7 +94,7 @@ Dropzone.options.uploader = {
         flag = true;
         this.on("complete", function(file) {
             var upurl = '0';
-            console.log('Triggering');
+            //console.log('Triggering');
             $.ajax({
                 type: 'get',
                 url: '/generate_upload_url/' + currentNode.name,
@@ -173,7 +173,7 @@ d3.json("/get_root_list/" + userID, function(result) {
 
     tabContentSelector =d3.select("#contentMyGraph");
     list.root_list.forEach(function(d){
-        console.log(d);
+        //console.log(d);
         nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
         addNodeWithContext(tabContentSelector, nodeData, shareMenu);
     });
@@ -181,45 +181,48 @@ d3.json("/get_root_list/" + userID, function(result) {
 
 d3.json("/get_shared_list/" + userID, function(result) {
     list = result;
-    console.log("getting shared list");
+    //console.log("getting shared list");
     _selector =d3.select("#divClipboardNode");
     list.shared_list.forEach(function(d){
-        console.log(d);
+        //console.log(d);
         nodeData = {"node_text":d.root_name, "node_data":{"msg": String(d.msg), "id": d.rootID}};
         addSingleNode(tabContentSelector, nodeData);
     });
 })
 
 d3.json("/get_clipboard/" + userID, function(result){
-    var children = result.children;
-    var thumbnails = result.thumbnails;
-    children.forEach(function(d){
-        nodeData = {"node_text": d.name, "node_data":{"msg": String(d.title), "id": d.id}};
-        addSingleNodeNoclick(d3.select("#divClipboardNode"),nodeData);
-    });
-    thumbnails.forEach(function(thumb){
-        //console.log("adding");
-        divRef.append("a").attr("class", "thumbnail")
-			.append("img").attr("src", thumb.url)
-            .attr("alt", thumb.msg)
-            .attr("style", "height:100px")
-            .on("mouseover",function(){
-                $("#tooltipContent").empty();
-                pos = $(this).offset();
-                console.log(pos);
-                placeDivTooltip(pos);
-                d3.select("#tooltipContent").append("h4").text(thumb.msg);
-                $("#divNodeTooltip").attr("style","display:inline");
-                console.log("Show triggered");
-            })
-            .on("mouseout",closeMsgCase);
-	});
+    //console.log(result)
+    if ("children" in result){
+        result.children.forEach(function(d){
+            nodeData = {"node_text": d.name, "node_data":{"msg": String(d.title), "id": d.id}};
+            addSingleNodeNoclick(d3.select("#divClipboardNode"),nodeData);
+        });
+    }
+    if ("thumbnails" in result){
+        result.thumbnails.forEach(function(thumb){
+            //console.log("adding");
+            divRef.append("a").attr("class", "thumbnail")
+			    .append("img").attr("src", thumb.url)
+                .attr("alt", thumb.msg)
+                .attr("style", "height:100px")
+                .on("mouseover",function(){
+                    $("#tooltipContent").empty();
+                    pos = $(this).offset();
+                    //console.log(pos);
+                    placeDivTooltip(pos);
+                    d3.select("#tooltipContent").append("h4").text(thumb.msg);
+                    $("#divNodeTooltip").attr("style","display:inline");
+                    //console.log("Show triggered");
+                })
+                .on("mouseout",closeMsgCase);
+	    });
+    }
 });
 
 function shareMenu(e){
     var shareUrl = "/shareroot/" + e.id + '/' + String(userID);
     d3.event.preventDefault();
-    console.log(e);
+    //console.log(e);
     if(shareShowing){
         closeShare();
     }
@@ -264,11 +267,10 @@ $("#divClipboardReference").sortable({
     },
     update: function(event, ui){
         var new_reference_list = [];
-        d3.selectAll("#divClipboardReference .thumbnail")
-          .each(function(e){
-            new_reference_list.push(e.id);
-            console.log(e);
-          });
+        $("#divClipboardReference a").each(function(e){
+            console.log(e);        
+            new_reference_list.push(e.attr("src"));
+        });
         $.ajax({
             type: 'post',
             url: '/api/update_clipboard',
@@ -581,14 +583,14 @@ function addNodeWithContext(div_selector, data, contextFunction){ // add single 
 function addRoot(e){
 
     var addRootUrl = "/addroot/" + String(userID);
-    console.log(e);
+    //console.log(e);
     if(addRootShowing){
         closeAddRoot();
     }
 
     d3.select("#divAddRoot").style("display","inline")
         .style("top", (e.x + 200)+"px");
-    console.log(e);
+    //console.log(e);
     d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
     //Load tag section
     d3.select("#formAddRoot").attr("action", addRootUrl);
@@ -602,7 +604,7 @@ function closeAddRoot(){
 }
 
 function updateGraph(e){ // TODO:retrieve content from server
-    console.log(e);
+    //console.log(e);
     //update graph with new root
     d3.json("/update_rooted_data/" + e.id + "/" + userID, function(result){
         root = result;
@@ -755,7 +757,8 @@ function contextmenu(d) {
     var _currentClass = d.name;
     d3.select("#divNodeDetail").style("display","inline")
         .style("top", (d.x+200)+"px");
-    d3.select("#spanNodeTitle").text(d.name);
+    if (!(d.title)){d.title = d.name;}
+    d3.select("#spanNodeTitle").text(d.title);
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
     loadTitle(d);
     //Load tag section
@@ -778,6 +781,8 @@ function closeContextMenu(){
 function loadTitle(d){
     $("#spanNodeTitle").editable({trigger: $("#btnEditNodeTitle"), action:"click"},
         function(e){
+            //console.log(d);
+            //console.log(e);
             if (e.value === d.name){
                 //window.alert(e.value+"=="+d.name);
                 return;
@@ -788,8 +793,8 @@ function loadTitle(d){
             }
             $.ajax({
                 type: 'post',
-                url: '/api/update_title',
-                data: {"name": d.name, "new_title": e.value},
+                url: '/api/update_node',
+                data: {"nodeID": d.id, "new_title": e.value},
                 dataType: "json",
                 success: function(response){
                     //console.log(response.status);
@@ -818,7 +823,7 @@ function loadTag(d){
         placeholder: "Add a tag",
         autocomplete: null, // { 'source': '/url/', minLength: 3 }
         onChange: function(original_field, current_editor, new_tags){
-            console.log(new_tags);
+            //console.log(new_tags);
             $.ajax({
                     type: 'post',
                     url: '/api/update_node',
@@ -827,7 +832,7 @@ function loadTag(d){
                     success: function(response){
                         //console.log(response.status);
                         if(response.status === "success"){
-                            d.tags = new_tags;
+                            //d.tags = new_tags;
                         }else if(response.status === "error"){
                             window.alert(response.message);
                         }},
@@ -845,16 +850,14 @@ function loadChild(d){ // load children
         },
         update: function(event, ui){
             var new_child_list = [];
-            //console.log(event);
-            //console.log(ui);
-            $("#contentMyGraph .thumbnail .img").each(function(e){
-                temp_reference_list.push(e.attr("src"));//TODO: change src to user id
-                console.log(e);
+            d3.selectAll("#divNodeChild .node").each(function(d, i){
+                new_child_list.push(d.id);//TODO: change src to user id
+                console.log(d);
               });
             $.ajax({
                 type: 'post',
                 url: '/api/update_node',
-                data: {"nodeID": d.id, "new_child_list": JSON.stringify(new_reference_list)},
+                data: {"nodeID": d.id, "new_child_list": JSON.stringify(new_child_list)},
                 dataType: "json",
                 success: function(response){
                     //console.log(response.status);
@@ -895,7 +898,7 @@ function loadDivRef(d){
             .append("img").attr("src", "src2")
             .attr("style", "height:100px");*/
     d.thumbnails.forEach(function(thumb){
-        console.log("adding");
+        //console.log("adding");
         divRef.append("a").attr("class", "thumbnail")
 			.append("img").attr("src", thumb.url)
             .attr("alt", thumb.msg)
@@ -903,7 +906,7 @@ function loadDivRef(d){
             .on("mouseover",function(){
                 $("#tooltipContent").empty();
                 pos = $(this).offset();
-                console.log(pos);
+                //console.log(pos);
                 placeDivTooltip(pos);
                 d3.select("#tooltipContent").append("h4").text(thumb.msg);
     //console.log(pos);
@@ -922,7 +925,7 @@ function loadDivRef(d){
             //console.log(event);
             //console.log(ui);
             $("#divReference .thumbnail .img").each(function(e){
-                temp_reference_list.push(e.attr("src"));//TODO: change src to user id
+                new_reference_list.push(e.attr("src"));//TODO: change src to user id
                 console.log(e);
               });
             $.ajax({
@@ -944,7 +947,7 @@ function loadDivRef(d){
 }
 
 function showMsgCase(e){
-    console.log(e);
+    //console.log(e);
     $("#tooltipContent").empty();
     offs = $(this).offset();
     pos = $(this)[0].getBoundingClientRect();
@@ -954,7 +957,7 @@ function showMsgCase(e){
     //console.log(pos);
     placeDivTooltip(new_pos);
     $("#divNodeTooltip").css("display","inline");
-    console.log("Show triggered");
+    //console.log("Show triggered");
 }
 
 function closeMsgCase(e){
@@ -964,8 +967,8 @@ function closeMsgCase(e){
 
 function closeDivRef(){
     $("#divReference").empty();
-    console.log(d3.select("#divReference"));
-    console.log("cleaning");
+    //console.log(d3.select("#divReference"));
+    //console.log("cleaning");
 }
 
 function closeDivAddRef(){
@@ -989,16 +992,16 @@ function trimString(str, len, str_omit_sign){ // shorten
 function placeDivTooltip(position){ // move divNodeTooltip pointer to new location
     var y = position.top - 25;
     var x = position.left + 15;
-    console.log("x = " + x + " y = " +y);
+    //console.log("x = " + x + " y = " +y);
     $("#divNodeTooltip").css({"top": y , "left": x });
-    console.log("changed");
+    //console.log("changed");
 }
 
 function changeDisplay(d){ //display or hide the selected element using jquery
     $selector = d.selector;
     //console.log("Change display");
     if ($selector.css('display') === "none"){
-        console.log('Show');
+        //console.log('Show');
         $("#divClipboard").css('height', 'auto');
         $selector.css("display", "inline-block");
         if ('showFunction' in d){ // Callback function of show activity
