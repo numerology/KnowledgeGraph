@@ -888,12 +888,12 @@ function loadDivRef(d){
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeNameInput").attr("value", d.name);
     divRef = d3.select("#divReference");
-    divRef.append("a").attr("class", "thumbnail")
+    /*divRef.append("a").attr("class", "thumbnail")
             .append("img").attr("src", "src1")
             .attr("style", "height:100px");
             divRef.append("a").attr("class", "thumbnail")
             .append("img").attr("src", "src2")
-            .attr("style", "height:100px");
+            .attr("style", "height:100px");*/
     d.thumbnails.forEach(function(thumb){
         console.log("adding");
         divRef.append("a").attr("class", "thumbnail")

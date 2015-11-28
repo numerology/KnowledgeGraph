@@ -164,24 +164,27 @@ class UpdateNode(webapp2.RequestHandler):
             response["message"] = "Node not found"
         else:
             new_title = str(self.request.get("new_title"))
-            new_tag_list = json.loads(self.request.get("new_tag_list"))
-            new_child_list = json.loads(self.request.get("new_child_list"))
-            new_reference_list = json.loads(self.request.get("new_reference_list"))
+            new_tag_list = self.request.get("new_tag_list")
+            new_child_list = self.request.get("new_child_list")
+            new_reference_list = self.request.get("new_reference_list")
             if new_title:
                 print "new title: " + new_title
                 cnode.title = new_title
                 response["message"] += " name changed"
             if new_tag_list:
+                new_tag_list = json.loads(new_tag_list)
                 print "new tags: "
                 print new_tag_list
                 cnode.child = new_tag_list
                 response["message"] += " tag changed"
             if new_child_list:
+                new_child_list = json.loads(new_child_list)
                 print "new child list: "
                 print new_child_list
                 cnode.childrenIDs = new_child_list
                 response["message"] += " child changed"
             if new_reference_list:
+                new_reference_list = json.loads(new_reference_list)
                 print "new reference list: "
                 print new_reference_list
                 cnode.reference = new_reference_list
@@ -216,13 +219,13 @@ class CreateRoot(webapp2.RequestHandler):
         user_email = self.request.get('user_email')
         root_name = self.request.get('root_name')
         title_name = self.request.get('title_name')
-        rt_node = Node(name=root_name, title=title_name, ChildrenIDs=[])
+        rt_node = Node(name=root_name, title=title_name, childrenIDs=[])
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
         # titlelist = [title_name]
-        new_clipboard = Node(name="Clipboard", title="Clipboard Title", ChildrenIDs=[], reference=[])
+        new_clipboard = Node(name="Clipboard", title="Clipboard Title", childrenIDs=[], reference=[])
         new_clipboard.put()
-        new_user_prof = User(email=user_email, rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=new_clipboard.key.id())
+        new_user_prof = User(email=user_email, rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=str(new_clipboard.key.id()))
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
@@ -362,7 +365,8 @@ class ReturnRoots(webapp2.RequestHandler):
         # return the list of roots, containing the id of root and
         for r in current_user.rootID:
             current_root = Node.get_by_id(int(r))
-            pair = {'msg': current_user.titles[current_user.rootID.index(r)], 'rootID':r , 'root_name':current_root.name}
+            pair = {'msg': current_root.title,
+                    'rootID': r, 'root_name': current_root.name}
             out_list.append(pair)
 
         self.response.headers['Content-Type'] = 'text/plain'
