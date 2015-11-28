@@ -531,7 +531,8 @@ function contextmenu(d) {
     currentNode = d;
     var _currentClass = d.name;
     d3.select("#divNodeDetail").style("display","inline")
-        .style("top", (d.x+200)+"px");
+        .style("top", (d.x+200)+"px")
+        .style("left", (d.y+400)+"px");
     d3.select("#nodeTitle").text(d.name);
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
     //Load tag section
@@ -647,20 +648,22 @@ function loadDivRef(d){
     d.thumbnails.forEach(function(thumb){
         console.log("adding");
         divRef.append("a").attr("class", "thumbnail")
-            .append("img").attr("src", thumb.url)
-            .attr("alt", thumb.msg)
-            .attr("style", "height:100px")
             .on("mouseover",function(){
-                $("#tooltipContent").empty();
+                $("#RefTipContent").empty();
                 pos = $(this).offset();
                 console.log(pos);
-                placeDivTooltip(pos);
-                d3.select("#tooltipContent").append("h4").text(thumb.msg);
+                $("#divReftip").css({"top": pos.top + 20 , "left": pos.left +20 });
+                d3.select("#RefTipContent").append("h4").text(thumb.msg);
     //console.log(pos);
-                $("#divNodeTooltip").attr("style","display:inline");
+                $("#divReftip").css("display","inline");
                 console.log("Show triggered");
             })
-            .on("mouseout",closeMsgCase);
+            .on("mouseout",function(){
+                $("#divReftip").css("display", "none");
+                console.log("Close triggered");
+            }).append("img").attr("src", thumb.url)
+            .attr("alt", thumb.msg)
+            .attr("style", "height:100px");
     });
 
 }
