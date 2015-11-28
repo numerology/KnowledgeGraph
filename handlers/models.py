@@ -24,7 +24,7 @@ class Node(ndb.Model):
     tags = ndb.StringProperty(repeated=True)
     childrenIDs = ndb.StringProperty(repeated=True)
     trending = ndb.IntegerProperty(repeated=True)
-    reference = ndb.StructuredProperty(Reference, repeated=True)
+    reference = ndb.StringProperty(repeated=True)
 
 
 class User(ndb.Model):
