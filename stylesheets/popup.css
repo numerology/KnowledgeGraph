@@ -3,7 +3,7 @@
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
@@ -16,6 +16,14 @@
     box-shadow: #333 2px 2px 4px;
     padding: 15px;
     font-family: arial, helvetica, sans-serif;
+}
+
+#divNodeDetail .div-empty {
+    width: 100%;
+    border-radius: 5px;
+    min-height: 20px;
+    background-color: #F0F8FF;
+    margin-bottom: 10px;
 }
 
 #divAddRoot {
@@ -83,8 +91,6 @@
     width: 100%;
     height: auto;
     background-color: #fff;
-}
-#btnCloseNodeDetail {
 }
 #nodeTag .tag-editor {
     margin-bottom: 0px;
@@ -156,7 +162,7 @@
     margin-right: 0;
 }
 
-#btnCloseNodeDetail {
+.btn-close {
     display: inline-block;
     position: absolute;
     top: 15px;

@@ -29,6 +29,8 @@ routes = [
     webapp2.Route(r'/api/update_tag', handler=UpdateTag),
     webapp2.Route(r'/api/update_title', handler=UpdateTitle),
     webapp2.Route(r'/api/update_root', handler=UpdateRootList),
+    webapp2.Route(r'/api/update_clipboard', handler=UpdateClipboard),
+    webapp2.Route(r'/api/update_node', handler=UpdateNode),
     # test for Jinja template system
     webapp2.Route(r'/test/jinja', handler=JinjaHandler),
 ]

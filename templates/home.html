@@ -136,16 +136,9 @@
                 <textarea id="tagEditor"></textarea>
                 <!--div id="divNodeTag" class="bs-component" ></div-->
             </div>
-            <div class="row" id="divAddTag" style="display:none">
-                <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
-                    <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="tagString">
-                    <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
-                    <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-                </form>
-            </div>
             <div class="row" id="nodeChildren">
                 <h4>Children:</h4>
-                <div class = "row" id="divNodeChild"></div>
+                <div class = "div-empty" id="divNodeChild"></div>
                 <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
             </div>
             <div class="row" id="divAddChild" style="display:none">
@@ -159,7 +152,7 @@
             </div>
             <div class="row" id="nodeReference">
                 <h4>References:</h4>
-                <div class = "row" id="divReference"></div>
+                <div class = "div-empty" id="divReference"></div>
                 <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
                 <div id="divUploadReference" style="display:none">
                     <form class="dropzone" method = "POST" enctype="multipart/form-data" id="uploader">
@@ -176,14 +169,21 @@
                 </div>
             </div>
         </div>
-        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
+        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
     <div id="divClipboard" class="draggable resizable popup-window clipboard clipboard-expanded" style="display:none">
         <div id="divExpandedClipboard" class="col-md-12 no-gutter" style="display:inline-block">
             <div class="row no-gutter">
                 <h3>Expanded Clipboard</h3>
             </div>
+            <span>Nodes:</span>
+            <div id="divClipboardNode" class="row no-gutter div-clipboard">
+            </div>
+            <span>References:</span>
+            <div id="divClipboardReference" class="row no-gutter div-clipboard">
+            </div>
         </div>
+        <a href="#" id="btnCloseClipboard" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
     <div id="divBtnClipboard" class="draggable" style="inline-display">
         <button type="button" id="btnClipboard" class="image btn-clipboard">

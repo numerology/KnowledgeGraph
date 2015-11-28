@@ -38,7 +38,7 @@ def node_collapse(node):
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
 
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_url, "children": children}
+        return {"name": node.name, "tags": node.tags, "thumbnails": current_url, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -78,7 +78,7 @@ class AddTag(webapp2.RequestHandler):
         cnode.put()
         self.redirect('/')
 
-		
+
 class UpdateTag(webapp2.RequestHandler):
     def post(self):
         node_name = self.request.get("name")
@@ -139,7 +139,64 @@ class UpdateRootList(webapp2.RequestHandler):
                 user.put()
             else:
                 response["status"] = "error"
-                response["message"] = "User not found"
+                response["message"] = "Add type not found"
+        self.response.write(json.dumps(response))
+
+
+class UpdateNode(webapp2.RequestHandler):
+    def post(self):
+        node_id = int(self.request.get("nodeID"))
+        response = {"status": "success", "message": "Node changed"}
+        cnode = User.get_by_id(node_id)
+        if not cnode:
+            response["status"] = "error"
+            response["message"] = "Node not found"
+        else:
+            new_title = str(self.request.get("new_title"))
+            new_tag_list = json.loads(self.request.get("new_tag_list"))
+            new_child_list = json.loads(self.request.get("new_child_list"))
+            new_reference_list = json.loads(self.request.get("new_reference_list"))
+            if new_title:
+                print "new title: " + new_title
+                cnode.name = new_title
+                response["message"] += " name changed"
+            if new_tag_list:
+                print "new tags: "
+                print new_tag_list
+                cnode.child = new_tag_list
+                response["message"] += " tag changed"
+            if new_child_list:
+                print "new child list: "
+                print new_child_list
+                cnode.childrenIDs = new_child_list
+                response["message"] += " child changed"
+            if new_reference_list:
+                print "new reference list: "
+                print new_reference_list
+                cnode.reference = new_reference_list
+                response["message"] += " reference changed"
+            # cnode.put()
+        self.response.write(json.dumps(response))
+
+
+class UpdateClipboard(webapp2.RequestHandler):
+    def post(self):
+        user_id = int(self.request.get("userID"))
+        response = {"status": "success", "message": "Clipboard updated"}
+        user = User.get_by_id(user_id)
+        if not user:
+            response["status"] = "error"
+            response["message"] = "User not found"
+        else:
+            new_node_list = json.loads(self.request.get("new_node_list"))
+            new_reference_list = json.loads(self.request.get("new_reference_list"))
+            print ("new ref list: " + new_node_list)
+            if new_node_list:
+                print "update clipboard node list"
+            if new_reference_list:
+                print "update clipboard reference list"
+            # user.rootID = new_reference_list
+            # user.put()
         self.response.write(json.dumps(response))
 
 

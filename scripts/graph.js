@@ -227,9 +227,44 @@ $("#divClipboard").resizable({
     maxHeight: 600,
     minHeight: 300,
 });
+$("#divClipboardReference").sortable({
+    appendTo: document.body,
+    items: '.thumbnail',
+    connectWith: "#divReference",
+    receive: function (event, ui){
+        //ui.sender.sortable('cancel');
+    },
+    update: function(event, ui){
+        var new_reference_list = [];
+        d3.selectAll("#contentMyGraph .node")
+          .filter(function(d,i){return i!=0;}) // do not include first node, i.e., add root node
+          .each(function(e){
+            new_reference_list.push(e.id);
+            console.log(e);
+          });
+        $.ajax({
+            type: 'post',
+            url: '/api/update_clipboard',
+            data: {"userID": userID, "new_node_list": JSON.stringify(new_reference_list)},
+            dataType: "json",
+            success: function(response){
+                //console.log(response.status);
+                if(response.status === "success"){
+                }else if(response.status === "error"){
+                    window.alert(response.message);
+                }},
+            failure: function(){
+                window.alert("ajax error in updating my node list");},
+        });
+    },
+});
 $("#divClipboard").css({"position": "fixed",
                         "bottom": '200px',
                         "right": '150px'});
+$("#btnCloseClipboard").on('click', function(){
+    $("#btnClipboard").show();
+    $("#divClipboard").toggle();
+});
 $("#btnClipboard").on("mousedown", function(e){
     var mdown = document.createEvent("MouseEvents");
     mdown.initMouseEvent("mousedown", true, true, 
@@ -247,6 +282,7 @@ $("#btnClipboard").on("mousedown", function(e){
         $draggable.data("preventBehavior", false);
     }else {
         $("#divClipboard").toggle();
+        $_this.hide();
         /*changeDisplay({
             "selector": $("#divExpandedClipboard"),
             "showFunction": function(){
@@ -709,8 +745,8 @@ function loadTag(d){
             console.log(new_tags);
             $.ajax({
                     type: 'post',
-                    url: '/api/update_tag',
-                    data: {"name": d.name, "new_tags": JSON.stringify(new_tags)},
+                    url: '/api/update_node',
+                    data: {"nodeID": d.id, "new_tag_list": JSON.stringify(new_tags)},
                     dataType: "json",
                     success: function(response){
                         //console.log(response.status);
@@ -723,49 +759,37 @@ function loadTag(d){
             }); //TODO: show alert if failed? sequence of ajax?
         },
     });
-    /*
-    divTag = d3.select("#divNodeTag");
-    $("#divNodeTag").empty(); //jquery ...
-    var myTag = d.name + " tag1";
-    var tagUrl;
-    divTag.append("a").attr("class", "btn btn-default btn-sm").text(d.name).attr("href", "javascript:clickTag('"+tagUrl+"')"); // or add onclick
-    //Button for adding tag
-    d.tags.forEach(function(tag){
-        divTag.append("a")
-            .attr("class", "btn btn-primary btn-sm")
-            .text(tag);
-    });
+}
 
-    divTag.append("a")
-        .attr("class", "btn btn-primary btn-sm")
-        .text("Add Tag")
-        .attr("id", "btnShowAddTag")
-        .attr("href", "javascript: showDivAddTag()");*/
-}
-/*function loadDivAddTag(d){ // load the add Tag Div
-    var addTagUrl = "/api/addtag/"+d.name; //some encoding here?
-    d3.select("#formAddTag").attr("action", addTagUrl);
-    //d3.select("#btnAddTag").on("click", );//TODO: add action to add tag button
-    d3.select("#btnCancelAddTag").on("click", closeDivAddTag);
-}*/
-function clickTag(url){ //action when tag is clicked
-    // open window for searching ?
-}
-function showDivAddTag(){
-    d3.select("#divAddTag").style("display", "inline");
-    d3.select("#inputAddTag").property("value", "");
-    d3.select("#btnShowAddTag").remove();
-}
-function closeDivAddTag(){
-    d3.select("#divAddTag").style("display", "none");
-    d3.select("#inputAddTag").property("value", "");
-    d3.select("#divNodeTag").append("a")
-        .attr("class", "btn btn-primary btn-sm")
-        .text("Add Tag")
-        .attr("id", "btnShowAddTag")
-        .attr("href", "javascript: showDivAddTag()");
-}
 function loadChild(d){ // load children
+    //load children ...
+    $("#divNodeChild").sortable({
+        connectWith: "#divClipboardNode", //TODO: connect with my tabs and shared graph
+        receive: function (event, ui){ // check whether the current node is in the graph
+        },
+        update: function(event, ui){
+            var new_child_list = [];
+            //console.log(event);
+            //console.log(ui);
+            $("#contentMyGraph .thumbnail .img").each(function(e){
+                temp_reference_list.push(e.attr("src"));//TODO: change src to user id
+                console.log(e);
+              });
+            $.ajax({
+                type: 'post',
+                url: '/api/update_node',
+                data: {"nodeID": d.id, "new_child_list": JSON.stringify(new_reference_list)},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        }});
 }
 function loadDivAddChild(d){
     btnShowAddChild = d3.select("#btnShowAddChild");
@@ -788,13 +812,48 @@ function loadDivRef(d){
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeNameInput").attr("value", d.name);
     divRef = d3.select("#divReference");
+    divRef.append("a").attr("class", "thumbnail")
+            .append("img").attr("src", "src1")
+            .attr("style", "height:100px");
+            divRef.append("a").attr("class", "thumbnail")
+            .append("img").attr("src", "src2")
+            .attr("style", "height:100px");
     d.thumbnails.forEach(function(thumb){
         console.log("adding");
         divRef.append("a").attr("class", "thumbnail")
             .append("img").attr("src", thumb)
             .attr("style", "height:100px");
+            //TODO: add reference id to "a"
     });
-
+    $("#divReference").sortable({
+        //cancel: "#nodeAddRoot", //exclude add root node
+        connectWith: "#divClipboardReference",
+        receive: function (event, ui){
+        },
+        update: function(event, ui){
+            var new_reference_list = [];
+            //console.log(event);
+            //console.log(ui);
+            $("#divReference .thumbnail .img").each(function(e){
+                temp_reference_list.push(e.attr("src"));//TODO: change src to user id
+                console.log(e);
+              });
+            $.ajax({
+                type: 'post',
+                url: '/api/update_node',
+                data: {"nodeID": d.id, "new_reference_list": JSON.stringify(new_reference_list)},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        }
+    });
 }
 
 function closeDivRef(){

@@ -19,6 +19,7 @@ class Reference(ndb.Model):
 
 class Node(ndb.Model):
     name = ndb.StringProperty()
+    title = ndb.StringProperty()
     definition = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
     childrenIDs = ndb.StringProperty(repeated=True)
