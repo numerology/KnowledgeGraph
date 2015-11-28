@@ -38,14 +38,16 @@ def node_collapse(node):
 
     if len(node.childrenIDs) == 0:
         return {"name": node.name, "title": node.title, "id": str(node.key.id()),
-                "tags": node.tags, "thumbnails": current_thumbs, "reference": node.reference}
+                "tags": node.tags, "thumbnails": current_thumbs, 
+                "reference": node.reference, "childrenIDs": node.childrenIDs}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
         return {"name": node.name, "title": node.title, "id": str(node.key.id()),
-                "tags": node.tags, "thumbnails": current_thumbs, "children": children, "reference": node.reference}
+                "tags": node.tags, "thumbnails": current_thumbs, "children": children, 
+                "reference": node.reference, "childrenIDs": node.childrenIDs}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -203,10 +205,10 @@ class UpdateClipboard(webapp2.RequestHandler):
         else:
             clip_node = Node.get_by_id(int(cuser.clipboardID))
             rqst_args = self.request.arguments()
-            if "new_node_list" in rqst_args:
-                new_node_list = json.loads(self.request.get("new_load_list"))
+            if "new_child_list" in rqst_args:
+                new_child_list = json.loads(self.request.get("new_child_list"))
                 print "update clipboard node list"
-                clip_node.childrenIDs = new_node_list
+                clip_node.childrenIDs = new_child_list
                 response["message"] += " children updated"
             if "new_reference_list" in rqst_args:
                 new_reference_list = json.loads(self.request.get("new_reference_list"))

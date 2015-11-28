@@ -170,7 +170,6 @@ d3.json("/get_rooted_data/" + userID, function(flare) {
 //write out the root list
 d3.json("/get_root_list/" + userID, function(result) {
     list = result;
-
     tabContentSelector =d3.select("#contentMyGraph");
     list.root_list.forEach(function(d){
         //console.log(d);
@@ -182,23 +181,33 @@ d3.json("/get_root_list/" + userID, function(result) {
 d3.json("/get_shared_list/" + userID, function(result) {
     list = result;
     //console.log("getting shared list");
-    _selector =d3.select("#divClipboardNode");
+    tabSharedSelector =d3.select("#divClipboardNode");
     list.shared_list.forEach(function(d){
         //console.log(d);
         nodeData = {"node_text":d.root_name, "node_data":{"msg": String(d.msg), "id": d.rootID}};
-        addSingleNode(tabContentSelector, nodeData);
+        addSingleNode(tabSharedSelector, nodeData);
     });
 })
 
 d3.json("/get_clipboard/" + userID, function(result){
     //console.log(result)
-    var divClipRef = d3.select("#divClipboardReference");
-    if ("children" in result){
-        result.children.forEach(function(d){
-            nodeData = {"node_text": d.name, "node_data":{"msg": String(d.title), "id": d.id}};
-            addSingleNodeNoclick(d3.select("#divClipboardNode"),nodeData);
+    console.log(result)
+    divClipboardChild =d3.select("#divClipboardNode");
+    $("#divClipboardNode").empty();
+    if (result.children){
+        children = d.children;
+        //console.log("load child for contextmenu");
+        //console.log(d.children);
+        children.forEach(function(child){
+            var msg = child.name
+            if (child.title){
+                msg = child.title;
+            }
+            nodeData = {"node_text":child.name, "node_data":{"msg": msg, "id": child.id.toString(), "child": child}};
+            addSingleNodeNoclick(divClipboardChild, nodeData);
         });
     }
+    var divClipRef = d3.select("#divClipboardReference");
     if ("thumbnails" in result){
         result.thumbnails.forEach(function(thumb){
             //console.log("adding");
@@ -290,19 +299,23 @@ $("#divClipboardReference").sortable({
     },
 });
 $("#divClipboardNode").sortable({
-    appendTo: document.body,
-    items: 'svg',
-    connectWith: "#divNodeChild, #contentMyGraph, #contentSharedGraph",
+    appendTo: $("#divClipboardNode"),
+    //items: 'svg',
+    connectWith: ["#divNodeChild", "#contentMyGraph", "#contentSharedGraph"],
     receive: function (event, ui){
         //ui.sender.sortable('cancel');
     },
     update: function(event, ui){
         var new_child_list = [];
+        var new_children = [];
         d3.selectAll("#contentMyGraph .node")
           .each(function(e){
-            new_child_list.push(e.id);
             console.log(e);
+            new_child_list.push(e.id.toString());
+            new_children.push(e.child);
+            //
           });
+        
         $.ajax({
             type: 'post',
             url: '/api/update_clipboard',
@@ -403,6 +416,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     //console.log(helperTspan.node().getComputedTextLength());
     $("#contentMyGraph").sortable({
         cancel: "#nodeAddRoot", //exclude add root node
+        connectWith: "#divClipboardNode",
         update: function(event, ui){
             var temp_node_list = [];
             //console.log(event);
@@ -430,6 +444,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
         }
     });
     $("#contentSharedGraph").sortable({
+        connectWith: "#divClipboardNode",
         update: function(event, ui){
             var temp_node_list = [];
             //console.log(event);
@@ -549,6 +564,7 @@ function addSingleNodeNoclick(div_selector, data){ // add single node to selecte
              .on("mouseover", showBriefNodeInfo)
              .on("mouseout", closeBriefNodeInfo);
     tempNode.data([data.node_data], 0);
+    //console.log(tempNode.data());
     //console.log(data.node_data);
     //console.log(tempNode.__data__);
     tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
@@ -844,18 +860,39 @@ function loadTag(d){
     });
 }
 
-function loadChild(d){ // load children
-    //load children ...
+function loadChild(d){ // load children in ContextMenu
+    divNodeChild =d3.select("#divNodeChild");
+    $("#divNodeChild").empty();
+    //console.log("Load child :");
+    //console.log(d.children);
+    if (d.children){
+        children = d.children;
+        console.log(d.children);
+        children.forEach(function(child){
+            console.log(child);
+            console.log(child.id);
+            var msg = child.name
+            if (child.title){
+                msg = child.title;
+            }
+            nodeData = {"node_text":child.name, "node_data":{"msg": msg, "id": child.id.toString(), "child": child}};
+            addSingleNodeNoclick(divNodeChild, nodeData);
+        });
+    }    
     $("#divNodeChild").sortable({
-        connectWith: "#divClipboardNode", //TODO: connect with my tabs and shared graph
-        receive: function (event, ui){ // check whether the current node is in the graph
+        connectWith: "#divClipboardNode",
+        receive: function (event, ui){ // TODO: check whether the current node is in the graph
         },
         update: function(event, ui){
             var new_child_list = [];
-            d3.selectAll("#divNodeChild .node").each(function(d, i){
-                new_child_list.push(d.id);//TODO: change src to user id
-                console.log(d);
-              });
+            var new_children = [];
+            d3.selectAll("#divNodeChild .node").each(function(e, i){
+                new_child_list.push(e.id.toString());
+                new_children.push(e.child);
+                //console.log("update children list:");
+                //console.log(e);
+            });
+            d.children = new_children;
             $.ajax({
                 type: 'post',
                 url: '/api/update_node',
@@ -889,6 +926,7 @@ function closeDivAddChild(){
 }
 
 function loadDivRef(d){
+    $("#divReference").empty(); //TODO: 
     d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeNameInput").attr("value", d.name);
