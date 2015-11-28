@@ -8,14 +8,13 @@ from google.appengine.ext.webapp import blobstore_handlers
 from models import *
 from constants import *
 from time import sleep as time_sleep
-import os, sys
+
 import webapp2
 import jinja2
 import json
-import StringIO
-from cloudinary.uploader import upload
-from cloudinary.utils import cloudinary_url
-from cloudinary.api import delete_resources_by_tag, resources_by_tag
+
+
+
 
 
 def node_collapse(node):
@@ -23,24 +22,28 @@ def node_collapse(node):
     :param node: a Node obj
     :return: formatted dict based on NDB data
     '''
-    current_url = []
+    current_thumbs = []
     for r in node.reference:
-        if r.type == IN_TYPE_IMG:
-            current_url.append(images.get_serving_url(r.blobkey) + '=s' + str(THUMBNAIL_SIZE))
-        if r.type == IN_TYPE_PDF:
-            return
-        if r.type == EXT_TYPE:
-            current_url.append(r.url)
+        ref = Reference.get_by_id(int(r))
+        current_description = ref.description
+        if ref.type == IN_TYPE_IMG:
+            current_url=images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
+        if ref.type == IN_TYPE_PDF:
+            current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
+        if ref.type == EXT_TYPE:
+            current_url=r.url
+
+        current_thumbs.append({"url": current_url, "msg": current_description})
 
     if len(node.childrenIDs) == 0:
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_url}
+        return {"name": node.name, "tags":node.tags, "thumbnails": current_thumbs}
     else:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
 
-        return {"name": node.name, "tags":node.tags, "thumbnails": current_url, "children": children}
+        return {"name": node.name, "tags":node.tags, "thumbnails": current_thumbs, "children": children}
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -104,37 +107,38 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
        # try:
             print ("PhotoUploadHandler: upload handler is running")
-            print(self.get_uploads()[0])
+
             print ("PhotoUploadHandler: upload resized")
             node_name = self.request.get("node_name")
+            upload = self.get_uploads()[0]
+            descriptionstr = self.request.get("description")
+            key = upload.key()
 
-            image_url = None
-            thumbnail_url1 = None
-            thumbnail_url2 = None
-            file = self.request.get('file')
 
             if(self.request.get("type_name") == "PDF"):
-                str_file = StringIO.StringIO(file)
-                str_file.name = 'file'
-                upload_result = upload(str_file)
-                image_url = upload_result['url']
-                thumbnail_url1, options = cloudinary_url(upload_result['public_id'], format = "jpg", crop = "fill", width = 100, height = 100)
-                thumbnail_url2, options = cloudinary_url(upload_result['public_id'], format = "jpg", crop = "fill", width = 200, height = 100, radius = 20, effect = "sepia")
                 user_file = Reference(type = IN_TYPE_PDF,
-                                   blobkey=image_url)
+                                   blobkey=upload.key(),description = descriptionstr)
+
             else:
                 user_file = Reference(type = IN_TYPE_IMG,
-                                   blobkey=image_url)
+                                   blobkey=upload.key(), description = descriptionstr)
+
             user_file.put()
             queried_node = Node.query(Node.name == node_name).get()
             if queried_node:
-                queried_node.reference.insert(0,user_file)
+                queried_node.reference.insert(0,str(user_file.key.id()))
 
                 queried_node.put()
             else:
                 print ("PhotoUploadHander: No stream found matching "+node_name)
+
+
+            #preprocessing, generating thumbnail
+
+
+
             self.redirect('/graph')
-            assert(1 == 0)
+
        # except:
        #     self.error(500)
 
