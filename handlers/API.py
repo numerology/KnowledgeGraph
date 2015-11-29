@@ -145,6 +145,11 @@ class UpdateRootList(webapp2.RequestHandler):
             new_my_node_list = json.loads(self.request.get("new_root_list"))
             if root_type == "MY_ROOT":
                 user.rootID = new_my_node_list
+                if user.currentrootID not in user.rootID:
+                    if len(new_my_node_list) == 0:
+                        print "update root: current root empty!"
+                    user.currentrootID = new_my_node_list[0]
+                    print "update root: change current root id"
                 user.put()
             elif root_type == "SHARED_ROOT":
                 user.sharedID = new_my_node_list

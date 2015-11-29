@@ -169,12 +169,15 @@ d3.json("/get_rooted_data/" + userID, function(flare) {
 //write out the root list
 d3.json("/get_root_list/" + userID, function(result) {
     list = result;
-    tabContentSelector =d3.select("#contentMyGraph");
+    tabContentSelector = d3.select("#contentMyGraph");
     list.root_list.forEach(function(d){
         //console.log(d);
         nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
         addNodeWithContext(tabContentSelector, nodeData, shareMenu);
     });
+	if (list.root_list.length == 1){
+		tabContentSelector.selectAll("g").classed("lastNode", true);
+	}
 })
 
 d3.json("/get_shared_list/" + userID, function(result) {
@@ -190,7 +193,7 @@ d3.json("/get_shared_list/" + userID, function(result) {
 
 d3.json("/get_clipboard/" + userID, function(result){
     //console.log(result)
-    console.log(result)
+    //console.log(result)
     divClipboardChild =d3.select("#divClipboardNode");
     $("#divClipboardNode").empty();
     if (result.children){
@@ -300,8 +303,23 @@ $("#divClipboardNode").sortable({
     //items: 'svg',
     connectWith: ["#divNodeChild", "#contentMyGraph", "#contentSharedGraph"],
     receive: function (event, ui){
-        //ui.sender.sortable('cancel');
-    },
+		var isLastNode = false;
+		//var d3selector;
+        //console.log(ui);
+		$(this).find("g").each(function(){
+			console.log($(this));
+			d3selector = d3.selectAll($(this).toArray());
+			if (d3selector.classed("lastNode")){
+				isLastNode = true;
+			}
+			//isLastNode = true;
+		});
+		console.log("Clipboard isLastNode: ");
+		console.log(isLastNode);
+		if (isLastNode){
+			ui.sender.sortable('cancel');
+		}
+	},
     update: function(event, ui){
         var new_child_list = [];
         var new_children = [];
@@ -418,26 +436,46 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
             var temp_node_list = [];
             //console.log(event);
             //console.log(ui);
+			var nodeNum = 0;
             d3.selectAll("#contentMyGraph .node")
               .filter(function(d,i){return i!=0;}) // do not include first node, i.e., add root node
               .each(function(e){
-                temp_node_list.push(e.id);
+				nodeNum++;
+                temp_node_list.push(e.id.toString());
                 console.log(e);
               });
-            $.ajax({
-                type: 'post',
-                url: '/api/update_root',
-                data: {"userID": userID,"type": "MY_ROOT", "new_root_list": JSON.stringify(temp_node_list)},
-                dataType: "json",
-                success: function(response){
-                    //console.log(response.status);
-                    if(response.status === "success"){
-                    }else if(response.status === "error"){
-                        window.alert(response.message);
-                    }},
-                failure: function(){
-                    window.alert("ajax error in updating my node list");},
-            });
+			//console.log("my graph update: nodeNum is " + nodeNum);
+			// IMPORTANT: YW: 11/28/2015 dont use $(this) inside other functions....
+					// jquery does not add class to d3 element ...
+			if (nodeNum == 1){ //only one node left in my graph
+				d3.selectAll("#contentMyGraph g")
+				  .classed("lastNode", true);
+				 $("#contentMyGraph .node").each(function(){
+					var $g = $(this);
+					console.log($g.attr("class"));
+				});
+			}else { //only one node left in my graph
+				d3.selectAll("#contentMyGraph g")
+				  .classed("lastNode", false);
+			}
+			if(nodeNum == 0){
+				console.log("sortable has no root now, does not update my roots");
+			} else{$.ajax({
+					type: 'post',
+					url: '/api/update_root',
+					data: {"userID": userID,"type": "MY_ROOT", "new_root_list": JSON.stringify(temp_node_list)},
+					dataType: "json",
+					success: function(response){
+						//console.log(response.status);
+						if(response.status === "success"){
+						}else if(response.status === "error"){
+							window.alert(response.message);
+						}},
+					failure: function(){
+						window.alert("ajax error in updating my node list");},
+				});
+			}
+            
         }
     });
     $("#contentSharedGraph").sortable({
