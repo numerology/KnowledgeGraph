@@ -51,9 +51,9 @@ def node_collapse(node):
 
 
 class AddChildHandler(webapp2.RequestHandler):
-    def post(self, cname):
+    def post(self, nodeID):
         child_name = self.request.get('childName')
-        cnode = Node.query(Node.name == cname).get()
+        cnode = Node.get_by_id(int(nodeID))
         child_node = Node(name=child_name, childrenIDs=[], reference=[])
         child_node.put()
 

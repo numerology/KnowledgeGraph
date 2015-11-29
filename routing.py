@@ -18,7 +18,7 @@ routes = [
     webapp2.Route(r'/update_rooted_data/<root_id:[\w-]+>/<user_id:[\w-]+>', handler = UpdateRoot),
     webapp2.Route(r'/shareroot/<root_id:[\w-]+>/<user_id:[\w-]+>', handler = ShareRoot),
 
-    webapp2.Route(r'/api/addChild/<cname:[\s\S-]+>', handler=AddChildHandler),
+    webapp2.Route(r'/api/addChild/<nodeID:[\s\S-]+>', handler=AddChildHandler),
     webapp2.Route(r'/api/createroot', handler=CreateRoot),
     # webapp2.Route(r'/api/addtag/<node_name:[\s\S-]+>', handler = AddTag),
     webapp2.Route(r'/api/delete_fig_partial/<id:[\w-]+>/<fig_key:[\S-]+>', handler = MiniDeleteFigHandler, name = 'delete_api'),

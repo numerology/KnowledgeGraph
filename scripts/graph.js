@@ -948,7 +948,7 @@ function loadChild(d){ // load children in ContextMenu
 }
 function loadDivAddChild(d){
     btnShowAddChild = d3.select("#btnShowAddChild");
-    currentClass = d.name;
+    currentClass = d.id;
     btnShowAddChild.on("click", function(){
             d3.select("#btnShowAddChild").style("display", "none");
             d3.select("#divAddChild").style("display","inline");
