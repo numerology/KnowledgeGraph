@@ -19,6 +19,7 @@ class Reference(ndb.Model):
 
 class Node(ndb.Model):
     name = ndb.StringProperty()
+    title = ndb.StringProperty()
     definition = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
     childrenIDs = ndb.StringProperty(repeated=True)
@@ -28,9 +29,10 @@ class Node(ndb.Model):
 
 class User(ndb.Model):
     email = ndb.StringProperty()
-    rootID = ndb.StringProperty(repeated = True)
-    sharedID = ndb.StringProperty(repeated = True)
-    titles = ndb.StringProperty(repeated = True)
+    rootID = ndb.StringProperty(repeated=True)
+    sharedID = ndb.StringProperty(repeated=True)
+    titles = ndb.StringProperty(repeated=True)
     sharedtitles = ndb.StringProperty(repeated=True)
     currentrootID = ndb.StringProperty()
+    clipboardID = ndb.StringProperty()
 

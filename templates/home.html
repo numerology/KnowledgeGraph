@@ -6,6 +6,7 @@
     <link href="/stylesheets/graphtab.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
+    <link href="/stylesheets/clipboard.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui, backtop>
     <script>
         var uploadUrl = "{{upload_url}}";
@@ -122,6 +123,7 @@
             </div>
         </div>
     </div>
+
     <div id="divReftip" class="popup" style="display:none">
         <div id="RefTipContent">
             <h2>POPUP for Tooltip!</h2>
@@ -129,28 +131,24 @@
         <div class="tip1"></div>
         <div class="tip2"></div>
     </div>
-    <div id="divNodeDetail" class="popup" style="display:none">
+
+    <div id="divNodeDetail" class="popup popup-window" style="display:none">
+
         <div class="col-md-12">
             <div class="row no-gutter">
                 <div class="col-md-10">
-                    <h2 id="nodeTitle"></h2>
+                    <span id="spanNodeTitle"></span>
                 </div>
+                <button class="image" id="btnEditNodeTitle" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Edit Title"><img src="/img/edit.png"></button>
             </div>
             <div class="row" id="nodeTag">
                 <h4>Tags:</h4>
                 <textarea id="tagEditor"></textarea>
                 <!--div id="divNodeTag" class="bs-component" ></div-->
             </div>
-            <div class="row" id="divAddTag" style="display:none">
-                <form class="form-horizontal" id="formAddTag" method="post" autocomplete="off">
-                    <input id="inputAddTag" type="text" class="form-control" placeholder="Enter tag(s), separate by semicolon" name="tagString">
-                    <button id="btnAddTag" class="btn btn-primary" type="submit" value="Add">Add</button>
-                    <button id="btnCancelAddTag" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-                </form>
-            </div>
             <div class="row" id="nodeChildren">
                 <h4>Children:</h4>
-                <div class = "row" id="divNodeChild"></div>
+                <div class = "div-empty myTabContent" id="divNodeChild"></div>
                 <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
             </div>
             <div class="row" id="divAddChild" style="display:none">
@@ -164,7 +162,7 @@
             </div>
             <div class="row" id="nodeReference">
                 <h4>References:</h4>
-                <div class = "row" id="divReference"></div>
+                <div class = "div-empty" id="divReference"></div>
                 <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
                 <div id="divUploadReference" style="display:none">
                     <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
@@ -181,7 +179,26 @@
                 </div>
             </div>
         </div>
-        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs">&times;</a>
+        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs btn-close">&times;</a>
+    </div>
+    <div id="divClipboard" class="draggable resizable popup-window clipboard clipboard-expanded" style="display:none">
+        <div id="divExpandedClipboard" class="col-md-12 no-gutter" style="display:inline-block">
+            <div class="row no-gutter">
+                <h3>Expanded Clipboard</h3>
+            </div>
+            <span>Nodes:</span>
+            <div id="divClipboardNode" class="row no-gutter div-clipboard myTabContent">
+            </div>
+            <span>References:</span>
+            <div id="divClipboardReference" class="row no-gutter div-clipboard">
+            </div>
+        </div>
+        <a href="javascript: void(0)" id="btnCloseClipboard" class="btn btn-primary btn-xs btn-close">&times;</a>
+    </div>
+    <div id="divBtnClipboard" class="draggable" style="inline-display">
+        <button type="button" id="btnClipboard" class="image btn-clipboard">
+            <img class="icon-clipboard" src="/img/clipboard.png">
+        </button>
     </div>
 {% endblock content %}
 

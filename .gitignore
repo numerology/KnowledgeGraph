@@ -3,12 +3,6 @@
 .idea/*
 *.xml
 *.swp
-<<<<<<< HEAD
-
-=======
 stylesheets/*~
 templates/*~
 scripts/*~
-*.xml
-*.xml
->>>>>>> refs/remotes/origin/YW

@@ -1,3 +1,20 @@
+.popup-window{
+    border: 1px #ccc solid;
+    border-radius: 6px;
+    box-shadow: #333 2px 2px 4px;
+    padding: 15px;
+    font-family: arial, helvetica, sans-serif;
+}
+
+#divNodeDetail .div-empty {
+    width: 100%;
+    border-radius: 5px;
+    min-height: 20px;
+    background-color: #F0F8FF;
+    margin-bottom: 10px;
+}
+
+
 #divAddRoot {
     margin: 30px auto 0;
     position: absolute;
@@ -34,12 +51,35 @@
     font-family: arial, helvetica, sans-serif;
 }
 
-#nodeTitle {
+/*#nodeTitle {
     margin-top: 0px;
+    width: 100%;
     -ms-word-break: break-all;
     word-break: break-all;
+}*/
+#spanNodeTitle {
+    margin-top: 0px;
+    margin-bottom: 15px;
+    width: 100%;
+    display: inline-block;
+    -ms-word-break: break-all;
+    word-break: break-all;
+    font-size: 25px;
+    font-family: helvetica;
 }
-#btnCloseNodeDetail {
+#btnEditNodeTitle {
+    width: 24px;
+    height: 24px;
+    border: none;
+    margin-left: 10px;
+    padding: 0px;
+    cursor: pointer;
+    display: inline-block;
+}
+#btnEditNodeTitle img {
+    width: 100%;
+    height: auto;
+    background-color: #fff;
 }
 #nodeTag .tag-editor {
     margin-bottom: 0px;
@@ -152,7 +192,7 @@
     margin-right: 0;
 }
 
-#btnCloseNodeDetail {
+.btn-close {
     display: inline-block;
     position: absolute;
     top: 15px;
