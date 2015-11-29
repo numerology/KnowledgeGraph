@@ -194,9 +194,7 @@ d3.json("/get_clipboard/" + userID, function(result){
     divClipboardChild =d3.select("#divClipboardNode");
     $("#divClipboardNode").empty();
     if (result.children){
-        children = d.children;
-        //console.log("load child for contextmenu");
-        //console.log(d.children);
+        children = result.children;
         children.forEach(function(child){
             var msg = child.name
             if (child.title){
@@ -307,7 +305,7 @@ $("#divClipboardNode").sortable({
     update: function(event, ui){
         var new_child_list = [];
         var new_children = [];
-        d3.selectAll("#contentMyGraph .node")
+        d3.selectAll("#divClipboardNode .node")
           .each(function(e){
             console.log(e);
             new_child_list.push(e.id.toString());
@@ -864,9 +862,11 @@ function loadChild(d){ // load children in ContextMenu
     $("#divNodeChild").empty();
     //console.log("Load child :");
     //console.log(d.children);
-    if (d.children){
-        children = d.children;
-        console.log(d.children);
+	children = d.children;
+	if (d._children){
+		children = d._children;
+	}
+    if (children){
         children.forEach(function(child){
             console.log(child);
             console.log(child.id);
