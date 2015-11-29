@@ -163,7 +163,6 @@ d3.json("/get_rooted_data/" + userID, function(flare) {
     root.children.forEach(collapse);
     }
     update(root);
-
     loadGraphTab();
 });
 
