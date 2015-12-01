@@ -5,6 +5,7 @@ import webapp2
 import operator
 from models import *
 from constants import JINJA_ENVIRONMENT
+from API import *
 
 import jinja2
 import os
@@ -48,3 +49,29 @@ class CreateRootHandler(webapp2.RequestHandler):
         template_values = {'user_email': str(user.email())}
         template = JINJA_ENVIRONMENT.get_template('create_root.html')
         self.response.write(template.render(template_values))
+
+class MainHandler(webapp2.RequestHandler):
+
+  @decorator.oauth_aware
+  def get(self):
+    variables = {
+        'url': decorator.authorize_url(),
+        'has_credentials': decorator.has_credentials()
+        }
+    template = JINJA_ENVIRONMENT.get_template('grant.html')
+    self.response.write(template.render(variables))
+
+
+class AboutHandler(webapp2.RequestHandler):
+
+  @decorator.oauth_required
+  def get(self):
+    try:
+      http = decorator.http()
+      user = service.people().get(userId='me').execute(http=http)
+     # text = 'Hello, %s!' % user['displayName']
+      text = str(user)
+      template = JINJA_ENVIRONMENT.get_template('welcome.html')
+      self.response.write(template.render({'text': text }))
+    except client.AccessTokenRefreshError:
+      self.redirect('/plustest')
