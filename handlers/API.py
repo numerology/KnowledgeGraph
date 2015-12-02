@@ -42,7 +42,14 @@ http = httplib2.Http(memcache)
 service = discovery.build("plus", "v1", http=http)
 decorator = appengine.oauth2decorator_from_clientsecrets(
     CLIENT_SECRETS,
-    scope='https://www.googleapis.com/auth/plus.me',
+    # take care about the scope, we need:
+    # 1. login authorization
+    # 2. Not only access user's profile, but also friends' profiles, so plus.me does not suffice
+    scope=['https://www.googleapis.com/auth/plus.login',
+           'https://www.googleapis.com/auth/plus.profile.emails.read',
+           'https://www.googleapis.com/auth/userinfo.email',
+           'https://www.googleapis.com/auth/userinfo.profile',
+           'profile'],
     message=MISSING_CLIENT_SECRETS_MESSAGE)
 
 def node_collapse(node):

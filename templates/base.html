@@ -34,7 +34,7 @@
 		<div class = "container-fluid">
             <div class="navbar-header">
                 {% block nav_brand%}
-                <a href="/management" class="navbar-brand">Knowledge Graph</a>
+                <a href="/graph" class="navbar-brand">Knowledge Graph</a>
                 <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-main" aria-expanded="false">
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
@@ -46,13 +46,10 @@
                 <ul class="nav navbar-nav">
                     {% block nav_items%}
                     <li>
-                      <a href="/management">Management</a>
+                      <a href="/social">Social</a>
                     </li>
                     <li>
-                      <a href="/stream_list">View All Streams</a>
-                    </li>
-                    <li>
-                      <a href="/stream_trending">Trending</a>
+                      <a href="/index_view">Index View</a>
                     </li>
                     {% endblock nav_items%}
                 </ul>

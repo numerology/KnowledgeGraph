@@ -34,7 +34,7 @@ routes = [
     webapp2.Route(r'/api/update_node', handler=UpdateNode),
     # test for Jinja template system
     webapp2.Route(r'/test/jinja', handler=JinjaHandler),
-    webapp2.Route('/plustest', MainHandler),
+    webapp2.Route('/social', SocialHandler),
     webapp2.Route('/about', AboutHandler),
     webapp2.Route(decorator.callback_path, decorator.callback_handler()),
 ]

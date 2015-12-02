@@ -50,7 +50,7 @@ class CreateRootHandler(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('create_root.html')
         self.response.write(template.render(template_values))
 
-class MainHandler(webapp2.RequestHandler):
+class SocialHandler(webapp2.RequestHandler):
 
   @decorator.oauth_aware
   def get(self):
@@ -68,10 +68,21 @@ class AboutHandler(webapp2.RequestHandler):
   def get(self):
     try:
       http = decorator.http()
-      user = service.people().get(userId='me').execute(http=http)
+
+      user = service.people().list(userId = 'me', collection = 'visible')
      # text = 'Hello, %s!' % user['displayName']
-      text = str(user)
+      result = user.execute(http)
+
+      #dict = json.loads(str(user))
+   #   names = ''
+  #    for i in result['items']:
+  #        names = names + ' ' + i['displayName']
+
+ #     result = service.people().get(userId = result['items'][0]['id']).execute(http)
+
+    #  text = names
       template = JINJA_ENVIRONMENT.get_template('welcome.html')
-      self.response.write(template.render({'text': text }))
+      self.response.write(template.render({'text': str(result)}))
+
     except client.AccessTokenRefreshError:
-      self.redirect('/plustest')
+      self.redirect('/social')
