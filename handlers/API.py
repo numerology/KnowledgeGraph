@@ -65,7 +65,7 @@ class AddChildHandler(webapp2.RequestHandler):
 
         user = User.query(User.email == users.get_current_user().email()).get()
         plus_id = user.plusid
-        caction = Action(nodeid = str(cnode.key.id()), plusid = plus_id)
+        caction = Action(nodeid = str(child_node.key.id()), plusid = plus_id)
         caction.put()
 
         ACTION_QUEUE.actions.append(caction)

@@ -1,3 +1,4 @@
+
 {% extends "base.html" %}
 <!-- 1. Head -->
 {% block title %} My Graph {% endblock title %} <!title of page>
@@ -8,10 +9,6 @@
     <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
     <link href="/stylesheets/clipboard.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui, backtop>
-    <script>
-        var uploadUrl = "{{upload_url}}";
-    </script>
-    <script src="https://rawgit.com/enyo/dropzone/master/dist/dropzone.js"></script>
 {% endblock script%}
 {% block style %}
     {{ super() }} <! render autocomplete style>
@@ -50,16 +47,46 @@
 {% endblock page_header%}
 <!-- 2.3 Content -->
 {% block content %}
-
 {{text}}
+<div class = "container">
+    <div class="bs-docs-section clearfix">
+        <div class = "row">
+            <h1>What's new:</h1>
+        </div>
+        {% for action in output_actions %}
+        <div class = "row" align = "left">
+                    {{action['user_name']}} has updated one node at {{action['time']}}
+                    <svg width = "110px" height = "110px">
+                        <g class="node lastNode" style="cursor: pointer;">
+                            <circle cx="50" cy="50" r="50" style="fill: rgb(255, 255, 255); stroke: rgb(70, 130, 180); stroke-width: 1.5px;">
+                            </circle>
+                            <text x="50" y="50" dy="0.35em" text-anchor="middle" style="font-style: normal; font-variant: normal; font-weight: normal; font-stretch: normal; font-size: 20px; line-height: normal; font-family: sans-serif;">
+                                <tspan x="50" text-anchor="middle" y="50" dy="0.35em">{{action['node_name']}}</tspan>
+                            </text>
+                        </g>
+                    </svg>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
 
 <p>You can always <a
       href="https://www.google.com/accounts/b/0/IssuedAuthSubTokens">revoke</a>
     permission at any time.</p>
-
 {% endblock content %}
+
 
 <!-- 2.4 Footer -->
 {% block footer %}
     {{super()}}
 {% endblock footer%}
+
+<!-- 3 JS scripts appended to the end of body-->
+{% block body_script %}
+    {{ super() }}
+    <script src="//d3js.org/d3.v3.min.js"></script>
+    <script>
+
+    </script>
+{% endblock body_script %}

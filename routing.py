@@ -35,6 +35,7 @@ routes = [
     # test for Jinja template system
     webapp2.Route(r'/test/jinja', handler=JinjaHandler),
     webapp2.Route('/social', SocialHandler),
+    webapp2.Route('/social_page', SocialPageHandler),
     webapp2.Route(decorator.callback_path, decorator.callback_handler()),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)
