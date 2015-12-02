@@ -26,9 +26,15 @@ class Node(ndb.Model):
     trending = ndb.IntegerProperty(repeated=True)
     reference = ndb.StringProperty(repeated=True)
 
+class Action(ndb.Model):
+    plusid = ndb.StringProperty()
+    nodeid = ndb.StringProperty()
+    lastmodified = ndb.DateTimeProperty(auto_now_add = True)
+
 
 class User(ndb.Model):
     email = ndb.StringProperty()
+    plusid = ndb.StringProperty()
     rootID = ndb.StringProperty(repeated=True)
     sharedID = ndb.StringProperty(repeated=True)
     titles = ndb.StringProperty(repeated=True)
@@ -36,3 +42,5 @@ class User(ndb.Model):
     currentrootID = ndb.StringProperty()
     clipboardID = ndb.StringProperty()
 
+class Actionqueue(ndb.Model):
+    actions = ndb.StructuredProperty(Action,repeated = True)

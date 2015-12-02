@@ -70,15 +70,7 @@ $(document).ready(function() {
      
 });
 
-gapi.client.load('plus','v1', function(){
- var request = gapi.client.plus.people.list({
-   'userId': 'me',
-   'collection': 'visible'
- });
- request.execute(function(resp) {
-   console.log('Num people visible:' + resp.totalItems);
- });
-});
+
 
 
 Dropzone.options.uploader = {

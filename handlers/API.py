@@ -7,6 +7,7 @@ from google.appengine.ext.webapp import blobstore_handlers
 
 from models import *
 from constants import *
+from datetime import *
 from time import sleep as time_sleep
 
 import webapp2
@@ -20,37 +21,6 @@ from oauth2client import client
 from lib import httplib2
 from google.appengine.api import memcache
 
-CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
-
-
-
-MISSING_CLIENT_SECRETS_MESSAGE = """
-<h1>Warning: Please configure OAuth 2.0</h1>
-<p>
-To make this sample run you will need to populate the client_secrets.json file
-found at:
-</p>
-<p>
-<code>%s</code>.
-</p>
-<p>with information found on the <a
-href="https://code.google.com/apis/console">APIs Console</a>.
-</p>
-""" % CLIENT_SECRETS
-
-http = httplib2.Http(memcache)
-service = discovery.build("plus", "v1", http=http)
-decorator = appengine.oauth2decorator_from_clientsecrets(
-    CLIENT_SECRETS,
-    # take care about the scope, we need:
-    # 1. login authorization
-    # 2. Not only access user's profile, but also friends' profiles, so plus.me does not suffice
-    scope=['https://www.googleapis.com/auth/plus.login',
-           'https://www.googleapis.com/auth/plus.profile.emails.read',
-           'https://www.googleapis.com/auth/userinfo.email',
-           'https://www.googleapis.com/auth/userinfo.profile',
-           'profile'],
-    message=MISSING_CLIENT_SECRETS_MESSAGE)
 
 def node_collapse(node):
     '''
@@ -92,12 +62,32 @@ class AddChildHandler(webapp2.RequestHandler):
 
         cnode.childrenIDs.append(str(child_node.key.id()))
         cnode.put()
+
+        user = User.query(User.email == users.get_current_user().email()).get()
+        plus_id = user.plusid
+        caction = Action(nodeid = str(cnode.key.id()), plusid = plus_id)
+        caction.put()
+
+        ACTION_QUEUE.actions.append(caction)
+        delete_list = []
+        i = 0
+        while i < len(ACTION_QUEUE.actions):
+            if datetime.now() - ACTION_QUEUE.actions[i].lastmodified > timedelta(minutes = SOCIAL_TIME_WINDOW):
+                ACTION_QUEUE.actions.remove(ACTION_QUEUE.actions[i])
+            else:
+                break
+
+        ACTION_QUEUE.put()
+
+
         self.redirect('/')
 
 
 class AddRoot(webapp2.RequestHandler):
     def post(self, user_id):
         cuser = User.get_by_id(int(user_id))
+
+        plus_id = cuser.plusid
         root_name = self.request.get('root_name')
         title = self.request.get('title')
         new_root = Node(name=root_name, title=title ,childrenIDs=[], reference=[])
@@ -105,6 +95,22 @@ class AddRoot(webapp2.RequestHandler):
         cuser.rootID.append(str(new_root.key.id()))
         # cuser.titles.append(title)
         cuser.put()
+
+        caction = Action(nodeid = str(new_root.key.id()), plusid = plus_id)
+        caction.put()
+
+        ACTION_QUEUE.actions.append(caction)
+        delete_list = []
+        i = 0
+        while i < len(ACTION_QUEUE.actions):
+            if datetime.now() - ACTION_QUEUE.actions[i].lastmodified > timedelta(minutes = SOCIAL_TIME_WINDOW):
+                ACTION_QUEUE.actions.remove(ACTION_QUEUE.actions[i])
+            else:
+                break
+
+        ACTION_QUEUE.put()
+
+
 
         self.redirect('/')
 
@@ -265,13 +271,28 @@ class CreateRoot(webapp2.RequestHandler):
         user_email = self.request.get('user_email')
         root_name = self.request.get('root_name')
         title_name = self.request.get('title_name')
+        plus_id = self.request.get('plus_id')
         rt_node = Node(name=root_name, title=title_name, childrenIDs=[], reference=[])
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
         # titlelist = [title_name]
         new_clipboard = Node(name="Clipboard", title="Clipboard Title", childrenIDs=[], reference=[])
         new_clipboard.put()
-        new_user_prof = User(email=user_email, rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=str(new_clipboard.key.id()))
+        caction = Action(nodeid = str(rt_node.key.id()), plusid = plus_id)
+        caction.put()
+
+        ACTION_QUEUE.actions.append(caction)
+        delete_list = []
+        i = 0
+        while i < len(ACTION_QUEUE.actions):
+            if datetime.now() - ACTION_QUEUE.actions[i].lastmodified > timedelta(minutes = SOCIAL_TIME_WINDOW):
+                ACTION_QUEUE.actions.remove(ACTION_QUEUE.actions[i])
+            else:
+                break
+
+        ACTION_QUEUE.put()
+
+        new_user_prof = User(email=user_email, plusid = plus_id , rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=str(new_clipboard.key.id()))
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
         self.redirect('/graph')
@@ -288,6 +309,8 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             upload = self.get_uploads()[0]
             descriptionstr = self.request.get("description")
             key = upload.key()
+            user = User.query(User.email == users.get_current_user().email()).get()
+            plus_id = user.plusid
 
 
             if(self.request.get("type_name") == "PDF"):
@@ -304,6 +327,21 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
                 queried_node.reference.insert(0,str(user_file.key.id()))
 
                 queried_node.put()
+
+                caction = Action(nodeid = str(queried_node.key.id()), plusid = plus_id)
+                caction.put()
+
+                ACTION_QUEUE.actions.append(caction)
+                delete_list = []
+                i = 0
+                while i < len(ACTION_QUEUE.actions):
+                    if datetime.now() - ACTION_QUEUE.actions[i].lastmodified > timedelta(minutes = SOCIAL_TIME_WINDOW):
+                        ACTION_QUEUE.actions.remove(ACTION_QUEUE.actions[i])
+                    else:
+                        break
+
+                ACTION_QUEUE.put()
+
             else:
                 print ("PhotoUploadHander: No stream found matching "+node_name)
 
