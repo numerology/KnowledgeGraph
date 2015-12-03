@@ -63,7 +63,13 @@ class SocialPageHandler(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('social.html')
         self.response.write(template.render({'logout_url': users.create_logout_url("/")}))
 
-
+class IndexHandler(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
+        user_prof = User.query(User.email == str(user.email())).get()
+        template = JINJA_ENVIRONMENT.get_template('index.html')
+        self.response.write(template.render({'user_id': str(user_prof.key.id()),
+                                             'logout_url': users.create_logout_url("/")}))
 
 class SocialHandler(webapp2.RequestHandler):
 
