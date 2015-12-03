@@ -25,7 +25,10 @@ $(document).ready(function() {
         TOBselector = d3.select("#TOB")
 
         var thisLayer = TOBselector.append("div").attr("class","row").attr("style","border-style:outset");
-        thisLayer.append("h2").text(root.name);
+        thisLayer.append("h2").text(root.name)
+            .on('click', function(){
+                $('#content').load('/api/index_refresh/'+root.id);
+            });
 
         if(root.children){
             root.children.forEach(function(d){
@@ -51,7 +54,7 @@ $(document).ready(function() {
                     attr("class", "btn btn-primary").
                     text(d.name).
                     on("click",function(){
-
+                        $('#content').load('/api/index_refresh/'+d.id);
                         $("#"+d.id).collapse('toggle');
                     });
 
@@ -97,7 +100,7 @@ $(document).ready(function() {
                         attr("class", "btn btn-primary").
                         text(d.name).
                         on("click",function(){
-
+                            $('#content').load('/api/index_refresh/'+d.id);
                             $("#"+d.id).collapse('toggle');
                         });
 

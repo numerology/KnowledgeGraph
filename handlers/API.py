@@ -409,6 +409,15 @@ class MiniDeleteFigHandler(webapp2.RequestHandler):
 
         return
 '''
+class RefreshHandler(webapp2.RequestHandler):
+    def get(self, node_id):
+        cnode = Node.get_by_id(int(node_id))
+        template_values = {'name':cnode.name,
+                           'tags':cnode.tags,
+                           'def':cnode.definition,
+                           'refs':cnode.reference}
+        template = JINJA_ENVIRONMENT.get_template('content.html')
+        self.response.write(template.render(template_values))
 
 
 class ReturnJSON(webapp2.RequestHandler):
