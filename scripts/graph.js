@@ -74,7 +74,7 @@ $(document).ready(function() {
 
 
 Dropzone.options.uploader = {
-    url: '/upload_file',
+    url: uploadUrl,
     autoProcessQueue: true,
     uploadMultiple: true,
     parallelUploads: 1,
@@ -82,6 +82,7 @@ Dropzone.options.uploader = {
     dictRemoveFile: 'Remove file',
     acceptedFiles: 'image/*, application/pdf',
     maxFiles: 10,
+
     accept: function(file, done){
         var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
         if (ext == "pdf"){
@@ -92,6 +93,7 @@ Dropzone.options.uploader = {
         }
         done();
     },
+
     init: function() {
         flag = true;
         this.on("complete", function(file) {

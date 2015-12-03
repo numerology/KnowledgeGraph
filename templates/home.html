@@ -172,7 +172,7 @@
                         </div>
                         <input id="nodeNameInput" type="hidden" name="node_name" value = "">
                         <input id="typeInput" type="hidden" name="type_name" value = "">
-                        <input id="descriptionInput" type="hidden" name="description" placeholder = "describe your file briefly" value = "des">
+                        <input id="descriptionInput" type="text" name="description" placeholder = "describe your file briefly" value = "">
                     </form>
                     <button id = "uploadBtn" class="btn btn-default">Upload</button>
                     <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
@@ -213,6 +213,7 @@
     <script src="//d3js.org/d3.v3.min.js"></script>
     <script>
         var userID = {{user_id}};
+        var uploadUrl = '{{upload_url}}';
     </script>
     <script src="/scripts/graph.js" type = "text/javascript"></script>
 {% endblock body_script %}

@@ -32,9 +32,9 @@ class GraphHandler(webapp2.RequestHandler):
     def get(self):
         user = users.get_current_user()
         user_prof = User.query(User.email == str(user.email())).get()
-      #  upload_url = blobstore.create_upload_url('/upload_file')
+        upload_url = blobstore.create_upload_url('/upload_file')
         #switch to cloudinary
-        upload_url = ('/upload_file')
+       # upload_url = ('/upload_file')
         if(user_prof):
             template_values = {'user_id': str(user_prof.key.id()), 'upload_url': str(upload_url), 'logout_url': users.create_logout_url("/")}
             template = JINJA_ENVIRONMENT.get_template('home.html')

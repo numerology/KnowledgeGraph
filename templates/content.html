@@ -18,7 +18,9 @@
             </tr>
             <tr><h2>References:</h2>
                 {% for r in refs %}
-                    ref
+                    <a class = "thumbnail" style = "height:100px">
+                        <img src = "{{r['url']}}" alt = "{{r['description']}}">
+                    </a>
                 {% endfor %}
             </tr>
 

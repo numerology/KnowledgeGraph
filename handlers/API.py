@@ -305,8 +305,9 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             print ("PhotoUploadHandler: upload handler is running")
 
             print ("PhotoUploadHandler: upload resized")
-            node_name = self.request.get("node_name")
+
             upload = self.get_uploads()[0]
+            node_name = self.request.get("node_name")
             descriptionstr = self.request.get("description")
             key = upload.key()
             user = User.query(User.email == users.get_current_user().email()).get()
@@ -412,10 +413,23 @@ class MiniDeleteFigHandler(webapp2.RequestHandler):
 class RefreshHandler(webapp2.RequestHandler):
     def get(self, node_id):
         cnode = Node.get_by_id(int(node_id))
+        ref_list = []
+        for sref in cnode.reference:
+            ref = Reference.get_by_id(int(sref))
+            if ref.type == IN_TYPE_IMG:
+                current_url=images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
+            elif ref.type == IN_TYPE_PDF:
+                current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
+            else:
+                current_url=ref.url
+
+            ref_list.append({'description':ref.description,
+                             'url':current_url})
+
         template_values = {'name':cnode.name,
                            'tags':cnode.tags,
                            'def':cnode.definition,
-                           'refs':cnode.reference}
+                           'refs':ref_list}
         template = JINJA_ENVIRONMENT.get_template('content.html')
         self.response.write(template.render(template_values))
 
