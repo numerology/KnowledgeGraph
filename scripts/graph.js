@@ -282,8 +282,9 @@ $("#divClipboard").resizable({
     maxHeight: 600,
     minHeight: 300,
 });
+$('.scrollbar-light').scrollbar();
 $("#divClipboardReference").sortable({
-    appendTo: document.body,
+    appendTo: 'document.body',
     items: '.thumbnail',
     connectWith: "#divReference",
     receive: function (event, ui){
@@ -312,7 +313,7 @@ $("#divClipboardReference").sortable({
     },
 });
 $("#divClipboardNode").sortable({
-    appendTo: $("#divClipboardNode"),
+    appendTo: 'document.body',
     //items: 'svg',
     connectWith: ["#divNodeChild", "#contentMyGraph", "#contentSharedGraph"],
     receive: function (event, ui){
@@ -443,6 +444,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
     $("#contentMyGraph").sortable({
+        appendTo: 'document.body',
         cancel: "#nodeAddRoot", //exclude add root node
         connectWith: "#divClipboardNode",
         update: function(event, ui){
@@ -492,6 +494,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
         }
     });
     $("#contentSharedGraph").sortable({
+        appendTo: 'document.body',
         connectWith: "#divClipboardNode",
         update: function(event, ui){
             var temp_node_list = [];
@@ -933,6 +936,8 @@ function loadChild(d){ // load children in ContextMenu
         });
     }    
     $("#divNodeChild").sortable({
+        appendTo: 'document.body',
+        zIndex: 1000,
         connectWith: "#divClipboardNode",
         receive: function (event, ui){ // TODO: check whether the current node is in the graph
         },
@@ -1016,6 +1021,7 @@ function loadDivRef(d){
 	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
         //cancel: "#nodeAddRoot", //exclude add root node
+        appendTo: 'document.body',
         connectWith: "#divClipboardReference",
         receive: function (event, ui){
         },

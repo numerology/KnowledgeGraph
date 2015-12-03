@@ -14,7 +14,16 @@
     margin-bottom: 10px;
 }
 
+#divNodeChild {
+    max-height: 200px;
+}
 
+#divNodeChild {
+    max-height: 200px;
+}
+#divReference {
+    max-height: 350px;
+}
 #divAddRoot {
     margin: 30px auto 0;
     position: absolute;
@@ -38,7 +47,7 @@
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
@@ -150,7 +159,7 @@
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
