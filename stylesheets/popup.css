@@ -76,6 +76,12 @@
     font-size: 25px;
     font-family: helvetica;
 }
+#divBtnEditNodeTitle{
+    display:block;
+    position: absolute;
+    top: 25px;
+    right: 60px;
+}
 #btnEditNodeTitle {
     width: 24px;
     height: 24px;
@@ -84,6 +90,9 @@
     padding: 0px;
     cursor: pointer;
     display: inline-block;
+    position: absolute;
+    right:0px;
+    bottom: 0px;
 }
 #btnEditNodeTitle img {
     width: 100%;
@@ -206,4 +215,16 @@
     position: absolute;
     top: 15px;
     right: 15px;
+}
+span.title {
+    width: 80%;
+    display: block;
+    font-size: 25px;
+    font-family: arial, helvetica, sans-serif;
+}
+#spanNodeTitle{
+    width: 80%;
+    display: block;
+    font-size: 25px;
+    font-family: arial, helvetica, sans-serif;
 }

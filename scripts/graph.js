@@ -2,6 +2,7 @@
 var TAG_MAX_SHOW_LENGTH = 20;
 var TITLE_MAX_SHOW_LENGTH = 50;
 var TITLE_MAX_LENGTH = 100;
+var NODE_NAME_LENGTH = 25;
 
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 900 - margin.right - margin.left,
@@ -664,7 +665,18 @@ function addRoot(e){
     //Load tag section
     d3.select("#formAddRoot").attr("action", addRootUrl);
     addRootShowing = true;
-
+    $("#formAddRoot").validate({
+        rules: {
+            root_name: {
+                required: true,
+                maxlength: NODE_NAME_LENGTH,
+            },
+            title: {
+                required: false,
+                maxlength: TITLE_MAX_LENGTH,
+            }
+        }
+    });
 }
 
 function closeAddRoot(){
@@ -976,6 +988,17 @@ function loadDivAddChild(d){
         });
     d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
     d3.select("#btnCancelAddChild").on("click", closeDivAddChild);
+    $("#formAddChild").validate({
+        rules: {
+            childName: {
+                required: true,
+                maxlength: NODE_NAME_LENGTH,
+            },
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter($("#btnCancelAddChild")); // <- the default
+        },
+    });
 }
 function closeDivAddChild(){
     d3.select("#btnShowAddChild").style("display", "inline");

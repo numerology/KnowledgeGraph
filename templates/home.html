@@ -105,16 +105,10 @@
     <div id="divAddRoot" class="popup" style="display:none">
         <div class="col-md-12">
             <div class="row no-gutter">
-                <div class="col-md-10">
-                    <h2>Add new root</h2>
-                </div>
-                <div class="col-md-2 text-right">
-                    <a href="#" id="btnCloseAddRoot" class="btn btn-primary btn-xs">&times;</a>
-                </div>
+                <p><span class="title">Add new root</span></p>
             </div>
             <div class="row" id="divAddRootForm">
                 <form class="form-horizontal" id="formAddRoot" method="post" autocomplete="off">
-
                     <input id="inputRootName" type="text" class="form-control" placeholder="Enter the name of the new root" name="root_name">
                     <input id="inputRootTitle" type="text" class="form-control" placeholder="Enter the title of the graph" name="title">
                     <button id="btnAddRoot" class="btn btn-primary" type="submit" value="Add">Add</button>
@@ -122,6 +116,7 @@
                 </form>
             </div>
         </div>
+        <a href="javascript: void(0)" id="btnCloseAddRoot" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
 
     <div id="divReftip" class="popup" style="display:none">
@@ -135,11 +130,13 @@
     <div id="divNodeDetail" class="popup popup-window" style="display:none">
 
         <div class="col-md-12">
-            <div class="row no-gutter">
-                <div class="col-md-10">
-                    <span id="spanNodeTitle"></span>
+            <div class="row no-gutter" style="position: relative;">
+                <p>
+                    <span id="spanNodeTitle" class="title"></span>
+                </p>
+                <div id="divBtnEditNodeTitle">
+                    <button class="image" id="btnEditNodeTitle" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Edit Title"><img src="/img/edit.png"></button>
                 </div>
-                <button class="image" id="btnEditNodeTitle" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Edit Title"><img src="/img/edit.png"></button>
             </div>
             <div class="row" id="nodeTag">
                 <h4>Tags:</h4>
@@ -179,7 +176,7 @@
                 </div>
             </div>
         </div>
-        <a href="#" id="btnCloseNodeDetail" class="btn btn-primary btn-xs btn-close">&times;</a>
+        <a href="javascript: void(0)" id="btnCloseNodeDetail" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
     <div id="divClipboard" class="draggable resizable popup-window clipboard clipboard-expanded" style="display:none">
         <div id="divExpandedClipboard" class="col-md-12 no-gutter" style="display:inline-block">
