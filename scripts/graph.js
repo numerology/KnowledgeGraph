@@ -186,7 +186,7 @@ d3.json("/get_root_list/" + userID, function(result) {
     tabContentSelector = d3.select("#contentMyGraph");
     list.root_list.forEach(function(d){
         //console.log(d);
-        nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
+        nodeData = {"node_text":d.root_name,"node_data":{"name":d.root_name,"msg": String(d.msg), "id": d.rootID}};
         addNodeWithContext(tabContentSelector, nodeData, shareMenu);
     });
 	if (list.root_list.length == 1){
@@ -200,7 +200,7 @@ d3.json("/get_shared_list/" + userID, function(result) {
     tabSharedSelector =d3.select("#divClipboardNode");
     list.shared_list.forEach(function(d){
         //console.log(d);
-        nodeData = {"node_text":d.root_name, "node_data":{"msg": String(d.msg), "id": d.rootID}};
+        nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
         addSingleNode(tabSharedSelector, nodeData);
     });
 })
@@ -251,7 +251,8 @@ function shareMenu(e){
     if(shareShowing){
         closeShare();
     }
-
+    $("#shareNodeName").text(e.name);
+    console.log(e);
     d3.select("#divShare").style("display","inline")
         .style("top", (e.x + 200)+"px");
 
@@ -369,6 +370,7 @@ $("#btnCloseClipboard").on('click', function(){
     $("#btnClipboard").show();
     $("#divClipboard").toggle();
 });
+$("#btnCloseShare").click(function(){$("#divShare").toggle()});
 $("#btnClipboard").on("mousedown", function(e){
     var mdown = document.createEvent("MouseEvents");
     mdown.initMouseEvent("mousedown", true, true, 

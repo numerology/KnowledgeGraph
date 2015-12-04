@@ -57,7 +57,7 @@
         </ul>
         <div id="myTabContent" class="tab-content myTabContent">
             <div class="tab-pane fade active in" id="mygraph">
-                <h2>Div My Graphs</h2>
+                <h2>List of  My Graphs</h2>
                 <div class="tabContentNodeDiv scrollbar-light" id="contentMyGraph">
                     <svg width="110" height="110" id="svgAddRoot" >
                         <g class="node" id="nodeAddRoot">
@@ -69,7 +69,7 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="sharedgraph">
-                <h2>Div Graphs shared with me</h2>
+                <h2>List of Graphs shared with me</h2>
                 <div class="tabContentNodeDiv scrollbar-light" id="contentSharedGraph">
                 </div>
             </div>
@@ -88,19 +88,18 @@
         <div class="col-md-12">
             <div class="row no-gutter">
                 <div class="col-md-10">
-                    <h2>Share to your friends</h2>
+                    <h2>Share <span id="shareNodeName" class="shareNodeName"></span> to your friends</h2>
                 </div>
             </div>
             <div class="row" id="divShareForm">
                 <form class="form-horizontal" id="formShareRoot" method="post" autocomplete="off">
-
                     <input id="inputFriend" type="text" class="form-control" placeholder="Enter the email of your friend" name="target_mail">
-
                     <button id="btnShareRoot" class="btn btn-primary" type="submit" value="Add">Share</button>
                     <button id="btnCancelShareRoot" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
                 </form>
             </div>
         </div>
+        <a href="javascript: void(0)" id="btnCloseShare" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
     <div id="divAddRoot" class="popup" style="display:none">
         <div class="col-md-12">

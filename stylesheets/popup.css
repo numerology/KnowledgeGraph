@@ -228,3 +228,8 @@ span.title {
     font-size: 25px;
     font-family: arial, helvetica, sans-serif;
 }
+
+span.shareNodeName{
+    color: steelblue;
+    font-weight: bold;
+}
