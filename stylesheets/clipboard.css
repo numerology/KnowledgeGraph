@@ -41,4 +41,5 @@
 }
 .clipboard-display-div{
     max-height: 150px;
+    overflow:auto;
 }

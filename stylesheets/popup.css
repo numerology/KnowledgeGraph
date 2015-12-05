@@ -29,7 +29,7 @@
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
@@ -117,6 +117,7 @@
     width: 300px;
     float: left;
     margin-right: 5px;
+    margin-left: 5px;
 }
 
 #divNodeTooltip {

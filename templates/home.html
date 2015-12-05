@@ -58,7 +58,7 @@
         <div id="myTabContent" class="tab-content myTabContent">
             <div class="tab-pane fade active in" id="mygraph">
                 <h2>List of  My Graphs</h2>
-                <div class="tabContentNodeDiv scrollbar-light" id="contentMyGraph">
+                <div class="tabContentNodeDiv " id="contentMyGraph">
                     <svg width="110" height="110" id="svgAddRoot" >
                         <g class="node" id="nodeAddRoot">
                             <circle cx="50" cy="50" r="50"/>
@@ -70,7 +70,7 @@
             </div>
             <div class="tab-pane fade" id="sharedgraph">
                 <h2>List of Graphs shared with me</h2>
-                <div class="tabContentNodeDiv scrollbar-light" id="contentSharedGraph">
+                <div class="tabContentNodeDiv" id="contentSharedGraph">
                 </div>
             </div>
         </div>
@@ -144,7 +144,7 @@
             </div>
             <div class="row" id="nodeChildren">
                 <h4>Children:</h4>
-                <div class = "div-empty myTabContent scrollbar-light" id="divNodeChild"></div>
+                <div class = "div-empty myTabContent" id="divNodeChild"></div>
                 <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
             </div>
             <div class="row" id="divAddChild" style="display:none">
@@ -158,7 +158,7 @@
             </div>
             <div class="row" id="nodeReference">
                 <h4>References:</h4>
-                <div class = "div-empty scrollbar-light" id="divReference"></div>
+                <div class = "div-empty " id="divReference"></div>
                 <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
                 <div id="divUploadReference" style="display:none">
                     <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
@@ -184,12 +184,12 @@
             </div>
             <div class="row no-gutter">
                 <span>Nodes:</span>
-                <div id="divClipboardNode" class="clipboard-display-div div-clipboard myTabContent scrollbar-light">
+                <div id="divClipboardNode" class="clipboard-display-div div-clipboard myTabContent">
                 </div>
             </div>
             <div class="row no-gutter">
                 <span>References:</span>
-                <div id="divClipboardReference" class="clipboard-display-div div-clipboard scrollbar-light">
+                <div id="divClipboardReference" class="clipboard-display-div div-clipboard">
                 </div>
             </div>
         </div>

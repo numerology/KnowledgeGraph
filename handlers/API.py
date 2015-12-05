@@ -482,6 +482,10 @@ class getIndexData(webapp2.RequestHandler): # return all the nodes for index vie
             for root_id in current_user.sharedID:
                 root_node = Node.get_by_id(int(root_id))
                 response["sharedNode"].append(node_collapse(root_node))
+            clipboard_data = node_collapse(Node.get_by_id(int(current_user.clipboardID)))
+            clipboard_data["is_clipboard"] = True
+            clipboard_data["label"] = "Clipboard"
+            response["clipboard"] = clipboard_data
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(response))
         return
