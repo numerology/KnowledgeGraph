@@ -12,6 +12,7 @@ routes = [
     webapp2.Route(r'/get_root_list/<user_id:[\w-]+>', handler = ReturnRoots),
     webapp2.Route(r'/get_shared_list/<user_id:[\w-]+>', handler = ReturnShares),
     webapp2.Route(r'/get_clipboard/<user_id:[\w-]+>', handler=ReturnClipboard),
+    webapp2.Route(r'/get_index_data/<user_id:[\w-]+>', handler=getIndexData),
     webapp2.Route(r'/graph', handler=GraphHandler),
     webapp2.Route(r'/createroot', handler=CreateRootHandler),
     webapp2.Route(r'/addroot/<user_id:[\w-]+>', handler = AddRoot),

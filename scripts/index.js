@@ -9,12 +9,37 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
 var indentStep = 25;
 var currentIndent = 0;
 
+var data = [
+    {
+        label: 'node1',
+        id: 45005,
+        children: [
+            { label: 'child1' },
+            { label: 'child2' }
+        ]
+    },
+    {
+        label: 'node2',
+        id: 15551,
+        children: [
+            { label: 'child3' }
+        ]
+    }
+];
 
 $(document).ready(function() {
     var cache = {};
 
-    d3.json("/get_rooted_data/" + userID, function(flare) {
-
+    d3.json("/get_index_data/" + userID, function(response) {
+        console.log(response);
+        if(response.status != "success"){
+            console.log(response.message);
+            return;
+        }
+        $("#treeView").tree({
+            data: response.myNode,
+        });
+        flare = response.myNode[0];
   //  if (error) throw error;
         root = flare;
     //  root = JSON.parse(myjson);

@@ -8,6 +8,8 @@
     <link href="/stylesheets/popup.css" type="text/css" rel="stylesheet" />
     <link href="/stylesheets/dropzone.css" type="text/css" rel="stylesheet"/>
     <link href="/stylesheets/clipboard.css" type="text/css" rel="stylesheet"/>
+    <link href="/stylesheets/jqtree.css" type="text/css" rel="stylesheet"/>
+    <link href="/stylesheets/index.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui, backtop>
 {% endblock script%}
 {% block style %}
@@ -37,7 +39,7 @@
 {% endblock navbar %}
 <!-- 2.2 page header -->
 {% block page_header_string %}
-    My Social
+    Index View of Graphs
 {% endblock page_header_string %}
 {% block page_header_lead %}
     View my graphs and graphs shared with me
@@ -48,21 +50,24 @@
 <!-- 2.3 Content -->
 {% block content %}
 
-<div class = "container">
-    <div class = "page-header">
-        <div class = "row">
-            <div class="col-lg-3 col-md-3 col-sm-4">
-                <div class="list-group table-of-contents" id = "TOB">
-                    <a class="list-group-item">Navbar</a>
-                </div>
-            </div>
-            <div class="col-lg-7 col-md-7 col-sm-6" style = "border-style:outset" id = "content">
-
-
+<div class = "col-lg-12">
+    <div class = "row">
+        <div class="col-lg-3 col-md-3 col-sm-4">
+            <div class="list-group table-of-contents" id = "TOB">
+                <a class="list-group-item">Navbar</a>
             </div>
         </div>
+        <div class="col-lg-7 col-md-7 col-sm-6" style = "border-style:outset" id = "content">
+        </div>
     </div>
+    <div class="row index-content">
+        <div class="col-lg-3 col-md-3 col-sm-4" id="treeView">
 
+        </div>
+        <div class="col-lg-9 col-md-9 col-sm-8" id="nodeContent">
+
+        </div>
+    </div>
 </div>
 
 {% endblock %}
@@ -80,4 +85,5 @@
         var userID = {{user_id}};
     </script>
     <script src="/scripts/index.js" type = "text/javascript"></script>
+    <script src="/scripts/tree.jquery.js" type="text/javascript"></script>
 {% endblock body_script %}

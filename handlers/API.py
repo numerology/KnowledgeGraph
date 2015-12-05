@@ -40,7 +40,7 @@ def node_collapse(node):
         current_thumbs.append({"url": current_url, "msg": current_description})
 
     if len(node.childrenIDs) == 0:
-        return {"name": node.name, "title": node.title, "id": str(node.key.id()),
+        return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
                 "tags": node.tags, "thumbnails": current_thumbs, 
                 "reference": node.reference, "childrenIDs": node.childrenIDs}
     else:
@@ -48,7 +48,7 @@ def node_collapse(node):
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
-        return {"name": node.name, "title": node.title, "id": str(node.key.id()),
+        return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
                 "tags": node.tags, "thumbnails": current_thumbs, "children": children, 
                 "reference": node.reference, "childrenIDs": node.childrenIDs}
 
@@ -463,7 +463,27 @@ class ReturnJSON(webapp2.RequestHandler):
         print(out_dict)
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(out_dict))
+        return
 
+
+class getIndexData(webapp2.RequestHandler): # return all the nodes for index view
+    def get(self,user_id):
+        response = {'status':"success", "message": "get index nodes succeed"}
+        current_user = User.get_by_id(int(user_id))
+        if not current_user:
+            response["status"]="error"
+            response["message"]="user not found"
+        else:
+            response['myNode'] = []
+            response['sharedNode'] = []
+            for root_id in current_user.rootID:
+                root_node = Node.get_by_id(int(root_id))
+                response['myNode'].append(node_collapse(root_node))
+            for root_id in current_user.sharedID:
+                root_node = Node.get_by_id(int(root_id))
+                response["sharedNode"].append(node_collapse(root_node))
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(response))
         return
 
 

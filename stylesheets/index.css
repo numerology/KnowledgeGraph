@@ -1,0 +1,11 @@
+/*CSS for index.html*/
+.index-content {
+    display: table;
+    width: 100%;
+    min-height: 60px;
+}
+.index-content [class*="col-"] {
+    float: none;
+    display: table-cell;
+    vertical-align: top;
+}
