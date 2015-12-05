@@ -1,8 +1,3 @@
-// Constants
-var TAG_MAX_SHOW_LENGTH = 20;
-var TITLE_MAX_SHOW_LENGTH = 50;
-var TITLE_MAX_LENGTH = 100;
-
 var margin = {top: 20, right: 120, bottom: 20, left: 120},
     width = 900 - margin.right - margin.left,
     height = 800 - margin.top - margin.bottom;
@@ -36,10 +31,6 @@ var _this = null;
 var flag = true;
 var uploaded = []
 
-//YW: used to place tspan and measure text width
-var helperTspan = d3.select(".helper").append("div").attr("class", "myTabContent")
-                  .append("svg").attr({"height": 100, "width": 100})
-                  .append("g").attr("class","node").append("text").append("tspan");
 
 
 function sleep(milliseconds) {
@@ -73,85 +64,7 @@ $(document).ready(function() {
 
 
 
-Dropzone.options.uploader = {
-    url: uploadUrl,
-    autoProcessQueue: true,
-    uploadMultiple: true,
-    parallelUploads: 1,
-    addRemoveLinks: true,
-    dictRemoveFile: 'Remove file',
-    acceptedFiles: 'image/*, application/pdf',
-    maxFiles: 10,
 
-    accept: function(file, done){
-        var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
-        if (ext == "pdf"){
-            $("#typeInput").attr("value","PDF");
-        }
-        else{
-            $("#typeInput").attr("value","IMG");
-        }
-        done();
-    },
-
-    init: function() {
-        flag = true;
-        this.on("complete", function(file) {
-            var upurl = '0';
-            //console.log('Triggering');
-            $.ajax({
-                type: 'get',
-                url: '/generate_upload_url/' + currentNode.name,
-                async: false,
-                success: function(data) {
-                    console.log(data['upload_url']);
-                    //$('#uploader').attr("action",data);
-                    var jsdata = JSON.parse(data);
-                    upurl = jsdata['upload_url'];
-                    console.log("set");
-
-                },
-            });
-            this.options.url = upurl;
-        });
-        this.on("addedFile", function(file) {
-            var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
-            console.log("accepted");
-            if (ext == "pdf"){
-                $("#typeInput").attr("value","PDF");
-            }
-            else{
-                $("#typeInput").attr("value","IMG");
-                console.log(ext);
-            }
-        });
-        this.on("removedfile", function(file) {
-            console.log('removing');
-            var index = 0;
-            for (i=0; i<uploaded.length;i++){
-                if(uploaded[i] == file){
-                        index = i;
-                        break;
-                }
-
-            }
-            console.log(index);
-            console.log(flag);
-            if(flag==true){
-                $.ajax({
-                    type: 'get',
-                    url: '/api/delete_fig_partial/{{stream.key.id()}}/'+key_dict[index],
-                    async: false,
-                    success: function(data) {
-
-                    },
-                });
-                }
-            });
-
-        _this = this;
-    }
-};
 
 function done(){
  console.log("accepted called");
@@ -185,7 +98,7 @@ d3.json("/get_root_list/" + userID, function(result) {
     tabContentSelector = d3.select("#contentMyGraph");
     list.root_list.forEach(function(d){
         //console.log(d);
-        nodeData = {"node_text":d.root_name,"node_data":{"msg": String(d.msg), "id": d.rootID}};
+        nodeData = {"node_text":d.root_name,"node_data":{"name":d.root_name,"msg": String(d.msg), "id": d.rootID}};
         addNodeWithContext(tabContentSelector, nodeData, shareMenu);
     });
 	if (list.root_list.length == 1){
@@ -199,7 +112,7 @@ d3.json("/get_shared_list/" + userID, function(result) {
     tabSharedSelector =d3.select("#contentSharedGraph");
     list.shared_list.forEach(function(d){
         //console.log(d);
-        nodeData = {"node_text":d.root_name, "node_data":{"msg": String(d.msg), "id": d.rootID}};
+        nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
         addSingleNode(tabSharedSelector, nodeData);
     });
 })
@@ -250,7 +163,8 @@ function shareMenu(e){
     if(shareShowing){
         closeShare();
     }
-
+    $("#shareNodeName").text(e.name);
+    console.log(e);
     d3.select("#divShare").style("display","inline")
         .style("top", (e.x + 200)+"px");
 
@@ -282,8 +196,13 @@ $("#divClipboard").resizable({
     maxHeight: 600,
     minHeight: 300,
 });
+//$('.scrollbar-light').scrollbar();
 $("#divClipboardReference").sortable({
-    appendTo: document.body,
+    tolerance: 'pointer',
+    forceHelperSize: true,
+    helper: 'original',
+    scroll: true,
+    appendTo: 'document.body',
     items: '.thumbnail',
     connectWith: "#divReference",
     receive: function (event, ui){
@@ -312,7 +231,11 @@ $("#divClipboardReference").sortable({
     },
 });
 $("#divClipboardNode").sortable({
-    appendTo: $("#divClipboardNode"),
+    tolerance: 'pointer',
+    forceHelperSize: true,
+    helper: 'original',
+    scroll: true,
+    appendTo: 'document.body',
     //items: 'svg',
     connectWith: ["#divNodeChild", "#contentMyGraph"],
     receive: function (event, ui){
@@ -368,6 +291,7 @@ $("#btnCloseClipboard").on('click', function(){
     $("#btnClipboard").show();
     $("#divClipboard").toggle();
 });
+$("#btnCloseShare").click(function(){$("#divShare").toggle()});
 $("#btnClipboard").on("mousedown", function(e){
     var mdown = document.createEvent("MouseEvents");
     mdown.initMouseEvent("mousedown", true, true, 
@@ -394,7 +318,7 @@ $("#btnClipboard").on("mousedown", function(e){
                 var $div = $("#divClipboard");
                 console.log($div.css('bottom'));
                 var oldOffset = windowOffset($_this);
-                console.log(oldOffset); 
+                console.log(oldOffset);
                 $div.addClass("popup-window clipboard-expanded");
                 $div.css('width', '400px');
                 var newOffset = windowOffset($_this);
@@ -445,6 +369,11 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
     $("#contentMyGraph").sortable({
+        tolerance: 'pointer',
+        forceHelperSize: true,
+        helper: 'original',
+        scroll: true,
+        appendTo: 'document.body',
         cancel: "#nodeAddRoot", //exclude add root node
         connectWith: "#divClipboardNode",
         update: function(event, ui){
@@ -495,7 +424,12 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
         }
     });
     $("#contentSharedGraph").sortable({
-        connectWith: "#divClipboardNode",
+        tolerance: 'pointer',
+        forceHelperSize: true,
+        helper: 'original',
+        scroll: true,
+        appendTo: 'document.body',
+        //connectWith: "#divClipboardNode",
         update: function(event, ui){
             var temp_node_list = [];
             //console.log(event);
@@ -525,68 +459,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 }
 
 
-function wrap(text, width) { // function copied from bl.ocks.org/mbostock/7555321
-    //TODO: apply this to all node text
-    //TODO: place this function somewhere else in the graph.js file
-    var MAX_LINE_NUM = 3; // allow most 3 lines
-    var MAX_WORD_WIDTH = 0.9*width; // max width of a word
-    var TRIMMED_WORD_LENGTH = 8; // length of word for trimed word, point inclued in length "FOO."
-    text.each(function(){
-        var text = d3.select(this),
-            words = text.text().split(/\s+/).reverse(),
-            word,
-            line = [],
-            lineNumber = 0,
-            lineHeight = 1.1,
-            y = text.attr("y"),
-            dy = parseFloat(text.attr("dy")),
-            tspan = text.text(null).append("tspan")
-                        .attr("x", 50)
-                        .attr("text-anchor", "middle")
-                        .attr("y", y)
-                        .attr("dy", dy + "em"),
-            dy_set = [dy];
-        helperTspan.text(tspan.node().textContent);
-        //console.log("words: "+words);
-        while (word = words.pop()) {
-            helperTspan.text(word);
-            if (helperTspan.node().getComputedTextLength()> MAX_WORD_WIDTH){
-                word = trimString(word, TRIMMED_WORD_LENGTH, ".");
-            }
-            line.push(word);
-            tspan.text(line.join(" "));
-            helperTspan.text(tspan.node().textContent);
-            //console.log(tspan);
-            //console.log(tspan.node());
-            //console.log(tspan.node().textContent);
-            //console.log("span width: "+helperTspan.node().getComputedTextLength());
-            if (helperTspan.node().getComputedTextLength() > width) {
-                line.pop();
-                tspan.text(line.join(" "));
-                lineNumber++;
-                if (lineNumber == MAX_LINE_NUM){
-                   tspan.text(trimString(line.join(" ")+"...", 8, "..."));
-                   lineNumber--;
-                   break;
-                }
-                line = [word];
-                tspan = text.append("tspan").attr("x", 50).attr("y", y).attr("text-anchor", "middle")
-                            .attr("dy", lineNumber*lineHeight + dy + "em").text(word);
-                helperTspan.text(tspan.node().textContent);
-                dy_set.push(parseFloat(tspan.attr("dy")));
-            }
-        }
-        //console.log("dy set: "+ dy_set);
-        var dy_offset = - (dy_set[dy_set.length-1] - dy_set[0])/2;
-        //console.log(dy_offset);
-        d3.select(this).selectAll("tspan").each(function(){
-            var my_dy = parseFloat(d3.select(this).attr("dy"));
-            //console.log(my_dy);
-            d3.select(this).attr("dy", my_dy + dy_offset + "em");
-            //console.log(my_dy + dy_offset);
-        }); 
-    });
-}
+
 
 function addSingleNode(div_selector, data){ // add single node to selected div
     tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
@@ -665,7 +538,18 @@ function addRoot(e){
     //Load tag section
     d3.select("#formAddRoot").attr("action", addRootUrl);
     addRootShowing = true;
-
+    $("#formAddRoot").validate({
+        rules: {
+            root_name: {
+                required: true,
+                maxlength: NODE_NAME_LENGTH,
+            },
+            title: {
+                required: false,
+                maxlength: TITLE_MAX_LENGTH,
+            }
+        }
+    });
 }
 
 function closeAddRoot(){
@@ -713,7 +597,7 @@ function showBriefNodeInfo(e){
 }
 
 function closeBriefNodeInfo(e){
-    $("#divNodeTooltip").css("display", "none");
+    $("#divNodeTooltip").hide();
     //console.log("Close triggered");
 }
 
@@ -830,8 +714,6 @@ function contextmenu(d) {
         .style("top", (d.x+200)+"px")
         .style("left", (d.y+400)+"px");
 
-    d3.select("#spanNodeTitle").text(d.title);
-
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
     loadTitle(d);
     //Load tag section
@@ -852,12 +734,20 @@ function closeContextMenu(){
 }
 
 function loadTitle(d){
+    var temp_title = d.title;
+    if(!temp_title){temp_title = d.name;};
+    d3.select("#spanNodeTitle").text(temp_title);
     $("#spanNodeTitle").editable({trigger: $("#btnEditNodeTitle"), action:"click"},
         function(e){
             //console.log(d);
             //console.log(e);
-            if (e.value === d.name){
+            if (e.value === d.title){
                 //window.alert(e.value+"=="+d.name);
+                return;
+            }
+            if (e.value.length==0){
+                window.alert("New title empty");
+                e.target.html(e.old_value);
                 return;
             }
             if (e.value.length > TITLE_MAX_LENGTH){
@@ -937,6 +827,12 @@ function loadChild(d){ // load children in ContextMenu
         });
     }    
     $("#divNodeChild").sortable({
+        tolerance: 'pointer',
+        forceHelperSize: true,
+        helper: 'original',
+        scroll: true,
+        appendTo: 'document.body',
+        //zIndex: 1000,
         connectWith: "#divClipboardNode",
         receive: function (event, ui){ // TODO: check whether the current node is in the graph
         },
@@ -975,6 +871,17 @@ function loadDivAddChild(d){
         });
     d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
     d3.select("#btnCancelAddChild").on("click", closeDivAddChild);
+    $("#formAddChild").validate({
+        rules: {
+            childName: {
+                required: true,
+                maxlength: NODE_NAME_LENGTH,
+            },
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter($("#btnCancelAddChild")); // <- the default
+        },
+    });
 }
 function closeDivAddChild(){
     d3.select("#btnShowAddChild").style("display", "inline");
@@ -1020,6 +927,11 @@ function loadDivRef(d){
 	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
         //cancel: "#nodeAddRoot", //exclude add root node
+        tolerance: 'pointer',
+        forceHelperSize: true,
+        helper: 'original',
+        scroll: true,
+        appendTo: 'document.body',
         connectWith: "#divClipboardReference",
         receive: function (event, ui){
         },
@@ -1075,15 +987,7 @@ function closeDivRef(){
     //console.log("cleaning");
 }
 
-function closeDivAddRef(){
-    d3.select("#btnAddReference").style("display", "inline");
-    d3.select("#divUploadReference").style("display","none");
-}
 
-function showAddRef(){
-    d3.select("#divUploadReference").style("display", "inline");
-    d3.select("#btnAddReference").style("display","none");
-}
 
 function trimString(str, len, str_omit_sign){ // shorten
     if(str.length <= len){
@@ -1098,7 +1002,6 @@ function placeDivTooltip(position){ // move divNodeTooltip pointer to new locati
     var x = position.left + 15;
     //console.log("x = " + x + " y = " +y);
     $("#divNodeTooltip").css({"top": y , "left": x });
-    //console.log("changed");
 }
 
 function changeDisplay(d){ //display or hide the selected element using jquery

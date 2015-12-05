@@ -3,15 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <title>Create your root</title>
-    <link href="//bootswatch.com/flatly/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/>
+    <link href="//bootswatch.com/flatly/bootstrap.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" type="text/css" href="/stylesheets/createRoot.css"/>
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script type="text/javascript" src="/scripts/jquery.validate.js"></script>
+    <script type="text/javascript" src="/scripts/createRoot.js"></script>
 </head>
 <body>
-    <form class = "form_horizontal" action = "/api/createroot" method = "post">
-        <p><input class = "btn btn-primary" type = "submit" value = "Create Root"></p>
-        <input type = "hidden" name = "user_email" value = {{user_email}}>
-        <input type = "hidden" class="form-control" name = "plus_id" value = "{{user_plus_id}}">
-        <input type = "text" class="form-control" name = "root_name" placeholder = "input the name for your root">
-        <input type = "text" class="form-control" name = "title_name" placeholder = "input the title for associated graph">
-    </form>
+    <div class = "container">
+        <div class = "page-header">
+            <div class="row">
+                <div class="col-lg-8 col-md-7 col-sm-6">
+                    <br>
+                    <h1>Welcome to Knowledge Graph</h1>
+                    <p class="lead">Create your first knowledge root!</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-10 main-div">
+                <div class="well bs-component">
+                    <form id="createRootForm" class = "form-horizontal" action = "/api/createroot" method = "post">
+                        <fieldset>
+                        <div class="form-group">
+                            <label for="rootName" class="col-lg-2 control-label">Root Name</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control" id="rootName" name="root_name" placeholder = "Name of node">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="rootTitle" class="col-lg-2 control-label">Detailed Title</label>
+                            <div class="col-lg-10">
+                                <textarea class="form-control" rows="3" id="rootTitle" name = "title_name" placeholder = "Detailed title of node"></textarea>
+                            </div>
+                        </div>
+
+                        <input type = "hidden" name = "user_email" value = {{user_email}}>
+                        <input type = "hidden" class="form-control" name = "plus_id" value = "{{user_plus_id}}">
+
+                        <div class="form-group">
+                          <div class="col-lg-10 col-lg-offset-2">
+                            <button type="reset" class="btn btn-default">Cancel</button>
+                            <button type="submit" class="btn btn-primary" value = "Create Root">Submit</button>
+                          </div>
+                        </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <footer>
+            <div class=row">
+                <a>
+                    &copy; Copyright 2015 by JZ & YW
+                </a>
+                <!--a href="#top" class="pull-right">Back to top</a-->
+            </div>
+        </footer>
+    </div>
 </body>
 </html>

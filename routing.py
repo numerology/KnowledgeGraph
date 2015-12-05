@@ -13,6 +13,8 @@ routes = [
     webapp2.Route(r'/get_shared_list/<user_id:[\w-]+>', handler = ReturnShares),
     webapp2.Route(r'/get_clipboard/<user_id:[\w-]+>', handler=ReturnClipboard),
     webapp2.Route(r'/get_action_list/<user_id:[\w-]+>', handler=ReturnActions),
+    webapp2.Route(r'/get_index_data/<user_id:[\w-]+>', handler=getIndexData),
+
     webapp2.Route(r'/graph', handler=GraphHandler),
     webapp2.Route(r'/createroot', handler=CreateRootHandler),
     webapp2.Route(r'/addroot/<user_id:[\w-]+>', handler = AddRoot),
@@ -25,7 +27,7 @@ routes = [
     webapp2.Route(r'/api/delete_fig_partial/<id:[\w-]+>/<fig_key:[\S-]+>', handler = MiniDeleteFigHandler, name = 'delete_api'),
 
 
-    webapp2.Route(r'/generate_upload_url/<node_name:[\s\S-]+>', handler=GenerateUploadUrlHandler),
+    webapp2.Route(r'/generate_upload_url/<node_id:[\s\S-]+>', handler=GenerateUploadUrlHandler),
     webapp2.Route(r'/upload_file', handler=FileUploadHandler),
     webapp2.Route(r'/getpdf/([^/]+)?', handler=getPDF),
     # webapp2.Route(r'/api/update_tag', handler=UpdateTag),

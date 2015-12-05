@@ -21,3 +21,11 @@
   stroke: #ccc;
   stroke-width: 3px;
 }
+
+.form-group{
+    overflow:hidden;
+}/*prevent flow elements does not take space*/
+
+.form-horizontal{
+    overflow:hidden;
+}

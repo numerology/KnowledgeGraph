@@ -4,7 +4,7 @@
     bottom: 250px;
     right: 150px;
     width: 450px;
-    overflow: hidden;
+    /*overflow: hidden;*/
 }
 .clipboard-expanded {
     padding: 10px;
@@ -38,4 +38,8 @@
     position:fixed;
     bottom: 150px;
     right: 100px;
+}
+.clipboard-display-div{
+    max-height: 150px;
+    overflow:auto;
 }

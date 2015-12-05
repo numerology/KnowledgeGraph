@@ -40,7 +40,7 @@ def node_collapse(node):
         current_thumbs.append({"url": current_url, "msg": current_description})
 
     if len(node.childrenIDs) == 0:
-        return {"name": node.name, "title": node.title, "id": str(node.key.id()),
+        return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
                 "tags": node.tags, "thumbnails": current_thumbs, 
                 "reference": node.reference, "childrenIDs": node.childrenIDs}
     else:
@@ -48,7 +48,7 @@ def node_collapse(node):
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
             children.append(node_collapse(cchild))
-        return {"name": node.name, "title": node.title, "id": str(node.key.id()),
+        return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
                 "tags": node.tags, "thumbnails": current_thumbs, "children": children, 
                 "reference": node.reference, "childrenIDs": node.childrenIDs}
 
@@ -276,7 +276,7 @@ class CreateRoot(webapp2.RequestHandler):
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
         # titlelist = [title_name]
-        new_clipboard = Node(name="Clipboard", title="Clipboard Title", childrenIDs=[], reference=[])
+        new_clipboard = Node(name="Clipboard", title="Clipboard", childrenIDs=[], reference=[])
         new_clipboard.put()
         caction = Action(nodeid = str(rt_node.key.id()), plusid = plus_id)
         caction.put()
@@ -359,9 +359,9 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 class GenerateUploadUrlHandler(webapp2.RequestHandler):
       #
-    def get(self, node_name):
+    def get(self, node_id):
         self.response.headers['Content-Type'] = 'text/plain'
-        cnode = Node.query(Node.name == node_name).get()
+        cnode = Node.get_by_id(int(node_id))
        # bkey = cnode.reference[0].blob_key
 
         self.response.out.write(json.dumps({'upload_url':'/upload_file'}))
@@ -463,7 +463,31 @@ class ReturnJSON(webapp2.RequestHandler):
         print(out_dict)
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(out_dict))
+        return
 
+
+class getIndexData(webapp2.RequestHandler): # return all the nodes for index view
+    def get(self,user_id):
+        response = {'status':"success", "message": "get index nodes succeed"}
+        current_user = User.get_by_id(int(user_id))
+        if not current_user:
+            response["status"]="error"
+            response["message"]="user not found"
+        else:
+            response['myNode'] = []
+            response['sharedNode'] = []
+            for root_id in current_user.rootID:
+                root_node = Node.get_by_id(int(root_id))
+                response['myNode'].append(node_collapse(root_node))
+            for root_id in current_user.sharedID:
+                root_node = Node.get_by_id(int(root_id))
+                response["sharedNode"].append(node_collapse(root_node))
+            clipboard_data = node_collapse(Node.get_by_id(int(current_user.clipboardID)))
+            clipboard_data["is_clipboard"] = True
+            clipboard_data["label"] = "Clipboard"
+            response["clipboard"] = clipboard_data
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(response))
         return
 
 class ReturnActions(webapp2.RequestHandler):

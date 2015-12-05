@@ -7,7 +7,7 @@
     font-family: arial, helvetica, sans-serif;
 }
 
-#divNodeDetail .div-empty {
+.div-empty {
     width: 100%;
     border-radius: 5px;
     min-height: 20px;
@@ -15,13 +15,22 @@
     margin-bottom: 10px;
 }
 
+#divNodeChild {
+    max-height: 200px;
+}
 
+#divNodeChild {
+    max-height: 200px;
+}
+#divReference {
+    max-height: 350px;
+}
 #divAddRoot {
     margin: 30px auto 0;
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
@@ -39,7 +48,7 @@
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
@@ -68,6 +77,12 @@
     font-size: 25px;
     font-family: helvetica;
 }
+#divBtnEditNodeTitle{
+    display:block;
+    position: absolute;
+    top: 25px;
+    right: 60px;
+}
 #btnEditNodeTitle {
     width: 24px;
     height: 24px;
@@ -76,6 +91,9 @@
     padding: 0px;
     cursor: pointer;
     display: inline-block;
+    position: absolute;
+    right:0px;
+    bottom: 0px;
 }
 #btnEditNodeTitle img {
     width: 100%;
@@ -97,9 +115,10 @@
     margin-right: 5px;
 }*/
 #inputAddChild {
-    width: 300px;
+    width: 280px;
     float: left;
     margin-right: 5px;
+    margin-left: 5px;
 }
 
 #divNodeTooltip {
@@ -151,7 +170,7 @@
     position: absolute;
     width: 500px;
     height: auto;
-    overflow: hidden;
+    /*overflow: hidden;*/
     display: block;
     left: 50%;
     margin-left: -250px;
@@ -198,4 +217,21 @@
     position: absolute;
     top: 15px;
     right: 15px;
+}
+span.title {
+    width: 80%;
+    display: block;
+    font-size: 25px;
+    font-family: arial, helvetica, sans-serif;
+}
+#spanNodeTitle{
+    width: 80%;
+    display: block;
+    font-size: 25px;
+    font-family: arial, helvetica, sans-serif;
+}
+
+span.shareNodeName{
+    color: steelblue;
+    font-weight: bold;
 }
