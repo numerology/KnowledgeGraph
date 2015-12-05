@@ -11,6 +11,10 @@
     <link href="/stylesheets/jqtree.css" type="text/css" rel="stylesheet"/>
     <link href="/stylesheets/index.css" type="text/css" rel="stylesheet"/>
     {{ super() }} <!render bootswatch, jquery-ui, backtop>
+    <script>
+        var uploadUrl = "{{upload_url}}";
+    </script>
+    <script type = "text/javascript" src="https://rawgit.com/enyo/dropzone/master/dist/dropzone.js"></script>
 {% endblock script%}
 {% block style %}
     {{ super() }} <! render autocomplete style>
@@ -81,8 +85,9 @@
             <div id="indexAddRoot" class="row index-page" style="position: relative; display:none;">
                     <div class="col-lg-12">
                 <div class="well bs-component" style="position:relative">
-                    <form id="createRootForm" class = "form_horizontal" action = "javascript: void(0);" method = "post">
+                    <form id="createRootForm" class = "form-horizontal" action = "javascript: void(0);" method = "post">
                         <fieldset>
+                            <legend>Create root node</legend>
                             <div class="form-group">
                                 <label for="rootName" class="col-lg-2 control-label">Root Name</label>
                                 <div class="col-lg-9">
@@ -137,12 +142,36 @@
                             </div>
                         </form>
                     </div>
-
+                    <div class="row" id="nodeReference">
+                        <h4>References:</h4>
+                        <div class = "div-empty" id="divReference"></div>
+                        <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+                        <div id="divUploadReference" style="display:none">
+                            <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
+                                <div class="dropzone-previews"></div>
+                                <div class="dz-message">
+                                    <h2>Drop files here or click to upload.</h2>
+                                </div>
+                                <input id="nodeNameInput" type="hidden" name="node_name" value = "">
+                                <input id="typeInput" type="hidden" name="type_name" value = "">
+                                <input id="descriptionInput" type="text" name="description" placeholder = "describe your file briefly" value = "">
+                            </form>
+                            <button id = "uploadBtn" class="btn btn-default">Upload</button>
+                            <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                        </div>
+                    </div>
                     <a href="javascript: void(0)" id="btnCloseNodeDetail" class="btn btn-primary btn-xs btn-close">&times;</a>
                 </div>
 
             </div>
         </div>
+    </div>
+    <div id="divReftip" class="popup" style="display:none">
+        <div id="RefTipContent">
+            <h2>POPUP for Tooltip!</h2>
+        </div>
+        <div class="tip1"></div>
+        <div class="tip2"></div>
     </div>
 </div>
 <div id="divNodeTooltip" class="popup" style="display:none">
@@ -199,7 +228,9 @@
     <script>
         var userID = {{user_id}};
     </script>
-    <script type="text/javascript" src="/scripts/wrapNodeString.js"></script>
-    <script src="/scripts/index.js" type = "text/javascript"></script>
     <script src="/scripts/jquery.tree.js" type="text/javascript"></script>
+    <script type="text/javascript" src="/scripts/wrapNodeString.js"></script>
+    <script src="/scripts/referenceDropzone.js" type = "text/javascript"></script>
+    <script src="/scripts/nodeDetail.reference.js" type = "text/javascript"></script>
+    <script src="/scripts/index.js" type = "text/javascript"></script>
 {% endblock body_script %}

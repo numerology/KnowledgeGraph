@@ -10,10 +10,12 @@ var original_parent_node = {}; //record the original parent node
 var selected_node; //default selected node is set to the root node of tree
 var root_node;
 
+var indexTree = $("#myGraphIndexContent");
 $(".scrollbar-light").scrollbar();
 $(".tooltip-btn").tooltip();
 $('.index-page').hide();
 $('.scrollbar-light').scrollbar();
+
 
 $(document).ready(function() {
     var cache = {};
@@ -27,7 +29,7 @@ $(document).ready(function() {
         myGraphData = response.myNode;
         myGraphData.push(response.clipboard); //add clipboard to my node
         //console.log(response.clipboard.is_clipboard);
-        $("#myGraphIndexContent").tree({
+        indexTree.tree({
             data: response.myNode,
             dragAndDrop: true,
             onCreateLi: function(node, $li) {
@@ -65,9 +67,9 @@ $(document).ready(function() {
 
             }
         });
-        selected_node = $("#myGraphIndexContent").tree('getTree');
-        root_node = $('#myGraphIndexContent').tree('getTree');
-        $("#myGraphIndexContent").bind(
+        selected_node = indexTree.tree('getTree');
+        root_node = indexTree.tree('getTree');
+        indexTree.bind(
             'tree.click',
             function(event) {
                 // The clicked node is 'event.node'
@@ -80,7 +82,6 @@ $(document).ready(function() {
                     selected_node = node;
                     $('.index-page').hide();
                     $("#indexNodeDetail").show();
-                    //console.log(node);
                     showIndexNodeDetail(node);
                 }
             }
@@ -91,25 +92,35 @@ $(document).ready(function() {
             }else{
                 showDivAddChild();
             }
-            console.log(e);
-            console.log(selected_node);
+            //console.log(e);
+            //console.log(selected_node);
         });
+        $("#btnIndexAddReference").click(function(e){
+            if(!selected_node.parent){ // root node is selected
+
+                window.alert("Please select a node to add reference");
+            }else{
+                showDivAddChild();
+            }
+        });
+
     });
 });
 
-
 function showIndexNodeDetail(node) {
-    currentNode = node;
+    //currentNode = node;
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeIndexNodeDetail();");
     loadTitle(node);
     loadTag(node); // load the Tags of node
     loadChild(node);
     loadDivAddChild(node);
-    //loadDivRef(node);
+    loadDivRef(node);
 }
 
 function closeIndexNodeDetail(){
     $("#indexNodeDetail").hide();
+    closeDivAddChild();
+    indexTree.tree('selectNode', indexTree.tree('getTree')); // select root node if detail window is closed
 }
 
 function loadTitle(node){
@@ -200,7 +211,9 @@ function loadChild(node){ // load children in ContextMenu
         });
     }
 }
+
 function loadDivAddChild(node){
+    closeDivAddChild();
     btnShowAddChild = d3.select("#btnShowAddChild");
     currentClass = node.id;
     btnShowAddChild.on("click", showDivAddChild);
@@ -218,6 +231,7 @@ function loadDivAddChild(node){
         },
     });
 }
+
 
 
 function addSingleNodeNoclick(div_selector, data){ // add single node to selected div
