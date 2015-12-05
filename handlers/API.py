@@ -466,6 +466,43 @@ class ReturnJSON(webapp2.RequestHandler):
 
         return
 
+class ReturnActions(webapp2.RequestHandler):
+    @decorator.oauth_required
+    def get(self, user_id):
+        user_prof = User.get_by_id(int(user_id))
+
+        http = decorator.http()
+
+        user = service.people().list(userId = 'me', collection = 'visible')
+     # text = 'Hello, %s!' % user['displayName']
+        result = user.execute(http)
+        friend_id = {}
+
+        for i in result['items']:
+            f = User.query(User.plusid == i['id']).get()
+            if(f is not None):
+                friend_id[(f.plusid)] = i['displayName']
+
+        output_actions = []
+        for a in ACTION_QUEUE.actions:
+            if a.plusid in friend_id.keys():
+                cnode = Node.get_by_id(int(a.nodeid))
+
+                output_actions.append({'node_name': cnode.name,
+                                       'node_id': a.nodeid,
+                                       'user_name': friend_id[a.plusid],
+                                       'time':str(a.lastmodified)})
+
+      #dict = json.loads(str(user))
+   #   names = ''
+  #    for i in result['items']:
+  #        names = names + ' ' + i['displayName']
+
+ #     result = service.people().get(userId = result['items'][0]['id']).execute(http)
+
+    #  text = names
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(output_actions))
 
 class ReturnRoots(webapp2.RequestHandler):
     def get(self, user_id):
@@ -529,7 +566,8 @@ class ShareRoot(webapp2.RequestHandler):
         cuser = User.get_by_id(int(user_id))
         target_user = User.query(User.email == target_mail).get()
         target_user.sharedID.append(root_id)
-        target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
+        croot = Node.get_by_id(int(root_id))
+        target_user.sharedtitles.append(croot.title)
         target_user.put()
         self.redirect('/')
         return

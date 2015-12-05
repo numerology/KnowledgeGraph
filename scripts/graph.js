@@ -196,7 +196,7 @@ d3.json("/get_root_list/" + userID, function(result) {
 d3.json("/get_shared_list/" + userID, function(result) {
     list = result;
     //console.log("getting shared list");
-    tabSharedSelector =d3.select("#divClipboardNode");
+    tabSharedSelector =d3.select("#contentSharedGraph");
     list.shared_list.forEach(function(d){
         //console.log(d);
         nodeData = {"node_text":d.root_name, "node_data":{"msg": String(d.msg), "id": d.rootID}};
@@ -314,11 +314,12 @@ $("#divClipboardReference").sortable({
 $("#divClipboardNode").sortable({
     appendTo: $("#divClipboardNode"),
     //items: 'svg',
-    connectWith: ["#divNodeChild", "#contentMyGraph", "#contentSharedGraph"],
+    connectWith: ["#divNodeChild", "#contentMyGraph"],
     receive: function (event, ui){
 		var isLastNode = false;
 		//var d3selector;
         //console.log(ui);
+        console.log("receive");
 		$(this).find("g").each(function(){
 			console.log($(this));
 			d3selector = d3.selectAll($(this).toArray());
@@ -383,6 +384,7 @@ $("#btnClipboard").on("mousedown", function(e){
         //console.log('default prevented?');
         $draggable.data("preventBehavior", false);
     }else {
+        console.log('div clipboard show');
         $("#divClipboard").toggle();
         $_this.hide();
         /*changeDisplay({
@@ -435,11 +437,11 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     //console.log("Log: nodeaddroot data: " + d3.select(nodeaddroot).__data__);
     
     // generate graph for each node
-    nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
+  //  nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
  //   addSingleNode(tabContentSelector, nodeData);
     nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
-    addSingleNode(d3.select("#contentSharedGraph"), nodeData);
+  //  addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
     $("#contentMyGraph").sortable({
@@ -471,6 +473,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 				d3.selectAll("#contentMyGraph g")
 				  .classed("lastNode", false);
 			}
+			console.log("temp node list: "+temp_node_list );
 			if(nodeNum == 0){
 				console.log("sortable has no root now, does not update my roots");
 			} else{$.ajax({
@@ -502,6 +505,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
                 temp_node_list.push(e.id);
                 console.log(e);
               });
+            console.log("temp node list: "+JSON.stringify(temp_node_list) );
             $.ajax({
                 type: 'post',
                 url: '/api/update_root',

@@ -76,6 +76,10 @@ class SocialHandler(webapp2.RequestHandler):
   @decorator.oauth_required
   def get(self):
     try:
+      user = users.get_current_user()
+      user_prof = User.query(User.email == str(user.email())).get()
+
+      time_sleep(NDB_UPDATE_SLEEP_TIME)
       http = decorator.http()
 
       user = service.people().list(userId = 'me', collection = 'visible')
@@ -104,7 +108,8 @@ class SocialHandler(webapp2.RequestHandler):
 
     #  text = names
       template = JINJA_ENVIRONMENT.get_template('social.html')
-      self.response.write(template.render({'output_actions': output_actions,
+      self.response.write(template.render({'user_id': str(user_prof.key.id()),
+                                           'output_actions': output_actions,
                                            'logout_url': users.create_logout_url("/")}))
 
     except client.AccessTokenRefreshError:
