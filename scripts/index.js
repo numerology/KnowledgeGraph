@@ -9,6 +9,8 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
 var indentStep = 25;
 var currentIndent = 0;
 
+var original_parent_node = {}; //record the original parent node
+
 var data = [
     {
         label: 'node1',
@@ -27,6 +29,7 @@ var data = [
     }
 ];
 $(".scrollbar-light").scrollbar();
+$(".tooltip-btn").tooltip();
 $(document).ready(function() {
     var cache = {};
 
@@ -36,12 +39,13 @@ $(document).ready(function() {
             console.log(response.message);
             return;
         }
-        myGraphData = response.myNode.push(response.clipboard);
-        console.log(response.clipboard.is_clipboard);
-        $("#myGraphIndex").tree({
+        myGraphData = response.myNode;
+        myGraphData.push(response.clipboard); //add clipboard to my node
+        //console.log(response.clipboard.is_clipboard);
+        $("#myGraphIndexContent").tree({
             data: response.myNode,
             dragAndDrop: true,
-            onCanMove: function(node){
+            onCanMove: function(node){ // define what node can be moved
                 if (node.is_clipboard){ // clipboard can not be moved
                     return false;
                 }
@@ -57,7 +61,16 @@ $(document).ready(function() {
                 else {
                     return true;
                 }
+            },
+            onDragMove: function(node, ui){
+                original_parent_node = node.parent; //record the original parent of the node
+            },
+            onDragStop: function(node, ui){
+
             }
+
         });
+        $('.scrollbar-light').scrollbar();
     });
+
 });

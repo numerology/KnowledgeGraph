@@ -1,9 +1,11 @@
 /*CSS for index.html*/
+body{
+    min-width: 500px;
+}
 .index-content {
     display: table;
     width: 100%;
-    min-height: 400px;
-    max-height: 800px;
+    height:600px;
 }
 .index-content [class*="col-"] {
     float: none;
@@ -17,9 +19,54 @@
     padding: 5px;
 }
 .node-detail-box{
+    height: 100%;
     border: 1px #ccc solid;
     border-radius: 6px;
     box-shadow: #333 2px 2px 4px;
-    padding: 15px;
+    padding: 0px;
     font-family: arial, helvetica, sans-serif;
+}
+.node-detail-content{
+    padding: 15px;
+    height: 100%;
+}
+.tab-pane {
+    max-height:500px;
+}
+.wrapper{
+    width: auto;
+    display: block;
+    margin:0;
+    padding:0;
+    text-align:center;
+    position: absolute;
+    height: 30px;
+    left:0px;
+    right:0px;
+    bottom: 15px;
+}
+
+#myGraphIndexDiv {
+    margin-bottom: 30px;
+    max-height: 470px;
+}
+.btn-bar {
+    margin-bottom: 15px;
+    float: none;
+    display: inline-block;
+}
+.btn-img {
+    width: 30px;
+    height: 30px;
+    border: none;
+    padding: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    display: inline;
+}
+.btn-img img {
+    height: 100%;
+    width: auto;
+    background-color: #fff;
 }
