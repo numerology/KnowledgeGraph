@@ -25,7 +25,7 @@ d3.json("/get_action_list/" + userID, function(result) {
     divActionSelector =d3.select("#divActions");
     list.forEach(function(d){
         //console.log(d);
-        itemData = {"node_text":d.node_name, "time":d.time, "name":d.user_name, "node_data":{"id": d.node_id}};
+        itemData = {"node_text":d.node_name, "time":d.time, "name":d.user_name, "fig":d.user_figure, "node_data":{"id": d.node_id}};
         addActionItem(divActionSelector, itemData, d.node_id); //TODO: using node_id is danger
     });
 })
@@ -36,9 +36,9 @@ function addActionItem(divSelector, data, id){
     tempTextRow = d3.select("#divText").append("div").attr("class","row")
         .attr("align", "center")
         .attr("id", id + "text")
-        .attr("style", "height:110px");
+        .attr("style", "height:113px");
     tempTextRow.append("p").text(data.name+ " has updated one node at" + data.time);
-
+    tempTextRow.append("img").attr("src", data.fig);
 
 
     tempNode = divSelector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")

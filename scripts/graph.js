@@ -260,11 +260,13 @@ $("#divClipboardNode").sortable({
     update: function(event, ui){
         var new_child_list = [];
         var new_children = [];
+
         d3.selectAll("#divClipboardNode .node")
           .each(function(e){
             console.log(e);
             new_child_list.push(e.id.toString());
             new_children.push(e.child);
+
             //
           });
         

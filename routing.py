@@ -34,6 +34,7 @@ routes = [
     # webapp2.Route(r'/api/update_title', handler=UpdateTitle),
     webapp2.Route(r'/api/update_root', handler=UpdateRootList),
     webapp2.Route(r'/api/update_clipboard', handler=UpdateClipboard),
+    webapp2.Route(r'/api/update_clipboard_social', handler = UpdateClipboardSocial),
     webapp2.Route(r'/api/update_node', handler=UpdateNode),
     webapp2.Route(r'/api/index_refresh/<node_id:[\w-]+>', handler = RefreshHandler),
     webapp2.Route(r'/index_view', handler = IndexHandler),

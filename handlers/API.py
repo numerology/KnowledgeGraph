@@ -52,6 +52,23 @@ def node_collapse(node):
                 "tags": node.tags, "thumbnails": current_thumbs, "children": children, 
                 "reference": node.reference, "childrenIDs": node.childrenIDs}
 
+def node_deep_copy(target_node):
+    result = Node(name = target_node.name,
+                  title = target_node.title,
+                  definition = target_node.definition,
+                  tags = target_node.tags, #TODO: check the copy of array is shallow or deep
+                  childrenIDs = [],
+                  trending = target_node.trending,
+                  reference = target_node.reference) #Since users are not allowed to delete or edit a reference item,
+                                                    # i think it is okay to do shallow copy here
+    for c in target_node.childrenIDs:
+        child = Node.get_by_id(int(c))
+        new_child = node_deep_copy(child)
+        result.childrenIDs.append(str(new_child.key.id()))
+
+    return result
+
+
 
 class AddChildHandler(webapp2.RequestHandler):
     def post(self, nodeID):
@@ -260,6 +277,47 @@ class UpdateClipboard(webapp2.RequestHandler):
                 # print clip_node.key.id()
                 clip_node.reference = new_reference_list
                 response["message"] += " reference updated"
+            clip_node.put()
+            # user.rootID = new_reference_list
+            # user.put()
+        self.response.write(json.dumps(response))
+
+
+class UpdateClipboardSocial(webapp2.RequestHandler):
+    def post(self):
+        # Idea: All the nodes updated in this operation should be deep copied
+
+        user_id = int(self.request.get("userID"))
+        response = {"status": "success", "message": "Clipboard updated"}
+        cuser = User.get_by_id(user_id)
+        if not cuser:
+            response["status"] = "error"
+            response["message"] = "User not found"
+        else:
+            clip_node = Node.get_by_id(int(cuser.clipboardID))
+            rqst_args = self.request.arguments()
+            if "new_child_list" in rqst_args:
+                new_child_list = json.loads(self.request.get("new_child_list"))
+                print "update clipboard node list"
+                for id in new_child_list:
+                    if id in clip_node.childrenIDs:
+                        continue
+                    else:
+                        # do a deep copy and put new id into childrenIDs
+                        target_node = Node.get_by_id(int(cuser.clipboardID))
+                        new_node = node_deep_copy(target_node)
+
+                clip_node.childrenIDs = new_child_list
+                response["message"] += " children updated"
+            '''
+                # DO not need reference stuff
+            if "new_reference_list" in rqst_args:
+                new_reference_list = json.loads(self.request.get("new_reference_list"))
+                # print "update clipboard reference list"
+                # print clip_node.key.id()
+                clip_node.reference = new_reference_list
+                response["message"] += " reference updated"
+            '''
             clip_node.put()
             # user.rootID = new_reference_list
             # user.put()
@@ -500,21 +558,24 @@ class ReturnActions(webapp2.RequestHandler):
         user = service.people().list(userId = 'me', collection = 'visible')
      # text = 'Hello, %s!' % user['displayName']
         result = user.execute(http)
-        friend_id = {}
+        friend_name = {}
+        friend_fig = {}
 
         for i in result['items']:
             f = User.query(User.plusid == i['id']).get()
             if(f is not None):
-                friend_id[(f.plusid)] = i['displayName']
+                friend_name[(f.plusid)] = i['displayName']
+                friend_fig[(f.plusid)] = i['image']['url']
 
         output_actions = []
         for a in ACTION_QUEUE.actions:
-            if a.plusid in friend_id.keys():
+            if a.plusid in friend_name.keys():
                 cnode = Node.get_by_id(int(a.nodeid))
 
                 output_actions.append({'node_name': cnode.name,
                                        'node_id': a.nodeid,
-                                       'user_name': friend_id[a.plusid],
+                                       'user_name': friend_name[a.plusid],
+                                       'user_figure':friend_fig[a.plusid],
                                        'time':str(a.lastmodified)})
 
       #dict = json.loads(str(user))
