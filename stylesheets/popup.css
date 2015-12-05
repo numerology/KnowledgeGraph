@@ -6,7 +6,7 @@
     font-family: arial, helvetica, sans-serif;
 }
 
-#divNodeDetail .div-empty {
+.div-empty {
     width: 100%;
     border-radius: 5px;
     min-height: 20px;
@@ -114,7 +114,7 @@
     margin-right: 5px;
 }*/
 #inputAddChild {
-    width: 300px;
+    width: 280px;
     float: left;
     margin-right: 5px;
     margin-left: 5px;

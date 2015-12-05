@@ -30,6 +30,7 @@
     stroke-width: 3px;
 }
 .tabContentNodeDiv {
+    overflow: auto;
     width: 100%;
     max-height: 240px;
 }

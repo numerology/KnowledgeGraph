@@ -276,7 +276,7 @@ class CreateRoot(webapp2.RequestHandler):
         rt_node.put()
         rtIDlist = [str(rt_node.key.id())]
         # titlelist = [title_name]
-        new_clipboard = Node(name="Clipboard", title="Clipboard Title", childrenIDs=[], reference=[])
+        new_clipboard = Node(name="Clipboard", title="Clipboard", childrenIDs=[], reference=[])
         new_clipboard.put()
         caction = Action(nodeid = str(rt_node.key.id()), plusid = plus_id)
         caction.put()
