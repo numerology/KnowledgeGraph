@@ -9,6 +9,7 @@ var currentIndent = 0;
 var original_parent_node = {}; //record the original parent node
 var selected_node; //default selected node is set to the root node of tree
 var root_node;
+var currentNode;
 
 var indexTree = $("#myGraphIndexContent");
 $(".scrollbar-light").scrollbar();
@@ -108,7 +109,7 @@ $(document).ready(function() {
 });
 
 function showIndexNodeDetail(node) {
-    //currentNode = node;
+    currentNode = node;
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeIndexNodeDetail();");
     loadTitle(node);
     loadTag(node); // load the Tags of node

@@ -28,7 +28,7 @@ Dropzone.options.uploader = {
             //console.log('Triggering');
             $.ajax({
                 type: 'get',
-                url: '/generate_upload_url/' + currentNode.name,
+                url: '/generate_upload_url/' + currentNode.id,
                 async: false,
                 success: function(data) {
                     console.log(data['upload_url']);

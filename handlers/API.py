@@ -359,9 +359,9 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 
 class GenerateUploadUrlHandler(webapp2.RequestHandler):
       #
-    def get(self, node_name):
+    def get(self, node_id):
         self.response.headers['Content-Type'] = 'text/plain'
-        cnode = Node.query(Node.name == node_name).get()
+        cnode = Node.get_by_id(int(node_id))
        # bkey = cnode.reference[0].blob_key
 
         self.response.out.write(json.dumps({'upload_url':'/upload_file'}))
