@@ -13,6 +13,7 @@ routes = [
     webapp2.Route(r'/get_shared_list/<user_id:[\w-]+>', handler = ReturnShares),
     webapp2.Route(r'/get_clipboard/<user_id:[\w-]+>', handler=ReturnClipboard),
     webapp2.Route(r'/get_action_list/<user_id:[\w-]+>', handler=ReturnActions),
+    webapp2.Route(r'/get_individual_action_list/<user_id:[\w-]+>/<target_plus_id:[\w-]+>', handler=ReturnIndividualActions),
     webapp2.Route(r'/get_index_data/<user_id:[\w-]+>', handler=getIndexData),
 
     webapp2.Route(r'/graph', handler=GraphHandler),
@@ -41,7 +42,9 @@ routes = [
     # test for Jinja template system
     webapp2.Route(r'/test/jinja', handler=JinjaHandler),
     webapp2.Route('/social', SocialHandler),
+    webapp2.Route('/social_individual/<plusid:[\w-]+>', handler = SocialIndividualHandler),
     webapp2.Route('/social_page', SocialPageHandler),
+
     webapp2.Route(decorator.callback_path, decorator.callback_handler()),
 ]
 app = webapp2.WSGIApplication(routes=routes, debug=True)

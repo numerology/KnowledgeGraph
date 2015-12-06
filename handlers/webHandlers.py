@@ -86,25 +86,6 @@ class SocialHandler(webapp2.RequestHandler):
       user_prof = User.query(User.email == str(user.email())).get()
 
       time_sleep(NDB_UPDATE_SLEEP_TIME)
-      http = decorator.http()
-
-      user = service.people().list(userId = 'me', collection = 'visible')
-     # text = 'Hello, %s!' % user['displayName']
-      result = user.execute(http)
-      friend_id = {}
-
-      for i in result['items']:
-          f = User.query(User.plusid == i['id']).get()
-          if(f is not None):
-            friend_id[(f.plusid)] = i['displayName']
-
-      output_actions = []
-      for a in ACTION_QUEUE.actions:
-          if a.plusid in friend_id.keys():
-              cnode = Node.get_by_id(int(a.nodeid))
-
-              output_actions.append({'node_name': cnode.name, 'user_name': friend_id[a.plusid], 'time':str(a.lastmodified)})
-
       #dict = json.loads(str(user))
    #   names = ''
   #    for i in result['items']:
@@ -115,7 +96,31 @@ class SocialHandler(webapp2.RequestHandler):
     #  text = names
       template = JINJA_ENVIRONMENT.get_template('social.html')
       self.response.write(template.render({'user_id': str(user_prof.key.id()),
-                                           'output_actions': output_actions,
+                                           'logout_url': users.create_logout_url("/")}))
+
+    except client.AccessTokenRefreshError:
+      self.redirect('/')
+
+class SocialIndividualHandler(webapp2.RequestHandler):
+
+  @decorator.oauth_required
+  def get(self, plusid):
+    try:
+      user = users.get_current_user()
+      user_prof = User.query(User.email == str(user.email())).get()
+
+      time_sleep(NDB_UPDATE_SLEEP_TIME)
+      #dict = json.loads(str(user))
+   #   names = ''
+  #    for i in result['items']:
+  #        names = names + ' ' + i['displayName']
+
+ #     result = service.people().get(userId = result['items'][0]['id']).execute(http)
+
+    #  text = names
+      template = JINJA_ENVIRONMENT.get_template('social_individual.html')
+      self.response.write(template.render({'user_id': str(user_prof.key.id()),
+                                           'target_id': str(plusid),
                                            'logout_url': users.create_logout_url("/")}))
 
     except client.AccessTokenRefreshError:

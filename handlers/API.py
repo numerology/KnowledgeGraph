@@ -575,7 +575,42 @@ class ReturnActions(webapp2.RequestHandler):
                 output_actions.append({'node_name': cnode.name,
                                        'node_id': a.nodeid,
                                        'user_name': friend_name[a.plusid],
+                                       'plusID':a.plusid,
                                        'user_figure':friend_fig[a.plusid],
+                                       'time':str(a.lastmodified)})
+
+      #dict = json.loads(str(user))
+   #   names = ''
+  #    for i in result['items']:
+  #        names = names + ' ' + i['displayName']
+
+ #     result = service.people().get(userId = result['items'][0]['id']).execute(http)
+
+    #  text = names
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(output_actions))
+
+class ReturnIndividualActions(webapp2.RequestHandler):
+    @decorator.oauth_required
+    def get(self, user_id, target_plus_id):
+        user_prof = User.get_by_id(int(user_id))
+
+        http = decorator.http()
+
+        user = service.people().get(userId = target_plus_id)
+     # text = 'Hello, %s!' % user['displayName']
+        result = user.execute(http)
+       
+
+        output_actions = []
+        for a in ACTION_QUEUE.actions:
+            if a.plusid == target_plus_id:
+                cnode = Node.get_by_id(int(a.nodeid))
+
+                output_actions.append({'node_name': cnode.name,
+                                       'node_id': a.nodeid,
+                                       'user_name': result['displayName'],
+                                       'user_figure':result['image']['url'],
                                        'time':str(a.lastmodified)})
 
       #dict = json.loads(str(user))
