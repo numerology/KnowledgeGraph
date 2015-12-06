@@ -1,5 +1,7 @@
 var _this = null;
 
+console.log(targetPlusID);
+
 var helperTspan = d3.select(".helper").append("div").attr("class", "divActions")
                   .append("svg").attr({"height": 100, "width": 100})
                   .append("g").attr("class","node").append("text").append("tspan");
@@ -19,13 +21,14 @@ $("#divClipboard").resizable({
     minHeight: 300,
 });
 
-d3.json("/get_action_list/" + userID, function(result) {
+d3.json("/get_individual_action_list/" + userID + "/" + targetPlusID, function(result) {
     list = result;
+    console.log(targetPlusID);
     //console.log("getting shared list");
     divActionSelector =d3.select("#divActions");
     list.forEach(function(d){
         //console.log(d);
-        itemData = {"node_text":d.node_name, "time":d.time, "name":d.user_name, "plusid":d.plusID, "fig":d.user_figure, "node_data":{"id": d.node_id}};
+        itemData = {"node_text":d.node_name, "time":d.time, "name":d.user_name, "fig":d.user_figure, "node_data":{"id": d.node_id}};
         addActionItem(divActionSelector, itemData, d.node_id); //TODO: using node_id is danger
     });
 })
@@ -37,9 +40,7 @@ function addActionItem(divSelector, data, id){
         .attr("align", "center")
         .attr("id", id + "text")
         .attr("style", "height:113px");
-    paragraph = tempTextRow.append("p");
-    paragraph.append("a").attr("href","/social_individual/"+data.plusid).text(data.name);
-    paragraph.append("p").text(" has updated one node at" + data.time);
+    tempTextRow.append("p").text(data.name+ " has updated one node at" + data.time);
     tempTextRow.append("img").attr("src", data.fig);
 
 

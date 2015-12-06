@@ -464,6 +464,8 @@ function loadDivAddChild(node){
 
 
 
+
+
 function addSingleNodeNoclick(div_selector, data){ // add single node to selected div
     tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
              .attr("class", "node")
