@@ -895,7 +895,7 @@ function loadDivRef(d){
     $("#divReference").empty(); //TODO: 
     d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
-    d3.select("#nodeNameInput").attr("value", d.name);
+    d3.select("#nodeIDInput").attr("value", d.id);
     divRef = d3.select("#divReference");
     /*divRef.append("a").attr("class", "thumbnail")
             .append("img").attr("src", "src1")
@@ -908,6 +908,7 @@ function loadDivRef(d){
         divRef.append("a").attr("class", "thumbnail")
 			//.data([{"src": thumb.url}],0)
             .attr("style", "height:100px")
+            .attr("href", "/serve_reference/"+thumb.blob)
             .on("mouseover",function(){
                 $("#RefTipContent").empty();
                 pos = $(this).offset();

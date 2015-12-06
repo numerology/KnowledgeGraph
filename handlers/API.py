@@ -9,6 +9,7 @@ from models import *
 from constants import *
 from datetime import *
 from time import sleep as time_sleep
+from google.appengine.ext.blobstore import BlobKey
 
 import webapp2
 import jinja2
@@ -37,7 +38,7 @@ def node_collapse(node):
             current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
         if ref.type == EXT_TYPE:
             current_url=r.url
-        current_thumbs.append({"url": current_url, "msg": current_description})
+        current_thumbs.append({"url": current_url, "msg": current_description, "blob":str(ref.blobkey)})
 
     if len(node.childrenIDs) == 0:
         return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
@@ -365,7 +366,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             print ("PhotoUploadHandler: upload resized")
 
             upload = self.get_uploads()[0]
-            node_name = self.request.get("node_name")
+            node_id = self.request.get("node_ID")
             descriptionstr = self.request.get("description")
             key = upload.key()
             user = User.query(User.email == users.get_current_user().email()).get()
@@ -381,7 +382,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
                                    blobkey=upload.key(), description = descriptionstr)
 
             user_file.put()
-            queried_node = Node.query(Node.name == node_name).get()
+            queried_node = Node.get_by_id(int(node_id))
             if queried_node:
                 queried_node.reference.insert(0,str(user_file.key.id()))
 
@@ -402,7 +403,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
                 ACTION_QUEUE.put()
 
             else:
-                print ("PhotoUploadHander: No stream found matching "+node_name)
+                print ("PhotoUploadHander: No node found matching "+node_id)
 
 
             #preprocessing, generating thumbnail
@@ -600,7 +601,7 @@ class ReturnIndividualActions(webapp2.RequestHandler):
         user = service.people().get(userId = target_plus_id)
      # text = 'Hello, %s!' % user['displayName']
         result = user.execute(http)
-       
+
 
         output_actions = []
         for a in ACTION_QUEUE.actions:
@@ -679,6 +680,15 @@ class UpdateRoot(webapp2.RequestHandler):
 
         return
 
+class ServeReference(blobstore_handlers.BlobstoreDownloadHandler):
+    def get(self,blobkey):
+        key = BlobKey(blobkey)
+        '''
+        if not blobstore.get(key):
+            self.error(404)
+        else:
+        '''
+        self.send_blob(key)
 
 class ShareRoot(webapp2.RequestHandler):
     def post(self,root_id,user_id):

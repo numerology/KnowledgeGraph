@@ -15,6 +15,7 @@ routes = [
     webapp2.Route(r'/get_action_list/<user_id:[\w-]+>', handler=ReturnActions),
     webapp2.Route(r'/get_individual_action_list/<user_id:[\w-]+>/<target_plus_id:[\w-]+>', handler=ReturnIndividualActions),
     webapp2.Route(r'/get_index_data/<user_id:[\w-]+>', handler=getIndexData),
+    webapp2.Route(r'/serve_reference/<blobkey:[\s\S-]+>', handler = ServeReference),
 
     webapp2.Route(r'/graph', handler=GraphHandler),
     webapp2.Route(r'/createroot', handler=CreateRootHandler),
