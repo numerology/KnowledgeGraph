@@ -93,7 +93,7 @@ class AddRoot(webapp2.RequestHandler):
     def post(self, user_id):
         print "ADD ROOT"
         root_name = self.request.get('root_name')
-        title = self.request.get('title')
+        title = self.request.get('title_name')
 
         print "AddRoot: "+root_name+" title: " + title
 
@@ -145,6 +145,7 @@ class UpdateRootList(webapp2.RequestHandler):
                         print "update root: current root empty!"
                     user.currentrootID = new_my_node_list[0]
                     print "update root: change current root id"
+                    response["current_root_changed"] = True
                 user.put()
             elif root_type == "SHARED_ROOT":
                 user.sharedID = new_my_node_list
@@ -196,6 +197,8 @@ class UpdateNode(webapp2.RequestHandler):
 
 class UpdateClipboard(webapp2.RequestHandler):
     def post(self):
+        print self.request.get("userID")
+        print int(self.request.get("userID"))
         user_id = int(self.request.get("userID"))
         response = {"status": "success", "message": "Clipboard updated"}
         cuser = User.get_by_id(user_id)

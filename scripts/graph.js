@@ -60,7 +60,10 @@ $(document).ready(function() {
 
      
 });
-
+getMyGraphTab();
+getSharedGraphTab();
+getClipboard();
+getGraph();
 
 
 
@@ -70,54 +73,63 @@ function done(){
  console.log("accepted called");
 }
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
-d3.json("/get_rooted_data/" + userID, function(flare) {
+function getGraph(){
+    d3.json("/get_rooted_data/" + userID, function(flare) {
+          //  if (error) throw error;
+            root = flare;
+            //  root = JSON.parse(myjson);
+            root.x0 = height / 2;
+            root.y0 = 0;
 
-  //  if (error) throw error;
-    root = flare;
-    //  root = JSON.parse(myjson);
-    root.x0 = height / 2;
-    root.y0 = 0;
-
-    function collapse(d) {
-    if (d.children) {
-      d._children = d.children;
-      d._children.forEach(collapse);
-      d.children = null;
-    }
-    }
-    if(root.children){
-    root.children.forEach(collapse);
-    }
-    update(root);
-    loadGraphTab();
-});
+            function collapse(d) {
+            if (d.children) {
+              d._children = d.children;
+              d._children.forEach(collapse);
+              d.children = null;
+            }
+            }
+            if(root.children){
+            root.children.forEach(collapse);
+            }
+            update(root);
+        }
+    );
+}
 
 //write out the root list
-d3.json("/get_root_list/" + userID, function(result) {
-    list = result;
-    tabContentSelector = d3.select("#contentMyGraph");
-    list.root_list.forEach(function(d){
-        //console.log(d);
-        nodeData = {"node_text":d.root_name,"node_data":{"name":d.root_name,"msg": String(d.msg), "id": d.rootID}};
-        addNodeWithContext(tabContentSelector, nodeData, shareMenu);
-    });
-	if (list.root_list.length == 1){
-		tabContentSelector.selectAll("g").classed("lastNode", true);
-	}
-})
+function getMyGraphTab(){
+    d3.selectAll("#contentMyGraph .svg-node").remove();
+    loadMyGraphTab();
+    d3.json("/get_root_list/" + userID, function(result) {
+        list = result;
+        tabContentSelector = d3.select("#contentMyGraph");
+        list.root_list.forEach(function(d){
+            //console.log(d);
+            nodeData = {"node_text":d.root_name,"node_data":{"name":d.root_name,"msg": String(d.msg), "id": d.rootID}};
+            addNodeWithContext(tabContentSelector, nodeData, clickMyTabNode, shareMenu);
+        });
+        if (list.root_list.length == 1){
+            tabContentSelector.selectAll("g").classed("lastNode", true);
+        }
+    })
+}
 
-d3.json("/get_shared_list/" + userID, function(result) {
-    list = result;
-    //console.log("getting shared list");
-    tabSharedSelector =d3.select("#divClipboardNode");
-    list.shared_list.forEach(function(d){
-        //console.log(d);
-        nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
-        addSingleNode(tabSharedSelector, nodeData);
-    });
-})
+function getSharedGraphTab(){
+    loadSharedGraphTab();
+    d3.json("/get_shared_list/" + userID, function(result) {
+        list = result;
+        //console.log("getting shared list");
+        tabSharedSelector =d3.select("#divClipboardNode");
+        list.shared_list.forEach(function(d){
+            //console.log(d);
+            nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
+            addSingleNode(tabSharedSelector, nodeData, clickSharedTabNode);
+        });
+    })
+}
 
-d3.json("/get_clipboard/" + userID, function(result){
+function getClipboard(){
+    d3.json("/get_clipboard/" + userID, function(result){
     //console.log(result)
     //console.log(result)
     divClipboardChild =d3.select("#divClipboardNode");
@@ -155,24 +167,67 @@ d3.json("/get_clipboard/" + userID, function(result){
 	    divClipRef.selectAll("a").data(result.reference);
     }
 });
+}
 
 function shareMenu(e){
-    $("#formShareRoot")[0].reset();
-    var shareUrl = "/shareroot/" + e.id + '/' + String(userID);
-    d3.event.preventDefault();
-    //console.log(e);
     if(shareShowing){
         closeShare();
     }
-    $("#shareNodeName").text(e.name);
-    console.log(e);
+    var node = e;
+    $("#formShareRoot")[0].reset();
+    var shareUrl = "/shareroot/" + node.id + '/' + String(userID);
+    d3.event.preventDefault();
+    d3.select("#btnCancelShareRoot").attr("href", "javascript: closeShare();");
+    $("#shareNodeName").text(node.name);
+
     d3.select("#divShare").style("display","inline")
         .style("top", (e.x + 200)+"px");
-
-    d3.select("#btnCancelShareRoot").attr("href", "javascript: closeShare();");
-    //Load tag section
-    d3.select("#formShareRoot").attr("action", shareUrl);
     addRootShowing = true;
+
+    $("#divInputEmail .tag-editor").remove();
+    $("#inputEmail").empty();
+    $("#inputEmail").tagEditor({
+        initialTags:node.tags,
+        maxTags: 10,
+        removeDuplicates: true,
+        sortable: false,
+        placeholder: "Add email",
+        autocomplete: null, // { 'source': '/url/', minLength: 3 }
+        onChange: validateTagEmail,
+    });
+    $("#formShareRoot").validate({
+        rules: {
+            target_mail: {
+                required: true,
+
+            },
+            title_name: {
+                required: false,
+                maxlength: TITLE_MAX_LENGTH,
+            }
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter($("#formShareRoot ul")); // <- the default
+        },
+        submitHandler:function(){
+            $.ajax({
+                type: 'post',
+                url: shareUrl,
+                data: {"target_email": $('#inputEmail').val(), "share_message": $("#shareMessage").val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        closeShare();
+                        console.log(response.message);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in index sharing");},
+            });
+        }
+    });
 }
 
 function closeShare(){
@@ -262,12 +317,12 @@ $("#divClipboardNode").sortable({
         var new_child_list = [];
         var new_children = [];
         d3.selectAll("#divClipboardNode .node")
-          .each(function(e){
+            .each(function(e){
             console.log(e);
             new_child_list.push(e.id.toString());
             new_children.push(e.child);
             //
-          });
+            });
         
         $.ajax({
             type: 'post',
@@ -277,6 +332,7 @@ $("#divClipboardNode").sortable({
             success: function(response){
                 //console.log(response.status);
                 if(response.status === "success"){
+
                 }else if(response.status === "error"){
                     window.alert(response.message);
                 }},
@@ -351,7 +407,7 @@ function windowOffset(selector){ // return offset relative to current window
 
 $("#btnEditNodeTitle").tooltip();
 
-function loadGraphTab(){ // call the json function to load the roots for graph tab
+function loadMyGraphTab(){ // call the json function to load the roots for graph tab
     addRootData = {"msg": "Click to add new Root"}; // cannot use jquery on d3 object ...
     nodeaddroot = d3.select("#nodeAddRoot")
                     .on("click", addRoot)
@@ -364,8 +420,6 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
     nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
  //   addSingleNode(tabContentSelector, nodeData);
-    nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
-    addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
     $("#contentMyGraph").sortable({
@@ -386,7 +440,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
               .each(function(e){
 				nodeNum++;
                 temp_node_list.push(e.id.toString());
-                console.log(e);
+                //console.log(e);
               });
 			//console.log("my graph update: nodeNum is " + nodeNum);
 			// IMPORTANT: YW: 11/28/2015 dont use $(this) inside other functions....
@@ -412,6 +466,9 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 					success: function(response){
 						//console.log(response.status);
 						if(response.status === "success"){
+						    if (response.current_root_changed){ //update graph if current root changed
+						        getGraph();
+						    }
 						}else if(response.status === "error"){
 							window.alert(response.message);
 						}},
@@ -419,9 +476,12 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 						window.alert("ajax error in updating my node list");},
 				});
 			}
-            
         }
     });
+}
+function loadSharedGraphTab(){
+    nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
+    addSingleNode(d3.select("#contentSharedGraph"), nodeData, clickSharedTabNode);
     $("#contentSharedGraph").sortable({
         tolerance: 'pointer',
         forceHelperSize: true,
@@ -459,12 +519,15 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 
 
 
-function addSingleNode(div_selector, data){ // add single node to selected div
-    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+
+function addSingleNode(div_selector, data, clickFunction){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"})
+             .attr("class", "svg-node")
+             .append("g")
              .attr("class", "node")
              //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
-             .on("click", updateGraph)
+             .on("click", clickFunction)
              .on("mouseover", showBriefNodeInfo)
              .on("mouseout", closeBriefNodeInfo);
     tempNode.data([data.node_data], 0);   
@@ -480,7 +543,9 @@ function addSingleNode(div_selector, data){ // add single node to selected div
 }
 
 function addSingleNodeNoclick(div_selector, data){ // add single node to selected div
-    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"})
+             .attr("class", "svg-node")
+             .append("g")
              .attr("class", "node")
              //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
@@ -499,12 +564,14 @@ function addSingleNodeNoclick(div_selector, data){ // add single node to selecte
     //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
 }
 
-function addNodeWithContext(div_selector, data, contextFunction){ // add single node to selected div
-    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+function addNodeWithContext(div_selector, data, clickFunction, contextFunction){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"})
+             .attr("class", "svg-node")
+             .append("g")
              .attr("class", "node")
              //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
-             .on("click", updateGraph)
+             .on("click", clickFunction)
              .on("mouseover", showBriefNodeInfo)
              .on("mouseout", closeBriefNodeInfo)
              .on("contextmenu", contextFunction);
@@ -518,6 +585,19 @@ function addNodeWithContext(div_selector, data, contextFunction){ // add single 
              .style({"font":"20px sans-serif"})
              .call(wrap, 80);
     //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
+}
+
+
+function clickMyTabNode(e){
+    console.log("Click node of my tab");
+    closeContextMenu();
+    updateGraph(e);
+}
+
+function clickSharedTabNode(e){
+    //TODO: some behavior of shared node
+    closeContextMenu();
+    updateGraph(e);
 }
 
 
@@ -546,11 +626,31 @@ function addRoot(e){
                 required: false,
                 maxlength: TITLE_MAX_LENGTH,
             }
-        }
+        },
+        submitHandler: function(form){
+            $.ajax({
+                type: 'post',
+                url: addRootUrl,
+                data: {"root_name": $('#inputRootName').val(), "title_name": $("#inputRootTitle").val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        closeAddRoot();
+                        getMyGraphTab();
+                        console.log(response.message);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        },
     });
 }
 
 function closeAddRoot(){
+    $("#formAddRoot")[0].reset();
     d3.select("#divAddRoot").style("display","none");
     addRootShowing = false;
 }
@@ -894,11 +994,12 @@ function loadDivAddChild(d){
                 dataType: "json",
                 success: function(response){
                     if(response.status === "success"){
-                        window.alert(response.message);
-                        old_node = d3.selectAll("#graphcanvas svg g.node").filter(function(d){return d.id == response.new_node.id;});
-                        console.log(old_node);
-                        old_node.data([response.new_node], 0);
-                        update(old_node[0]); //TODO: HOW TO UPDATE graph here?
+                        console.log(response.message);
+                        //old_node = d3.selectAll("#graphcanvas svg g.node").filter(function(d){return d.id == response.new_node.id;});
+                        //console.log(old_node);
+                        //old_node.data([response.new_node], 0);
+                        //update(old_node[0]); //TODO: HOW TO UPDATE graph here?
+                        getGraph();
                         contextmenu(response.new_node);
                     }else if(response.status === "error"){
                         window.alert(response.message);

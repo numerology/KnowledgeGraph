@@ -6,16 +6,21 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
 var indentStep = 25;
 var currentIndent = 0;
 
-var original_parent_node = {}; //record the original parent node
+var original_parent_node_id=0; //record the original parent node
+var new_parent_node_id;
+var moved_node_id;
 var selected_node; //default selected node is set to the root node of tree
 var root_node;
 var currentNode;
 var email_list = [];
 var email_invalid_list = [];
 
+var currentTab = "#myGraphIndex";
+
 var addElementNode; // record the node that has been added child/reference
 
 var indexTree = $("#myGraphIndexContent");
+var sharedIndexTree = $("#sharedGraphIndexContent");
 $(".scrollbar-light").scrollbar();
 $(".tooltip-btn").tooltip();
 $('.index-page').hide();
@@ -24,10 +29,23 @@ $('.scrollbar-light').scrollbar();
 
 $(document).ready(function() {
     var cache = {};
-    loadIndex();
+    loadMyIndex();
+    loadSharedIndex();
 });
 
-function loadIndex(){
+$('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+  currentTab = $(e.target).attr("href") // activated tab
+  //window.alert(target);
+});
+function isOnMyTab(){
+    return currentTab=="#myGraphIndex";
+}
+
+function loadSharedIndex(){
+
+}
+
+function loadMyIndex(){
     d3.json("/get_index_data/" + userID, function(response) {
         //console.log(response);
             if(response.status != "success"){
@@ -37,7 +55,7 @@ function loadIndex(){
             myGraphData = response.myNode;
             myGraphData.push(response.clipboard); //add clipboard to my node
             //console.log(response.clipboard.is_clipboard);
-            if (!selected_node){
+            if (!indexTree.tree("getTree")){
                 indexTree.tree({
                 data: response.myNode,
                 dragAndDrop: true,
@@ -70,10 +88,60 @@ function loadIndex(){
                     }
                 },
                 onDragMove: function(node, ui){
-                    original_parent_node = node.parent; //record the original parent of the node
+                    if (!node.parent.parent){
+                        original_parent_node_id = 0; //record the original parent of the node
+                    }else{
+                        original_parent_node_id = node.parent.id;
+                    }
+                    console.log(original_parent_node_id);
+                    moved_node_id = node.id;
                 },
                 onDragStop: function(node, ui){
-
+                    if (!node.parent.parent){
+                        new_parent_node_id = 0;
+                    }else{
+                        new_parent_node_id = node.parent.id;
+                    }
+                    if (selected_node){
+                        if(selected_node.parent){
+                            if (selected_node.parent.parent){
+                                if(original_parent_node_id == selected_node.id | new_parent_node_id == selected_node.id){ // show detail of node
+                                    console.log("parent was selected");
+                                    if (selected_node.parent){ // if not root node, show index node detail
+                                        //closeShare();// show index is contained in close share
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    console.log("original parent: " + original_parent_node_id);
+                    console.log("post parent: " + new_parent_node_id);
+                    console.log("root id: " + indexTree.tree("getTree").id);
+                    if(new_parent_node_id != original_parent_node_id){
+                        var original_parent_node;
+                        console.log(original_parent_node_id);
+                        if(original_parent_node_id == 0){
+                            original_parent_node = indexTree.tree("getTree");
+                        }else{
+                            original_parent_node = indexTree.tree("getNodeById", original_parent_node_id);
+                        }
+                        if (!original_parent_node){console.error("original parent not found"); return;}
+                        else{
+                            var new_children = [];
+                            original_parent_node.children.forEach(function(child){
+                                if (child.id == node.id){
+                                    console.log("Still in original parent");
+                                }
+                                else{
+                                    new_children.push(child);
+                                }
+                            });
+                            original_parent_node.children = new_children;
+                        }
+                        post_update_node(original_parent_node_id);
+                    }
+                    post_update_node(new_parent_node_id);
+                    post_update_node(node.id);
                 }
             });
         }else{
@@ -135,6 +203,101 @@ function loadIndex(){
     });
 }
 
+
+function post_update_node(changedNodeId){
+    if (isOnMyTab()){
+        if(changedNodeId == 0){ // root node is changed
+            postRootList("MY_ROOT");
+        }else{
+            changedNode = indexTree.tree("getNodeById", changedNodeId);
+            if(changedNode){
+            postChildList(changedNodeId);
+            }
+        }
+    }else{ //only support root level movement for shared node
+        changedNode = sharedIndexTree.tree("getNodeById", changedNodeId);
+        if(!changedNode){return;}
+        if(!changedNode.parent){
+            postRootList("SHARED_ROOT");
+        }
+    }
+}
+
+function postChildList(changedNodeId){
+    if (isOnMyTab()){
+        changedNode = indexTree.tree("getNodeById", changedNodeId);
+    }else{ //only support root level movement for shared node
+        changedNode = sharedIndexTree.tree("getNodeById", changedNodeId);
+    }
+    if(!changedNode){return;}
+    new_child_list = [];
+    changedNode.children.forEach(function(child){
+        new_child_list.push(child.id);
+    });
+    postUrl = '/api/update_node';
+    if (changedNode.is_clipboard){
+        postUrl = '/api/update_clipboard';
+    }
+    console.log("changed node id: " + changedNode.id);
+    $.ajax({
+        type: 'post',
+        url: postUrl,
+        data: {"nodeID": changedNode.id, "userID": userID, "new_child_list": JSON.stringify(new_child_list)},
+        dataType: "json",
+        success: function(response){
+            if(response.status === "success"){
+                console.log(changedNode.name+"child list updated");
+            }else if(response.status === "error"){
+                window.alert(response.message);
+            }},
+        failure: function(){
+            window.alert("ajax error in updating my node list");},
+    });
+}
+
+
+function postRootList(rootType){
+    new_root_list = [];
+    var temp_tree;
+    if(rootType == "MY_ROOT"){
+        temp_tree = indexTree.tree("getTree");
+        if(!temp_tree){
+            console.error("my index tree not available now");
+            return;
+        }
+        temp_tree.children.forEach(function(child){
+            if(!child.is_clipboard){
+                new_root_list.push(child.id);
+            }
+        });
+    }else if(rootType == "SHARED_ROOT"){
+        temp_tree = sharedIndexTree.tree("getTree");
+        if(!temp_tree){
+            console.error("shared index tree not available now");
+        }
+        temp_tree.children.forEach(function(child){
+            new_root_list.push(child.id);
+        })
+    }
+    $.ajax({
+        type: 'post',
+        url: '/api/update_root',
+        data: {"userID": userID,"type": rootType, "new_root_list": JSON.stringify(new_root_list)},
+        dataType: "json",
+        success: function(response){ //console.log(response.status);
+            if(response.status === "success"){
+                console.log(response.message);
+                console.log("ROOT updated");
+            }else if(response.status === "error"){
+                window.alert(response.message);
+            }},
+        failure: function(){
+            window.alert("ajax error in updating "+ rootType+" root list");},
+    });
+}
+
+
+
 function showIndexNodeDetail(node) {
     currentNode = node;
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeIndexNodeDetail();");
@@ -177,7 +340,7 @@ function loadTitle(node){
         $.ajax({
             type: 'post',
             url: '/api/update_node',
-            data: {"nodeID": node.id, "new_title": e.value},
+            data: {"nodeID": node.id.toString(), "new_title": e.value},
             dataType: "json",
             success: function(response){
                 //console.log(response.status);
@@ -210,7 +373,7 @@ function loadTag(node){
             $.ajax({
                     type: 'post',
                     url: '/api/update_node',
-                    data: {"nodeID": node.id, "new_tag_list": JSON.stringify(new_tags)},
+                    data: {"nodeID": node.id.toString(), "new_tag_list": JSON.stringify(new_tags)},
                     dataType: "json",
                     success: function(response){
                         //console.log(response.status);
@@ -279,7 +442,7 @@ function loadDivAddChild(node){
                             indexTree.tree("selectNode", selected_node);
                             showIndexNodeDetail(selected_node);
                         } else { // has moved to a different node
-                            loadIndex();
+                            loadMyIndex();
                         }
                     }else if(response.status === "error"){
                         window.alert(response.message);
@@ -374,7 +537,7 @@ function showAddRoot(){
                 success: function(response){
                     if(response.status === "success"){
                         closeAddRoot();
-                        loadIndex();
+                        loadMyIndex();
                         window.alert(response.message);
                     }else if(response.status === "error"){
                         window.alert(response.message);
@@ -446,30 +609,7 @@ function showShare(){
     });
 }
 
-function validateTagEmail(original_field, current_editor, new_emails){ // validate emails
-    email_invalid_list = [];
-    email_list = [];
-    $('li', current_editor).each(function(){
-        var current_li = $(this);
-        temp_email = $.trim(current_li.find('.tag-editor-tag').html());
-        console.log(isValidEmailAddress(temp_email));
-        if ( !isValidEmailAddress(temp_email)){
-            current_li.addClass('red-tag');
-            email_invalid_list.push(temp_email);
-        }else{
-            current_li.removeClass('red-tag');
-            email_list.push(temp_email);
-        }
-    });
-    email_string = ""
-    if (email_list.length>0){
-        email_string = email_list+";";
-    }
-    console.log("email string is: "+email_string);
-    console.log(original_field[0]);
-    $(original_field).val(email_string);
-    console.log($("#inputEmail").val());
-}
+
 
 function closeShare(){
     $('#shareRootForm')[0].reset();

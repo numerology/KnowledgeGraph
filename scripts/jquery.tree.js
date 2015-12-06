@@ -1191,8 +1191,8 @@ Node = (function() {
   );
    */
 
-  Node.prototype.addChildAtPosition = function(node, id) {
-    this.children.splice(id, 0, node);
+  Node.prototype.addChildAtPosition = function(node, index) {
+    this.children.splice(index, 0, node);
     return node._setParent(this);
   };
 
@@ -1221,9 +1221,9 @@ Node = (function() {
 
 
   /*
-  Get child id.
+  Get child index.
   
-  var id = getChildIndex(node);
+  var index = getChildIndex(node);
    */
 
   Node.prototype.getChildIndex = function(node) {
@@ -2634,7 +2634,7 @@ JqTreeWidget = (function(superClass) {
       loadDataFromUrl('/my_data', node1);
       loadDataFromUrl('/my_data', node1, function() { console.log('finished'); });
       loadDataFromUrl('/my_data', null, function() { console.log('finished'); });
-
+  
   - loadDataFromUrl(parent_node=null, on_finished=null)
       loadDataFromUrl();
       loadDataFromUrl(node1);
