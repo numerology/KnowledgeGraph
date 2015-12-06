@@ -1,0 +1,36 @@
+.myTabContent {
+    width: 100%;
+    margin-left: 0px;
+    margin-right: 10px;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+.myTabContent svg {
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 3px;
+}
+.myTabContent .node {
+    cursor: pointer;
+}
+.myTabContent .node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.myTabContent .node text {
+    font: 20px sans-serif;
+    fill-opacity: 1;
+}
+
+.myTabContent .node line {
+    fill: steelblue;
+    stroke: steelblue;
+    stroke-width: 3px;
+}
+.tabContentNodeDiv {
+    overflow: auto;
+    width: 100%;
+    max-height: 240px;
+}

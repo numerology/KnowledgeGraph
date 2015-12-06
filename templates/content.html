@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+        <h1>{{name}}</h1>
+        <table class="table table-striped table-hover" style="width:700px" align="left">
+
+            <tr><h2>Definition:</h2>
+                {{def}}
+            </tr>
+            <tr><h2>Tags:</h2>
+                {% for t in tags %}
+                    {{t}}
+                {% endfor %}
+            </tr>
+            <tr><h2>References:</h2>
+                {% for r in refs %}
+                    <a class = "thumbnail" style = "height:100px">
+                        <img src = "{{r['url']}}" alt = "{{r['description']}}">
+                    </a>
+                {% endfor %}
+            </tr>
+
+        </table>
+
+
+</body>
+</html>

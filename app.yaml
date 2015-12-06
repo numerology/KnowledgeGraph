@@ -6,17 +6,24 @@ application: knowledge-graph
 
 # Handlers match in order, put above the default handler.
 handlers:
+- url: /img
+  static_dir: img
+
 - url: /scripts
   static_dir: scripts
 
 - url: /stylesheets
   static_dir: stylesheets
-  
+
+- url: /cloudinary
+  script: routing.app
+
 - url: /handlers
   script: rounting.app
 
 - url: /.*
   script: routing.app
+
 
 libraries:
 - name: webapp2

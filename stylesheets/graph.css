@@ -1,42 +1,31 @@
-
-#graphcanvas.node {
+#graphcanvas {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+#graphcanvas .node {
   cursor: pointer;
 }
 
-#graphcanvas.node circle {
+#graphcanvas .node circle {
   fill: #fff;
   stroke: steelblue;
   stroke-width: 1.5px;
 }
 
-#graphcanvas.node text {
+#graphcanvas .node text {
   font: 20px sans-serif;
 }
 
-#graphcanvas.link {
+#graphcanvas .link {
   fill: none;
   stroke: #ccc;
-  stroke-width: 1.5px;
+  stroke-width: 3px;
 }
 
-#graphcanvas.popup {
-    position: absolute;
-    left: 0;
-    top: 0;
-    background-color: #fff;
+.form-group{
+    overflow:hidden;
+}/*prevent flow elements does not take space*/
 
-    border: 1px #ccc solid;
-    border-radius: 6px;
-    box-shadow: #333 2px 2px 4px;
-    padding: 8px;
-    font-family: arial, helvetica, sans-serif;
-}
-#graphcanvas.popup h2 {
-    margin: 0 0 1rem 0;
-}
-
-.popup btn {
-    color:#ffffff;
-    background-color:#2c3e50;
-    border-color:#2c3e50
+.form-horizontal{
+    overflow:hidden;
 }

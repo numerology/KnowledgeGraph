@@ -1,0 +1,48 @@
+{
+  "name": "backTop",
+  "title": "backTop",
+  "description": "A jQuery plugin to create a customisable 'Back to top' feature that can be integrated in any website with ease.",
+  "version": "1.0",
+  "homepage": "http://codesalsa.net/backTop",
+  "author": {
+    "name": "Code Salsa",
+    "email": "admin@codesalsa.net",
+    "url": "http://codesalsa.net",
+    "twitter": "@codesalsa",
+    "github": "https://github.com/codesalsa"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codesalsa/backTop"
+  },
+  "bugs": {
+    "url": "https://github.com/codesalsa/backTop/issues"
+  },
+  "license": {
+    "name": "MIT",
+    "url": "http://opensource.org/licenses/MIT"
+  },
+  "keywords": [
+    "jquery",
+    "plugin",
+    "scroll",
+	"top",
+    "back to top",
+    "backTop",
+	"Back Top",
+    "scroll up",
+    "scroll to top"
+  ],
+  "devDependencies": {
+    "del": "^1.1.1",
+    "gulp": "^3.8.11",
+    "gulp-header": "^1.2.2",
+    "gulp-jshint": "^1.9.4",
+    "gulp-rename": "^1.2.0",
+    "gulp-uglify": "^1.1.0",
+    "jshint-stylish": "^1.0.1"
+  },
+  "engines": {
+    "node": ">=0.10.3"
+  }
+}
