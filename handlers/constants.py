@@ -25,8 +25,10 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
-ACTION_QUEUE = Actionqueue.query().fetch()[1]
-if ACTION_QUEUE is None:
+ACTION_QUEUE = Actionqueue.query().fetch()
+if ACTION_QUEUE:
+	ACTION_QUEUE = ACTION_QUEUE[0]
+else:
     ACTION_QUEUE = Actionqueue(actions = [])
     ACTION_QUEUE.put()
 

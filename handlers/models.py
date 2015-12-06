@@ -42,5 +42,6 @@ class User(ndb.Model):
     currentrootID = ndb.StringProperty()
     clipboardID = ndb.StringProperty()
 
+
 class Actionqueue(ndb.Model):
-    actions = ndb.StructuredProperty(Action,repeated = True)
+    actions = ndb.StructuredProperty(Action,repeated=True)

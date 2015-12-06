@@ -319,13 +319,12 @@ $("#divClipboardNode").sortable({
         var new_children = [];
 
         d3.selectAll("#divClipboardNode .node")
-            .each(function(e){
+            .each(function(e,i){
             console.log(e);
             new_child_list.push(e.id.toString());
             new_children.push(e.child);
+        }).on('click', function(e){});// remove click function for nodes in clipboard
 
-            //
-            });
         
         $.ajax({
             type: 'post',
@@ -424,7 +423,7 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
   //  nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
  //   addSingleNode(tabContentSelector, nodeData);
-    nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
+   // nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
   //  addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
@@ -447,7 +446,7 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
 				nodeNum++;
                 temp_node_list.push(e.id.toString());
                 //console.log(e);
-              });
+              }).on("click", clickMyTabNode);// add click function to node in my graph tab
 			//console.log("my graph update: nodeNum is " + nodeNum);
 			// IMPORTANT: YW: 11/28/2015 dont use $(this) inside other functions....
 					// jquery does not add class to d3 element ...
@@ -487,6 +486,7 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
     });
 }
 function loadSharedGraphTab(){
+	var nodeData = {"node_text":"Node1", "node_data":{"title":"Shared Node Test", "msg": "Shared node test"}};
     nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
     addSingleNode(d3.select("#contentSharedGraph"), nodeData, clickSharedTabNode);
     $("#contentSharedGraph").sortable({
