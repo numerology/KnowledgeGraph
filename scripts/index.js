@@ -7,7 +7,8 @@ var indentStep = 25;
 var currentIndent = 0;
 
 var original_parent_node_id=0; //record the original parent node
-var new_parent_node_id;
+var new_parent_node_id = 0;
+var current_node_id = 0;
 var moved_node_id;
 var selected_node; //default selected node is set to the root node of tree
 var root_node;
@@ -71,6 +72,12 @@ function loadMyIndex(){
                         return false;
                     }//TODO: return false if the node is the last node not on clipboard
                     else{
+                        if (!node.parent.parent){
+                            original_parent_node_id = 0; //record the original parent of the node
+                        }else{
+                            original_parent_node_id = node.parent.id;
+                        }
+                        console.log(original_parent_node_id);
                         return true;
                     }
                 },
@@ -88,13 +95,6 @@ function loadMyIndex(){
                     }
                 },
                 onDragMove: function(node, ui){
-                    if (!node.parent.parent){
-                        original_parent_node_id = 0; //record the original parent of the node
-                    }else{
-                        original_parent_node_id = node.parent.id;
-                    }
-                    console.log(original_parent_node_id);
-                    moved_node_id = node.id;
                 },
                 onDragStop: function(node, ui){
                     if (!node.parent.parent){
@@ -102,29 +102,26 @@ function loadMyIndex(){
                     }else{
                         new_parent_node_id = node.parent.id;
                     }
-                    if (selected_node){
-                        if(selected_node.parent){
-                            if (selected_node.parent.parent){
-                                if(original_parent_node_id == selected_node.id | new_parent_node_id == selected_node.id){ // show detail of node
-                                    console.log("parent was selected");
-                                    if (selected_node.parent){ // if not root node, show index node detail
-                                        //closeShare();// show index is contained in close share
-                                    }
-                                }
+                    if (selected_node.parent){
+                        if(original_parent_node_id == selected_node.id | new_parent_node_id == selected_node.id){ // show detail of node
+                            console.log("parent was selected");
+                            if (selected_node.parent){ // if not root node, show index node detail
+                                //closeShare();// show index is contained in close share
                             }
                         }
                     }
                     console.log("original parent: " + original_parent_node_id);
                     console.log("post parent: " + new_parent_node_id);
-                    console.log("root id: " + indexTree.tree("getTree").id);
+                    //console.log("root id: " + indexTree.tree("getTree").id);
                     if(new_parent_node_id != original_parent_node_id){
                         var original_parent_node;
-                        console.log(original_parent_node_id);
+                        //console.log(original_parent_node_id);
                         if(original_parent_node_id == 0){
                             original_parent_node = indexTree.tree("getTree");
                         }else{
                             original_parent_node = indexTree.tree("getNodeById", original_parent_node_id);
                         }
+                        console.log("ORI par name: "+original_parent_node.name);
                         if (!original_parent_node){console.error("original parent not found"); return;}
                         else{
                             var new_children = [];
@@ -138,10 +135,10 @@ function loadMyIndex(){
                             });
                             original_parent_node.children = new_children;
                         }
-                        post_update_node(original_parent_node_id);
+                        post_update_node(original_parent_node_id,{"removeId": node.id});
                     }
-                    post_update_node(new_parent_node_id);
-                    post_update_node(node.id);
+                    post_update_node(new_parent_node_id,{});
+                    //post_update_node(node.id);
                 }
             });
         }else{
@@ -204,26 +201,28 @@ function loadMyIndex(){
 }
 
 
-function post_update_node(changedNodeId){
+function post_update_node(changedNodeId, options){
+    var changedNode;
     if (isOnMyTab()){
         if(changedNodeId == 0){ // root node is changed
-            postRootList("MY_ROOT");
+            postRootList("MY_ROOT", options);
         }else{
             changedNode = indexTree.tree("getNodeById", changedNodeId);
             if(changedNode){
-            postChildList(changedNodeId);
+                postChildList(changedNodeId, options);
             }
         }
     }else{ //only support root level movement for shared node
         changedNode = sharedIndexTree.tree("getNodeById", changedNodeId);
         if(!changedNode){return;}
         if(!changedNode.parent){
-            postRootList("SHARED_ROOT");
+            postRootList("SHARED_ROOT", options);
         }
     }
 }
 
-function postChildList(changedNodeId){
+function postChildList(changedNodeId, options){
+    var changedNode;
     if (isOnMyTab()){
         changedNode = indexTree.tree("getNodeById", changedNodeId);
     }else{ //only support root level movement for shared node
@@ -232,7 +231,10 @@ function postChildList(changedNodeId){
     if(!changedNode){return;}
     new_child_list = [];
     changedNode.children.forEach(function(child){
-        new_child_list.push(child.id);
+        if (child.id != options.removeId){
+            new_child_list.push(child.id);
+        }
+
     });
     postUrl = '/api/update_node';
     if (changedNode.is_clipboard){
@@ -256,7 +258,7 @@ function postChildList(changedNodeId){
 }
 
 
-function postRootList(rootType){
+function postRootList(rootType, options){
     new_root_list = [];
     var temp_tree;
     if(rootType == "MY_ROOT"){
@@ -267,7 +269,9 @@ function postRootList(rootType){
         }
         temp_tree.children.forEach(function(child){
             if(!child.is_clipboard){
-                new_root_list.push(child.id);
+                if (child.id != options.removeId){
+                    new_root_list.push(child.id);
+                }
             }
         });
     }else if(rootType == "SHARED_ROOT"){
@@ -276,7 +280,10 @@ function postRootList(rootType){
             console.error("shared index tree not available now");
         }
         temp_tree.children.forEach(function(child){
-            new_root_list.push(child.id);
+            if (child.id != options.removeId){
+                new_root_list.push(child.id);
+            }
+
         })
     }
     $.ajax({
