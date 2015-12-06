@@ -84,22 +84,35 @@
         <div class="tip1"></div>
         <div class="tip2"></div>
     </div>
-    <div id="divShare" class="popup" style="display:none">
-        <div class="col-md-12">
-            <div class="row no-gutter">
-                <div class="col-md-10">
-                    <h2>Share <span id="shareNodeName" class="shareNodeName"></span> to your friends</h2>
-                </div>
-            </div>
-            <div class="row" id="divShareForm">
+    <div id="divShare" class="popup" style="display:none;padding:0;">
+        <div class="col-md-12" style="padding:0;">
+            <div class="well bs-component" style="margin:0;">
                 <form class="form-horizontal" id="formShareRoot" method="post" autocomplete="off">
-                    <input id="inputFriend" type="text" class="form-control" placeholder="Enter the email of your friend" name="target_mail">
-                    <button id="btnShareRoot" class="btn btn-primary" type="submit" value="Add">Share</button>
-                    <button id="btnCancelShareRoot" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                    <fieldset>
+                        <legend>Share <span id="shareNodeName" class="shareNodeName"></span> to your friends</legend>
+                        <div class="form-group">
+                            <label for="inputFriend" class="col-lg-2 control-label">Email</label>
+                            <div class="col-lg-9">
+                                <input id="inputFriend" type="text" class="form-control" placeholder="Enter the email of your friend" name="target_mail">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="shareMessage" class="col-lg-2 control-label">Message</label>
+                            <div class="col-lg-9">
+                                <textarea class="form-control" rows="3" id="shareMessage" name = "share_message" placeholder = "(Optional) Message for friends"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                          <div class="col-lg-9 col-lg-offset-2">
+                            <button id="btnShareRoot" type="submit" class="btn btn-primary" value = "Create Root">Submit</button>
+                            <button id="btnCancelShareRoot" type="reset" class="btn btn-default">Cancel</button>
+                          </div>
+                        </div>
+                    </fieldset>
                 </form>
             </div>
+            <a href="javascript: void(0)" id="btnCloseShare" class="btn btn-primary btn-xs btn-close">&times;</a>
         </div>
-        <a href="javascript: void(0)" id="btnCloseShare" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
     <div id="divAddRoot" class="popup" style="display:none">
         <div class="col-md-12">

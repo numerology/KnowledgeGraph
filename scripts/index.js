@@ -10,6 +10,10 @@ var original_parent_node = {}; //record the original parent node
 var selected_node; //default selected node is set to the root node of tree
 var root_node;
 var currentNode;
+var email_list = [];
+var email_invalid_list = [];
+
+var addElementNode; // record the node that has been added child/reference
 
 var indexTree = $("#myGraphIndexContent");
 $(".scrollbar-light").scrollbar();
@@ -20,67 +24,80 @@ $('.scrollbar-light').scrollbar();
 
 $(document).ready(function() {
     var cache = {};
+    loadIndex();
+});
 
+function loadIndex(){
     d3.json("/get_index_data/" + userID, function(response) {
-        console.log(response);
-        if(response.status != "success"){
-            console.log(response.message);
-            return;
-        }
-        myGraphData = response.myNode;
-        myGraphData.push(response.clipboard); //add clipboard to my node
-        //console.log(response.clipboard.is_clipboard);
-        indexTree.tree({
-            data: response.myNode,
-            dragAndDrop: true,
-            onCreateLi: function(node, $li) {
-                // Add 'icon' span before clipboard
-                if (node.is_clipboard){
-                    $li.find('.jqtree-title').css({"color":"blue", "font-weight":"bold"} );
-                }
-            },
-            onCanMove: function(node){ // define what node can be moved
-                var root = $('#myGraphIndexContent').tree('getTree');
-                if (node.is_clipboard){ // clipboard can not be moved
-                    return false;
-                }//TODO: return false if the node is the last node not on clipboard
-                else{
-                    return true;
-                }
-            },
-            onCanMoveTo: function(moved_node, target_node, position) {
-                var root = $('#myGraphIndexContent').tree('getTree');
-                if(root.children.length<=2 & !moved_node.parent.parent){ //the last root node cannot be moved
-                    return false;
-                }
-                if (target_node.is_clipboard) {
-                    // Example: can move inside or  before, not after
-                    return (position == 'before' || position=='inside');
-                }
-                else {
-                    return true;
-                }
-            },
-            onDragMove: function(node, ui){
-                original_parent_node = node.parent; //record the original parent of the node
-            },
-            onDragStop: function(node, ui){
-
+        //console.log(response);
+            if(response.status != "success"){
+                console.log(response.message);
+                return;
             }
-        });
+            myGraphData = response.myNode;
+            myGraphData.push(response.clipboard); //add clipboard to my node
+            //console.log(response.clipboard.is_clipboard);
+            if (!selected_node){
+                indexTree.tree({
+                data: response.myNode,
+                dragAndDrop: true,
+                onCreateLi: function(node, $li) {
+                    // Add 'icon' span before clipboard
+                    if (node.is_clipboard){
+                        $li.find('.jqtree-title').css({"color":"blue", "font-weight":"bold"} );
+                    }
+                },
+                onCanMove: function(node){ // define what node can be moved
+                    var root = $('#myGraphIndexContent').tree('getTree');
+                    if (node.is_clipboard){ // clipboard can not be moved
+                        return false;
+                    }//TODO: return false if the node is the last node not on clipboard
+                    else{
+                        return true;
+                    }
+                },
+                onCanMoveTo: function(moved_node, target_node, position) {
+                    var root = $('#myGraphIndexContent').tree('getTree');
+                    if(root.children.length<=2 & !moved_node.parent.parent){ //the last root node cannot be moved
+                        return false;
+                    }
+                    if (target_node.is_clipboard) {
+                        // Example: can move inside or  before, not after
+                        return (position == 'before' || position=='inside');
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                onDragMove: function(node, ui){
+                    original_parent_node = node.parent; //record the original parent of the node
+                },
+                onDragStop: function(node, ui){
+
+                }
+            });
+        }else{
+            indexTree.tree("loadData", myGraphData);
+        }
         selected_node = indexTree.tree('getTree');
         root_node = indexTree.tree('getTree');
+        closeIndexNodeDetail();
+        closeAddRoot();
+        closeShare();
         indexTree.bind(
             'tree.click',
             function(event) {
                 // The clicked node is 'event.node'
+                event.preventDefault();
                 var node = event.node;
                 if (node.id == selected_node.id){
                     selected_node = root_node;
+                    indexTree.tree('selectNode', selected_node);
                     $("#indexNodeDetail").hide();
                 }
                 else{
                     selected_node = node;
+                    indexTree.tree('selectNode', selected_node);
                     $('.index-page').hide();
                     $("#indexNodeDetail").show();
                     showIndexNodeDetail(node);
@@ -91,22 +108,32 @@ $(document).ready(function() {
             if(!selected_node.parent){ // no node selected
                 showAddRoot();
             }else{
+                closeShare();
                 showDivAddChild();
             }
-            //console.log(e);
-            //console.log(selected_node);
         });
         $("#btnIndexAddReference").click(function(e){
             if(!selected_node.parent){ // root node is selected
-
                 window.alert("Please select a node to add reference");
             }else{
-                showDivAddChild();
+                closeShare();
+                showAddRef();
+            }
+        });
+        $("#btnIndexShare").click(function(e){
+            if(!selected_node.parent){ // root node is selected
+                window.alert("Please select a node to share");
+            }
+            else if(selected_node.is_clipboard){
+                window.alert("Cannot share your clipboard");
+            }
+            else{
+                showShare();
             }
         });
 
     });
-});
+}
 
 function showIndexNodeDetail(node) {
     currentNode = node;
@@ -121,6 +148,7 @@ function showIndexNodeDetail(node) {
 function closeIndexNodeDetail(){
     $("#indexNodeDetail").hide();
     closeDivAddChild();
+    selected_node = indexTree.tree('getTree');
     indexTree.tree('selectNode', indexTree.tree('getTree')); // select root node if detail window is closed
 }
 
@@ -160,7 +188,7 @@ function loadTitle(node){
                     $("#spanNodeTitle").value(node.name);
                 }},
             failure: function(){
-                window.alert("ajax error in updating title");
+                window.alert("ajax error in index create new root");
                 $("#spanNodeTitle").value(node.name);},
         });
         window.alert(e.value);
@@ -215,10 +243,12 @@ function loadChild(node){ // load children in ContextMenu
 
 function loadDivAddChild(node){
     closeDivAddChild();
+    addElementNode = node;
     btnShowAddChild = d3.select("#btnShowAddChild");
-    currentClass = node.id;
+    //currentClass = node.id;
     btnShowAddChild.on("click", showDivAddChild);
-    d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
+    addChildUrl = "/api/addChild/"+node.id
+    //d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
     d3.select("#btnCancelAddChild").on("click", closeDivAddChild);
     $("#formAddChild").validate({
         rules: {
@@ -229,6 +259,35 @@ function loadDivAddChild(node){
         },
         errorPlacement: function(error, element) {
             error.insertAfter($("#btnCancelAddChild")); // <- the default
+        },
+        submitHandler: function(form){
+            $.ajax({
+                type: 'post',
+                url: addChildUrl,
+                data: {"childName": $('#inputAddChild').val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        window.alert(response.message);
+                        if(selected_node.id == addElementNode.id){ // still on the same node
+                            closeDivAddChild();
+                            var temp_node = indexTree.tree('getNodeById', addElementNode.id);
+                            console.log(temp_node);
+                            console.log(response.new_node);
+                            indexTree.tree("loadData", response.new_node.children, temp_node);
+                            selected_node = indexTree.tree('getNodeById', addElementNode.id);
+                            indexTree.tree("selectNode", selected_node);
+                            showIndexNodeDetail(selected_node);
+                        } else { // has moved to a different node
+                            loadIndex();
+                        }
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
         },
     });
 }
@@ -243,9 +302,6 @@ function addSingleNodeNoclick(div_selector, data){ // add single node to selecte
              .on("mouseover", showBriefNodeInfo)
              .on("mouseout", closeBriefNodeInfo);
     tempNode.data([data.node_data], 0);
-    //console.log(tempNode.data());
-    //console.log(data.node_data);
-    //console.log(tempNode.__data__);
     tempNode.append("circle").attr({"cx": 50, "cy": 50, "r": 50})
              .style({"fill":"#fff", "stroke": "steelblue", "stroke-width":"1.5px"});
     tempNode.append("text").attr({"x":50, "y":50, "dy":"0.35em", "text-anchor":"middle"})
@@ -293,23 +349,134 @@ function placeDivTooltip(position){ // move divNodeTooltip pointer to new locati
 function showAddRoot(){
     console.log("show add root");
     $('.index-page').hide();
+    $('#createRootForm')[0].reset();
     $('#indexAddRoot').show();
     var addRootUrl = "/addroot/" + String(userID);
     d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
-    d3.select("#createRootForm").attr("action", addRootUrl);
+    //d3.select("#createRootForm").attr("action", addRootUrl);
     $("#createRootForm").validate({
         rules: {
             root_name: {
                 required: true,
                 maxlength: NODE_NAME_LENGTH,
             },
-            title: {
+            title_name: {
                 required: false,
                 maxlength: TITLE_MAX_LENGTH,
             }
-        }
+        },
+        submitHandler: function(form){
+            $.ajax({
+                type: 'post',
+                url: addRootUrl,
+                data: {"root_name": $('#rootName').val(), "title_name": $("#rootTitle").val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        closeAddRoot();
+                        loadIndex();
+                        window.alert(response.message);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        },
     });
 }
 function closeAddRoot(){
+    $('#createRootForm')[0].reset();
     $('#indexAddRoot').hide();
+}
+
+function showShare(){
+    var node = currentNode;
+    console.log("show share");
+    $('.index-page').hide();
+    $('#shareRootForm')[0].reset();
+    $('#indexShare').show();
+    $("#shareNodeName").text(node.name);
+    var shareUrl = "/shareroot/" + node.id + '/' + String(userID);
+    d3.select("#btnCloseShare").attr("href", "javascript: closeShare();");
+    //d3.select("#shareRootForm").attr("action", shareUrl);
+    $("#divInputEmail .tag-editor").remove();
+    $("#inputEmail").empty();
+    $("#inputEmail").tagEditor({
+        initialTags:node.tags,
+        maxTags: 10,
+        removeDuplicates: true,
+        sortable: false,
+        placeholder: "Add email",
+        autocomplete: null, // { 'source': '/url/', minLength: 3 }
+        onChange: validateTagEmail,
+    });
+    $("#shareRootForm").validate({
+        rules: {
+            target_mail: {
+                required: true,
+            },
+            title_name: {
+                required: false,
+                maxlength: TITLE_MAX_LENGTH,
+            }
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter($("#shareRootForm ul")); // <- the default
+        },
+        submitHandler:function(){
+            $.ajax({
+                type: 'post',
+                url: shareUrl,
+                data: {"target_email": $('#inputEmail').val(), "share_message": $("#shareMessage").val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        closeShare();
+                        window.alert(response.message);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in index sharing");},
+            });
+        }
+    });
+}
+
+function validateTagEmail(original_field, current_editor, new_emails){ // validate emails
+    email_invalid_list = [];
+    email_list = [];
+    $('li', current_editor).each(function(){
+        var current_li = $(this);
+        temp_email = $.trim(current_li.find('.tag-editor-tag').html());
+        console.log(isValidEmailAddress(temp_email));
+        if ( !isValidEmailAddress(temp_email)){
+            current_li.addClass('red-tag');
+            email_invalid_list.push(temp_email);
+        }else{
+            current_li.removeClass('red-tag');
+            email_list.push(temp_email);
+        }
+    });
+    email_string = ""
+    if (email_list.length>0){
+        email_string = email_list+";";
+    }
+    console.log("email string is: "+email_string);
+    console.log(original_field[0]);
+    $(original_field).val(email_string);
+    console.log($("#inputEmail").val());
+}
+
+function closeShare(){
+    $('#shareRootForm')[0].reset();
+    $('#indexShare').hide();
+    if (selected_node.parent){
+        $('.index-page').hide();
+        $("#indexNodeDetail").show();
+        showIndexNodeDetail(selected_node);
+    }
 }

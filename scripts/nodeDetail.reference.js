@@ -65,7 +65,6 @@ function loadDivRef(d){
 }
 
 function closeDivAddRef(){
-    
     d3.select("#btnAddReference").style("display", "inline");
     d3.select("#divUploadReference").style("display","none");
 }

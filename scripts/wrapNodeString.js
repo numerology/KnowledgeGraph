@@ -66,3 +66,11 @@ function wrap(text, width) { // function copied from bl.ocks.org/mbostock/755532
         });
     });
 }
+
+function trimString(str, len, str_omit_sign){ // shorten
+    if(str.length <= len){
+        return str;
+    }
+    var trimmed = str.substring(0, len-str_omit_sign.length)+str_omit_sign;
+    return trimmed;
+}

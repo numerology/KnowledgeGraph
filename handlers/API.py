@@ -14,6 +14,7 @@ import webapp2
 import jinja2
 import json
 import os
+import re
 
 from googleapiclient import discovery
 from oauth2client import appengine
@@ -79,22 +80,32 @@ class AddChildHandler(webapp2.RequestHandler):
 
         ACTION_QUEUE.put()
 
-
-        self.redirect('/')
+        # self.redirect('/')
+        response = {"status":"success",
+                    "message": (child_node.name + " added to " + cnode.name),
+                    "new_node": node_collapse(cnode)}
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(response))
+        return
 
 
 class AddRoot(webapp2.RequestHandler):
     def post(self, user_id):
+        print "ADD ROOT"
+        root_name = self.request.get('root_name')
+        title = self.request.get('title')
+
+        print "AddRoot: "+root_name+" title: " + title
+
         cuser = User.get_by_id(int(user_id))
 
         plus_id = cuser.plusid
-        root_name = self.request.get('root_name')
-        title = self.request.get('title')
         new_root = Node(name=root_name, title=title ,childrenIDs=[], reference=[])
         new_root.put()
         cuser.rootID.append(str(new_root.key.id()))
         # cuser.titles.append(title)
         cuser.put()
+
 
         caction = Action(nodeid = str(new_root.key.id()), plusid = plus_id)
         caction.put()
@@ -110,65 +121,10 @@ class AddRoot(webapp2.RequestHandler):
 
         ACTION_QUEUE.put()
 
-
-
-        self.redirect('/')
-
-
-"""class AddTag(webapp2.RequestHandler):
-    def post(self, node_name):
-        cnode = Node.query(Node.name == node_name).get()
-        tagstring = self.request.get('tagString')
-        tag_list = tagstring.split(';')
-        for tag in tag_list:
-            cnode.tags.append(tag)
-
-        cnode.put()
-        self.redirect('/')
-"""
-
-"""
-class UpdateTag(webapp2.RequestHandler):
-    def post(self):
-        node_name = self.request.get("name")
-        new_tags = json.loads(self.request.get("new_tags"))
-        # print "updata tag for " + node_name
-        # print new_tags
-        if not new_tags:
-            new_tags = []
-        cnode = Node.query(Node.name == node_name).get()
-        response = {"status": "success", "message": "added"}
-        if cnode:
-            # print "node found"
-            cnode.tags = new_tags
-            cnode.put()
-        else:
-            response["status"] = "error"
-            response["message"] = "Node not found"
+        response = {"status":"success", "message": root_name+" created"}
         self.response.out.write(json.dumps(response))
-"""
-
-"""
-class UpdateTitle(webapp2.RequestHandler):
-    def post(self):
-        node_name = self.request.get("name")
-        new_title = self.request.get("new_title")
-        response = {"status": "success", "message": "title changed"}
-        if not new_title:
-            response["status"] = "error"
-            response["message"] = "New title is empty"
-            print "Update title: empty title"
-        else:
-            cnode = Node.query(Node.name == node_name).get()
-            if cnode:
-                print "Updata title: " + new_title
-                # TODO: change title here ...
-                # cnode.put()
-            else: 
-                response["status"] = "error"
-                response["message"] = "Node not found"
-        self.response.write(json.dumps(response))
-"""
+        # self.redirect('/')
+        return
 
 
 class UpdateRootList(webapp2.RequestHandler):
@@ -196,7 +152,7 @@ class UpdateRootList(webapp2.RequestHandler):
             else:
                 response["status"] = "error"
                 response["message"] = "Add type not found"
-        self.response.write(json.dumps(response))
+        self.response.out.write(json.dumps(response))
 
 
 class UpdateNode(webapp2.RequestHandler):
@@ -235,7 +191,7 @@ class UpdateNode(webapp2.RequestHandler):
                 cnode.reference = new_reference_list
                 response["message"] += " reference changed"
             cnode.put()
-        self.response.write(json.dumps(response))
+        self.response.out.write(json.dumps(response))
 
 
 class UpdateClipboard(webapp2.RequestHandler):
@@ -263,7 +219,7 @@ class UpdateClipboard(webapp2.RequestHandler):
             clip_node.put()
             # user.rootID = new_reference_list
             # user.put()
-        self.response.write(json.dumps(response))
+        self.response.out.write(json.dumps(response))
 
 
 class CreateRoot(webapp2.RequestHandler):
@@ -295,6 +251,7 @@ class CreateRoot(webapp2.RequestHandler):
         new_user_prof = User(email=user_email, plusid = plus_id , rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=str(new_clipboard.key.id()))
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
+
         self.redirect('/graph')
         return
 
@@ -549,13 +506,25 @@ class UpdateRoot(webapp2.RequestHandler):
 
 class ShareRoot(webapp2.RequestHandler):
     def post(self,root_id,user_id):
-        target_mail = self.request.get("target_mail")
+        mail_string = self.request.get("target_mail")
+        share_message = self.request.get("share_message") # TODO: can somehow use share message
+        mail_list = parseEmailString(mail_string)
         cuser = User.get_by_id(int(user_id))
-        target_user = User.query(User.email == target_mail).get()
-        target_user.sharedID.append(root_id)
-        target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
-        target_user.put()
-        self.redirect('/')
+        print "Share Root"
+        print mail_list
+        response = {"status":"success",
+                    "message":"node shared to"}
+        shared_num = 0
+        for target_mail in mail_list:
+            target_user = User.query(User.email == str(target_mail)).get()
+            if target_user:
+                target_user.sharedID.append(root_id)
+                target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
+                target_user.put()
+                shared_num  = shared_num+1
+        response["message"] = response["message"] + " " + str(shared_num) + " users"
+        # self.redirect(self.request.uri)
+        self.response.out.write(json.dumps(response))
         return
 
 """
@@ -578,3 +547,8 @@ class UpdateTag(webapp2.RequestHandler):
             response["message"] = "Node not found"
         self.response.out.write(json.dumps(response))
 """
+
+
+def parseEmailString(mail_string):
+    mail_list = filter(None, mail_string.split(r'[,;]'))
+    return mail_list

@@ -85,7 +85,7 @@
             <div id="indexAddRoot" class="row index-page" style="position: relative; display:none;">
                     <div class="col-lg-12">
                 <div class="well bs-component" style="position:relative">
-                    <form id="createRootForm" class = "form-horizontal" action = "javascript: void(0);" method = "post">
+                    <form id="createRootForm" class = "form-horizontal" method = "post">
                         <fieldset>
                             <legend>Create root node</legend>
                             <div class="form-group">
@@ -103,8 +103,8 @@
 
                             <div class="form-group">
                               <div class="col-lg-10 col-lg-offset-2">
-                                <button type="reset" class="btn btn-default">Cancel</button>
                                 <button type="submit" class="btn btn-primary" value = "Create Root">Submit</button>
+                                <button type="reset" class="btn btn-default">Cancel</button>
                               </div>
                             </div>
                         </fieldset>
@@ -112,6 +112,36 @@
                     <a href="javascript: void(0)" id="btnCloseAddRoot" class="btn btn-primary btn-xs btn-close">&times;</a>
                 </div>
 
+                </div>
+            </div>
+            <div id="indexShare" class="row index-page" style="position:relative; display:none;">
+                <div class="col-lg-12">
+                    <div class="well bs-component" style="position:relative;">
+                        <form class="form-horizontal" id="shareRootForm" method="post" autocomplete="off">
+                            <fieldset>
+                                <legend>Share <span id="shareNodeName" class="shareNodeName"></span> to your friends</legend>
+                                <div class="form-group">
+                                    <label for="inputEmail" class="col-lg-2 control-label">Email</label>
+                                    <div class="col-lg-9 tag-input" id="divInputEmail">
+                                        <input id="inputEmail" type="text" class="form-control" placeholder="Enter the email of your friend" name="target_mail">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="shareMessage" class="col-lg-2 control-label">Message</label>
+                                    <div class="col-lg-9">
+                                        <textarea class="form-control" rows="3" id="shareMessage" name = "share_message" placeholder = "(Optional) Message for friends"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                  <div class="col-lg-9 col-lg-offset-2">
+                                    <button id="btnShareRoot" type="submit" class="btn btn-primary" value = "Create Root">Submit</button>
+                                    <button id="btnCancelShareRoot" type="reset" class="btn btn-default">Cancel</button>
+                                  </div>
+                                </div>
+                            </fieldset>
+                        </form>
+                        <a href="javascript: void(0)" id="btnCloseShare" class="btn btn-primary btn-xs btn-close">&times;</a>
+                    </div>
                 </div>
             </div>
             <div id="indexNodeDetail" class="index-page node-detail-box">
@@ -180,38 +210,6 @@
     </div>
     <div class="tip1"></div>
     <div class="tip2"></div>
-</div>
-<div id="divShare" class="popup" style="display:none">
-    <div class="col-md-12">
-        <div class="row no-gutter">
-            <div class="col-md-10">
-                <h2>Share <span id="shareNodeName" class="shareNodeName"></span> to your friends</h2>
-            </div>
-        </div>
-        <div class="row" id="divShareForm">
-            <form class="form-horizontal" id="formShareRoot" method="post" autocomplete="off">
-                <input id="inputFriend" type="text" class="form-control" placeholder="Enter the email of your friend" name="target_mail">
-                <button id="btnShareRoot" class="btn btn-primary" type="submit" value="Add">Share</button>
-                <button id="btnCancelShareRoot" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-            </form>
-        </div>
-    </div>
-    <a href="javascript: void(0)" id="btnCloseShare" class="btn btn-primary btn-xs btn-close">&times;</a>
-</div>
-<div id="divAddRoot" class="popup" style="display:none">
-    <div class="col-md-12">
-        <div class="row no-gutter">
-            <p><span class="title">Add new root</span></p>
-        </div>
-        <div class="row" id="divAddRootForm">
-            <form class="form-horizontal" id="formAddRoot" method="post" autocomplete="off">
-                <input id="inputRootName" type="text" class="form-control" placeholder="Enter the name of the new root" name="root_name">
-                <input id="inputRootTitle" type="text" class="form-control" placeholder="Enter the title of the graph" name="title">
-                <button id="btnAddRoot" class="btn btn-primary" type="submit" value="Add">Add</button>
-                <button id="btnCancelAddRoot" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-            </form>
-        </div>
-    </div>
 </div>
 
 {% endblock %}

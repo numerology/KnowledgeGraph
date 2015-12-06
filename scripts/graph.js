@@ -157,6 +157,7 @@ d3.json("/get_clipboard/" + userID, function(result){
 });
 
 function shareMenu(e){
+    $("#formShareRoot")[0].reset();
     var shareUrl = "/shareroot/" + e.id + '/' + String(userID);
     d3.event.preventDefault();
     //console.log(e);
@@ -175,7 +176,8 @@ function shareMenu(e){
 }
 
 function closeShare(){
-    d3.select("#divShare").style("display","none");
+    $("#divShare").hide();
+    $("#formShareRoot")[0].reset();
     shareShowing = false;
 }
 
@@ -699,17 +701,19 @@ function click(d) {
 }
 
 function contextmenu(d) {
-    d3.event.preventDefault();
-    if(contextMenuShowing){
-        closeContextMenu();
+    if (d3.event){
+        d3.event.preventDefault();
     }
     currentNode = d;
     var _currentClass = d.name;
-    d3.select("#divNodeDetail").style("display","inline")
-
-        .style("top", (d.x+200)+"px")
-        .style("left", (d.y+400)+"px");
-
+    if(contextMenuShowing){
+        closeContextMenu();
+        d3.select("#divNodeDetail").style("display","inline");
+    }else{
+        d3.select("#divNodeDetail").style("display","inline")
+            .style("top", (d.x+200)+"px")
+            .style("left", (d.y+400)+"px");
+    }
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
     loadTitle(d);
     //Load tag section
@@ -858,14 +862,19 @@ function loadChild(d){ // load children in ContextMenu
             });
         }});
 }
+
+function showDivAddChild(){
+    d3.select("#btnShowAddChild").style("display", "none");
+    d3.select("#divAddChild").style("display","inline");
+}
+
 function loadDivAddChild(d){
+    $_this = d3.select(this);
     btnShowAddChild = d3.select("#btnShowAddChild");
     currentClass = d.id;
-    btnShowAddChild.on("click", function(){
-            d3.select("#btnShowAddChild").style("display", "none");
-            d3.select("#divAddChild").style("display","inline");
-        });
-    d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
+    btnShowAddChild.on("click", showDivAddChild);
+    addChildUrl = "/api/addChild/"+currentClass;
+//    d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
     d3.select("#btnCancelAddChild").on("click", closeDivAddChild);
     $("#formAddChild").validate({
         rules: {
@@ -877,8 +886,32 @@ function loadDivAddChild(d){
         errorPlacement: function(error, element) {
             error.insertAfter($("#btnCancelAddChild")); // <- the default
         },
+        submitHandler: function(form){
+            $.ajax({
+                type: 'post',
+                url: addChildUrl,
+                data: {"childName": $('#inputAddChild').val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        window.alert(response.message);
+                        old_node = d3.selectAll("#graphcanvas svg g.node").filter(function(d){return d.id == response.new_node.id;});
+                        console.log(old_node);
+                        old_node.data([response.new_node], 0);
+                        update(old_node[0]); //TODO: HOW TO UPDATE graph here?
+                        contextmenu(response.new_node);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        },
     });
 }
+
+
 function closeDivAddChild(){
     d3.select("#btnShowAddChild").style("display", "inline");
     d3.select("#divAddChild").style("display","none");
@@ -985,13 +1018,7 @@ function closeDivRef(){
 
 
 
-function trimString(str, len, str_omit_sign){ // shorten
-    if(str.length <= len){
-        return str;
-    }
-    var trimmed = str.substring(0, len-str_omit_sign.length)+str_omit_sign;
-    return trimmed;
-}
+
 
 function placeDivTooltip(position){ // move divNodeTooltip pointer to new location
     var y = position.top - 25;

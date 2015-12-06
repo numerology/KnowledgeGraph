@@ -1191,8 +1191,8 @@ Node = (function() {
   );
    */
 
-  Node.prototype.addChildAtPosition = function(node, index) {
-    this.children.splice(index, 0, node);
+  Node.prototype.addChildAtPosition = function(node, id) {
+    this.children.splice(id, 0, node);
     return node._setParent(this);
   };
 
@@ -1221,9 +1221,9 @@ Node = (function() {
 
 
   /*
-  Get child index.
+  Get child id.
   
-  var index = getChildIndex(node);
+  var id = getChildIndex(node);
    */
 
   Node.prototype.getChildIndex = function(node) {
