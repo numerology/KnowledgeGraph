@@ -1,7 +1,7 @@
 //This file contain the function to wrap string for node in d3
 
 //YW: used to place tspan and measure text width
-var helperTspan = d3.select(".helper").append("div")
+var helperTspan = d3.select(".text-helper").append("div")
                   .append("svg").attr({"height": 100, "width": 100})
                   .append("g").attr("class","node").append("text").append("tspan");
 

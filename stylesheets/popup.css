@@ -3,7 +3,7 @@
     border-radius: 6px;
     box-shadow: #333 2px 2px 4px;
     padding: 15px;
-    z-index: 0;
+    /*z-index: 0;*/
     font-family: arial, helvetica, sans-serif;
 }
 
