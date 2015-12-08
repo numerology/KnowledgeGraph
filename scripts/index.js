@@ -369,6 +369,7 @@ function loadTag(node){
     // New tag editor to display tags
     $("#nodeTag .tag-editor").remove();
     $("#tagEditor").empty();
+    $("#tagEditor").tagEditor("destroy");
     $("#tagEditor").tagEditor({
         initialTags:node.tags,
         maxTags: 10,
@@ -377,6 +378,7 @@ function loadTag(node){
         autocomplete: null, // { 'source': '/url/', minLength: 3 }
         onChange: function(original_field, current_editor, new_tags){
             //console.log(new_tags);
+            var new_tags = $('#tagEditor').tagEditor('getTags')[0].tags;
             $.ajax({
                     type: 'post',
                     url: '/api/update_node',
@@ -576,7 +578,7 @@ function showShare(){
     $("#divInputEmail .tag-editor").remove();
     $("#inputEmail").empty();
     $("#inputEmail").tagEditor({
-        initialTags:node.tags,
+        initialTags:[],
         maxTags: 10,
         removeDuplicates: true,
         sortable: false,

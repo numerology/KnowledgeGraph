@@ -187,7 +187,7 @@ function shareMenu(e){
     $("#divInputEmail .tag-editor").remove();
     $("#inputEmail").empty();
     $("#inputEmail").tagEditor({
-        initialTags:node.tags,
+        initialTags:[],
         maxTags: 10,
         removeDuplicates: true,
         sortable: false,
@@ -885,16 +885,23 @@ function loadTitle(d){
 
 function loadTag(d){
     // New tag editor to display tags
-    $("#nodeTag .tag-editor").remove();
+    //console.log(d.tags);
+    var initTags = d.tags;
+    //console.log($("#nodeTag ul"));
+    //$("#nodeTag .tag-editor").empty();
+    //$("#nodeTag .tag-editor").remove();
     $("#tagEditor").empty();
+    $('#tagEditor').tagEditor('destroy');
+
     $("#tagEditor").tagEditor({
-        initialTags:d.tags,
+        initialTags:initTags,
         maxTags: 10,
         removeDuplicates: true,
         placeholder: "Add a tag",
         autocomplete: null, // { 'source': '/url/', minLength: 3 }
         onChange: function(original_field, current_editor, new_tags){
-            //console.log(new_tags);
+            //console.log(d.name);
+            var new_tags = $('#tagEditor').tagEditor('getTags')[0].tags;
             $.ajax({
                     type: 'post',
                     url: '/api/update_node',
@@ -903,12 +910,12 @@ function loadTag(d){
                     success: function(response){
                         //console.log(response.status);
                         if(response.status === "success"){
-                            //d.tags = new_tags;
+                            d.tags = new_tags;
                         }else if(response.status === "error"){
                             window.alert(response.message);
                         }},
                     failure: function(){window.alert("ajax error in updating tags")},
-            }); //TODO: show alert if failed? sequence of ajax?
+            });
         },
     });
 }
@@ -924,8 +931,8 @@ function loadChild(d){ // load children in ContextMenu
 	}
     if (children){
         children.forEach(function(child){
-            console.log(child);
-            console.log(child.id);
+            //console.log(child);
+            //console.log(child.id);
             var msg = child.name
             if (child.title){
                 msg = child.title;
