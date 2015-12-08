@@ -77,7 +77,7 @@ function loadMyIndex(){
                         }else{
                             original_parent_node_id = node.parent.id;
                         }
-                        console.log(original_parent_node_id);
+                        //console.log(original_parent_node_id);
                         return true;
                     }
                 },
@@ -367,7 +367,7 @@ function loadTitle(node){
 
 function loadTag(node){
     // New tag editor to display tags
-    $("#nodeTag .tag-editor").remove();
+    //$("#nodeTag .tag-editor").remove();
     $("#tagEditor").empty();
     $("#tagEditor").tagEditor("destroy");
     $("#tagEditor").tagEditor({
@@ -377,8 +377,6 @@ function loadTag(node){
         placeholder: "Add a tag",
         autocomplete: null, // { 'source': '/url/', minLength: 3 }
         onChange: function(original_field, current_editor, new_tags){
-            //console.log(new_tags);
-            var new_tags = $('#tagEditor').tagEditor('getTags')[0].tags;
             $.ajax({
                     type: 'post',
                     url: '/api/update_node',

@@ -886,22 +886,21 @@ function loadTitle(d){
 function loadTag(d){
     // New tag editor to display tags
     //console.log(d.tags);
-    var initTags = d.tags;
+    //var initTags = d.tags;
     //console.log($("#nodeTag ul"));
     //$("#nodeTag .tag-editor").empty();
     //$("#nodeTag .tag-editor").remove();
+    //init = null;
     $("#tagEditor").empty();
     $('#tagEditor').tagEditor('destroy');
-
     $("#tagEditor").tagEditor({
-        initialTags:initTags,
+        initialTags: d.tags,
         maxTags: 10,
         removeDuplicates: true,
         placeholder: "Add a tag",
         autocomplete: null, // { 'source': '/url/', minLength: 3 }
         onChange: function(original_field, current_editor, new_tags){
-            //console.log(d.name);
-            var new_tags = $('#tagEditor').tagEditor('getTags')[0].tags;
+            //console.log(new_tags);
             $.ajax({
                     type: 'post',
                     url: '/api/update_node',

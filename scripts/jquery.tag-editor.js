@@ -327,7 +327,16 @@
             });
 
             // create initial tags
-            var tags = o.initialTags.length ? o.initialTags : el.val().split(o.dregex);
+            //YW: empty tags if initialTags length is 0
+            var tags;
+            if(o.initialTags){
+                tags = o.initialTags;
+            }else{
+                //console.log("null");
+                tags = el.val().split(o.dregex);
+            }
+            //var tags = o.initialTags;
+            //var tags = o.initialTags.length ? o.initialTags : el.val().split(o.dregex);
             for (var i=0; i<tags.length; i++) {
                 if (o.maxTags && i >= o.maxTags) break;
                 var tag = $.trim(tags[i].replace(/ +/, ' '));
@@ -348,7 +357,7 @@
     };
 
     $.fn.tagEditor.defaults = {
-        initialTags: [],
+        initialTags: null,
         maxTags: 0,
         maxLength: 50,
         delimiter: ',;',
