@@ -2,9 +2,9 @@
 
 Dropzone.options.uploader = {
     url: uploadUrl,
-    autoProcessQueue: true,
+    autoProcessQueue: false,
     uploadMultiple: true,
-    parallelUploads: 1,
+    parallelUploads: true,
     addRemoveLinks: true,
     dictRemoveFile: 'Remove file',
     acceptedFiles: 'image/*, application/pdf',
@@ -23,6 +23,16 @@ Dropzone.options.uploader = {
 
     init: function() {
         flag = true;
+        myDropzone = this;
+        $("#uploadBtn").click(function() {
+            flag = false;
+            console.log('refreshing');
+            sleep(200);
+
+            console.log(uploadUrl);
+            myDropzone.processQueue();
+            flag = true; //the flag is used to prevent the backend actually deleting my img
+        });
         this.on("complete", function(file) {
             var upurl = '0';
             //console.log('Triggering');
@@ -40,6 +50,12 @@ Dropzone.options.uploader = {
                 },
             });
             this.options.url = upurl;
+            myDropzone.removeFile(file);
+        });
+        this.on("sending", function(file, xhr, formData){
+            console.log("sending");
+            console.log($("#descriptionInput").val());
+            formData.append("description", $("#descriptionInput").val());
         });
         this.on("addedFile", function(file) {
             var ext = file.name.substr((file.name.lastIndexOf('.') + 1));

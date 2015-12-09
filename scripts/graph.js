@@ -45,18 +45,7 @@ function sleep(milliseconds) {
 $(document).ready(function() {
     var cache = {};
 
-    $("#uploadBtn").click(function() {
-        flag = false;
-        console.log('refreshing');
-        sleep(200);
-        if(this!=null){
-            _this.removeAllFiles();
-        }
-        uploaded = [];
-        key_dict = [];
-        $('#content').load('/refresh/{{stream.key.id()}}/1');
-        flag = true; //the flag is used to prevent the backend actually deleting my img
-    });
+
 
      
 });
