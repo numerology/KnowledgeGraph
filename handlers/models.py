@@ -13,7 +13,7 @@ class Reference(ndb.Model):
     url = ndb.StringProperty()
     blobkey = ndb.BlobKeyProperty()
     adddate = ndb.DateTimeProperty(auto_now_add=True)
-    publishdate = ndb.DateTimeProperty()
+   # publishdate = ndb.DateTimeProperty()
     description = ndb.StringProperty()
 
 
@@ -23,7 +23,7 @@ class Node(ndb.Model):
     definition = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
     childrenIDs = ndb.StringProperty(repeated=True)
-    trending = ndb.IntegerProperty(repeated=True)
+   # trending = ndb.IntegerProperty(repeated=True)
     reference = ndb.StringProperty(repeated=True)
 
 class Action(ndb.Model):
