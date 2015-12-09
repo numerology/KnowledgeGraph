@@ -1,0 +1,25 @@
+
+.divActions svg {
+    margin-left: 10px;
+    margin-right: 10px;
+    padding: 3px;
+}
+.divActions .node {
+    cursor: pointer;
+}
+.divActions .node circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+}
+
+.divActions .node text {
+    font: 20px sans-serif;
+    fill-opacity: 1;
+}
+
+.divActions .node line {
+    fill: steelblue;
+    stroke: steelblue;
+    stroke-width: 3px;
+}

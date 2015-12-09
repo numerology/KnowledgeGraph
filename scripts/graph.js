@@ -187,7 +187,7 @@ function shareMenu(e){
     $("#divInputEmail .tag-editor").remove();
     $("#inputEmail").empty();
     $("#inputEmail").tagEditor({
-        initialTags:node.tags,
+        initialTags:[],
         maxTags: 10,
         removeDuplicates: true,
         sortable: false,
@@ -294,11 +294,12 @@ $("#divClipboardNode").sortable({
     scroll: true,
     appendTo: 'document.body',
     //items: 'svg',
-    connectWith: ["#divNodeChild", "#contentMyGraph", "#contentSharedGraph"],
+    connectWith: ["#divNodeChild", "#contentMyGraph"],
     receive: function (event, ui){
 		var isLastNode = false;
 		//var d3selector;
         //console.log(ui);
+        console.log("receive");
 		$(this).find("g").each(function(){
 			console.log($(this));
 			d3selector = d3.selectAll($(this).toArray());
@@ -316,13 +317,14 @@ $("#divClipboardNode").sortable({
     update: function(event, ui){
         var new_child_list = [];
         var new_children = [];
+
         d3.selectAll("#divClipboardNode .node")
-            .each(function(e){
+            .each(function(e,i){
             console.log(e);
             new_child_list.push(e.id.toString());
             new_children.push(e.child);
-            //
-            });
+        }).on('click', function(e){});// remove click function for nodes in clipboard
+
         
         $.ajax({
             type: 'post',
@@ -365,6 +367,7 @@ $("#btnClipboard").on("mousedown", function(e){
         //console.log('default prevented?');
         $draggable.data("preventBehavior", false);
     }else {
+        console.log('div clipboard show');
         $("#divClipboard").toggle();
         $_this.hide();
         /*changeDisplay({
@@ -417,9 +420,11 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
     //console.log("Log: nodeaddroot data: " + d3.select(nodeaddroot).__data__);
     
     // generate graph for each node
-    nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
+  //  nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
  //   addSingleNode(tabContentSelector, nodeData);
+   // nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
+  //  addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
     $("#contentMyGraph").sortable({
@@ -441,7 +446,7 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
 				nodeNum++;
                 temp_node_list.push(e.id.toString());
                 //console.log(e);
-              });
+              }).on("click", clickMyTabNode);// add click function to node in my graph tab
 			//console.log("my graph update: nodeNum is " + nodeNum);
 			// IMPORTANT: YW: 11/28/2015 dont use $(this) inside other functions....
 					// jquery does not add class to d3 element ...
@@ -456,6 +461,7 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
 				d3.selectAll("#contentMyGraph g")
 				  .classed("lastNode", false);
 			}
+			console.log("temp node list: "+temp_node_list );
 			if(nodeNum == 0){
 				console.log("sortable has no root now, does not update my roots");
 			} else{$.ajax({
@@ -480,6 +486,7 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
     });
 }
 function loadSharedGraphTab(){
+	var nodeData = {"node_text":"Node1", "node_data":{"title":"Shared Node Test", "msg": "Shared node test"}};
     nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
     addSingleNode(d3.select("#contentSharedGraph"), nodeData, clickSharedTabNode);
     $("#contentSharedGraph").sortable({
@@ -498,6 +505,7 @@ function loadSharedGraphTab(){
                 temp_node_list.push(e.id);
                 console.log(e);
               });
+            console.log("temp node list: "+JSON.stringify(temp_node_list) );
             $.ajax({
                 type: 'post',
                 url: '/api/update_root',
@@ -877,10 +885,16 @@ function loadTitle(d){
 
 function loadTag(d){
     // New tag editor to display tags
-    $("#nodeTag .tag-editor").remove();
+    //console.log(d.tags);
+    //var initTags = d.tags;
+    //console.log($("#nodeTag ul"));
+    //$("#nodeTag .tag-editor").empty();
+    //$("#nodeTag .tag-editor").remove();
+    //init = null;
     $("#tagEditor").empty();
+    $('#tagEditor').tagEditor('destroy');
     $("#tagEditor").tagEditor({
-        initialTags:d.tags,
+        initialTags: d.tags,
         maxTags: 10,
         removeDuplicates: true,
         placeholder: "Add a tag",
@@ -895,12 +909,12 @@ function loadTag(d){
                     success: function(response){
                         //console.log(response.status);
                         if(response.status === "success"){
-                            //d.tags = new_tags;
+                            d.tags = new_tags;
                         }else if(response.status === "error"){
                             window.alert(response.message);
                         }},
                     failure: function(){window.alert("ajax error in updating tags")},
-            }); //TODO: show alert if failed? sequence of ajax?
+            });
         },
     });
 }
@@ -916,8 +930,8 @@ function loadChild(d){ // load children in ContextMenu
 	}
     if (children){
         children.forEach(function(child){
-            console.log(child);
-            console.log(child.id);
+            //console.log(child);
+            //console.log(child.id);
             var msg = child.name
             if (child.title){
                 msg = child.title;
@@ -1023,7 +1037,7 @@ function loadDivRef(d){
     $("#divReference").empty(); //TODO: 
     d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
-    d3.select("#nodeNameInput").attr("value", d.name);
+    d3.select("#nodeIDInput").attr("value", d.id);
     divRef = d3.select("#divReference");
     /*divRef.append("a").attr("class", "thumbnail")
             .append("img").attr("src", "src1")
@@ -1036,6 +1050,7 @@ function loadDivRef(d){
         divRef.append("a").attr("class", "thumbnail")
 			//.data([{"src": thumb.url}],0)
             .attr("style", "height:100px")
+            .attr("href", "/serve_reference/"+thumb.blob)
             .on("mouseover",function(){
                 $("#RefTipContent").empty();
                 pos = $(this).offset();

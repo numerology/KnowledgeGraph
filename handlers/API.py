@@ -9,6 +9,7 @@ from models import *
 from constants import *
 from datetime import *
 from time import sleep as time_sleep
+from google.appengine.ext.blobstore import BlobKey
 
 import webapp2
 import jinja2
@@ -38,7 +39,7 @@ def node_collapse(node):
             current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
         if ref.type == EXT_TYPE:
             current_url=r.url
-        current_thumbs.append({"url": current_url, "msg": current_description})
+        current_thumbs.append({"url": current_url, "msg": current_description, "blob":str(ref.blobkey)})
 
     if len(node.childrenIDs) == 0:
         return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
@@ -52,6 +53,23 @@ def node_collapse(node):
         return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
                 "tags": node.tags, "thumbnails": current_thumbs, "children": children, 
                 "reference": node.reference, "childrenIDs": node.childrenIDs}
+
+def node_deep_copy(target_node):
+    result = Node(name = target_node.name,
+                  title = target_node.title,
+                  definition = target_node.definition,
+                  tags = target_node.tags, #TODO: check the copy of array is shallow or deep
+                  childrenIDs = [],
+                  trending = target_node.trending,
+                  reference = target_node.reference) #Since users are not allowed to delete or edit a reference item,
+                                                    # i think it is okay to do shallow copy here
+    for c in target_node.childrenIDs:
+        child = Node.get_by_id(int(c))
+        new_child = node_deep_copy(child)
+        result.childrenIDs.append(str(new_child.key.id()))
+
+    return result
+
 
 
 class AddChildHandler(webapp2.RequestHandler):
@@ -225,6 +243,47 @@ class UpdateClipboard(webapp2.RequestHandler):
         self.response.out.write(json.dumps(response))
 
 
+class UpdateClipboardSocial(webapp2.RequestHandler):
+    def post(self):
+        # Idea: All the nodes updated in this operation should be deep copied
+
+        user_id = int(self.request.get("userID"))
+        response = {"status": "success", "message": "Clipboard updated"}
+        cuser = User.get_by_id(user_id)
+        if not cuser:
+            response["status"] = "error"
+            response["message"] = "User not found"
+        else:
+            clip_node = Node.get_by_id(int(cuser.clipboardID))
+            rqst_args = self.request.arguments()
+            if "new_child_list" in rqst_args:
+                new_child_list = json.loads(self.request.get("new_child_list"))
+                print "update clipboard node list"
+                for id in new_child_list:
+                    if id in clip_node.childrenIDs:
+                        continue
+                    else:
+                        # do a deep copy and put new id into childrenIDs
+                        target_node = Node.get_by_id(int(cuser.clipboardID))
+                        new_node = node_deep_copy(target_node)
+
+                clip_node.childrenIDs = new_child_list
+                response["message"] += " children updated"
+            '''
+                # DO not need reference stuff
+            if "new_reference_list" in rqst_args:
+                new_reference_list = json.loads(self.request.get("new_reference_list"))
+                # print "update clipboard reference list"
+                # print clip_node.key.id()
+                clip_node.reference = new_reference_list
+                response["message"] += " reference updated"
+            '''
+            clip_node.put()
+            # user.rootID = new_reference_list
+            # user.put()
+        self.response.write(json.dumps(response))
+
+
 class CreateRoot(webapp2.RequestHandler):
     def post(self):
         user_email = self.request.get('user_email')
@@ -267,7 +326,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
             print ("PhotoUploadHandler: upload resized")
 
             upload = self.get_uploads()[0]
-            node_name = self.request.get("node_name")
+            node_id = self.request.get("node_ID")
             descriptionstr = self.request.get("description")
             key = upload.key()
             user = User.query(User.email == users.get_current_user().email()).get()
@@ -283,7 +342,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
                                    blobkey=upload.key(), description = descriptionstr)
 
             user_file.put()
-            queried_node = Node.query(Node.name == node_name).get()
+            queried_node = Node.get_by_id(int(node_id))
             if queried_node:
                 queried_node.reference.insert(0,str(user_file.key.id()))
 
@@ -304,7 +363,7 @@ class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
                 ACTION_QUEUE.put()
 
             else:
-                print ("PhotoUploadHander: No stream found matching "+node_name)
+                print ("PhotoUploadHander: No node found matching "+node_id)
 
 
             #preprocessing, generating thumbnail
@@ -450,6 +509,81 @@ class getIndexData(webapp2.RequestHandler): # return all the nodes for index vie
         self.response.out.write(json.dumps(response))
         return
 
+class ReturnActions(webapp2.RequestHandler):
+    @decorator.oauth_required
+    def get(self, user_id):
+        user_prof = User.get_by_id(int(user_id))
+
+        http = decorator.http()
+
+        user = service.people().list(userId = 'me', collection = 'visible')
+     # text = 'Hello, %s!' % user['displayName']
+        result = user.execute(http)
+        friend_name = {}
+        friend_fig = {}
+
+        for i in result['items']:
+            f = User.query(User.plusid == i['id']).get()
+            if(f is not None):
+                friend_name[(f.plusid)] = i['displayName']
+                friend_fig[(f.plusid)] = i['image']['url']
+
+        output_actions = []
+        for a in ACTION_QUEUE.actions:
+            if a.plusid in friend_name.keys():
+                cnode = Node.get_by_id(int(a.nodeid))
+
+                output_actions.append({'node_name': cnode.name,
+                                       'node_id': a.nodeid,
+                                       'user_name': friend_name[a.plusid],
+                                       'plusID':a.plusid,
+                                       'user_figure':friend_fig[a.plusid],
+                                       'time':str(a.lastmodified)})
+
+      #dict = json.loads(str(user))
+   #   names = ''
+  #    for i in result['items']:
+  #        names = names + ' ' + i['displayName']
+
+ #     result = service.people().get(userId = result['items'][0]['id']).execute(http)
+
+    #  text = names
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(output_actions))
+
+class ReturnIndividualActions(webapp2.RequestHandler):
+    @decorator.oauth_required
+    def get(self, user_id, target_plus_id):
+        user_prof = User.get_by_id(int(user_id))
+
+        http = decorator.http()
+
+        user = service.people().get(userId = target_plus_id)
+     # text = 'Hello, %s!' % user['displayName']
+        result = user.execute(http)
+
+
+        output_actions = []
+        for a in ACTION_QUEUE.actions:
+            if a.plusid == target_plus_id:
+                cnode = Node.get_by_id(int(a.nodeid))
+
+                output_actions.append({'node_name': cnode.name,
+                                       'node_id': a.nodeid,
+                                       'user_name': result['displayName'],
+                                       'user_figure':result['image']['url'],
+                                       'time':str(a.lastmodified)})
+
+      #dict = json.loads(str(user))
+   #   names = ''
+  #    for i in result['items']:
+  #        names = names + ' ' + i['displayName']
+
+ #     result = service.people().get(userId = result['items'][0]['id']).execute(http)
+
+    #  text = names
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(output_actions))
 
 class ReturnRoots(webapp2.RequestHandler):
     def get(self, user_id):
@@ -506,6 +640,15 @@ class UpdateRoot(webapp2.RequestHandler):
 
         return
 
+class ServeReference(blobstore_handlers.BlobstoreDownloadHandler):
+    def get(self,blobkey):
+        key = BlobKey(blobkey)
+        '''
+        if not blobstore.get(key):
+            self.error(404)
+        else:
+        '''
+        self.send_blob(key)
 
 class ShareRoot(webapp2.RequestHandler):
     def post(self,root_id,user_id):
@@ -513,8 +656,8 @@ class ShareRoot(webapp2.RequestHandler):
         share_message = self.request.get("share_message") # TODO: can somehow use share message
         mail_list = parseEmailString(mail_string)
         cuser = User.get_by_id(int(user_id))
-        print "Share Root"
-        print mail_list
+        # print "Share Root"
+        # print mail_list
         response = {"status":"success",
                     "message":"node shared to"}
         shared_num = 0

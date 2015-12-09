@@ -15,7 +15,7 @@ IN_TYPE_IMG = "int"
 IN_TYPE_PDF = "pdf"
 EXT_TYPE = "ext"
 THUMBNAIL_SIZE = 100
-SOCIAL_TIME_WINDOW = 120 #in minute
+SOCIAL_TIME_WINDOW = 2400 #in minutes
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), '../templates')),
@@ -25,8 +25,12 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 CLIENT_SECRETS = os.path.join(os.path.dirname(__file__), 'client_secrets.json')
 
-ACTION_QUEUE = Actionqueue(actions = [])
-ACTION_QUEUE.put()
+ACTION_QUEUE = Actionqueue.query().fetch()
+if ACTION_QUEUE:
+	ACTION_QUEUE = ACTION_QUEUE[0]
+else:
+    ACTION_QUEUE = Actionqueue(actions = [])
+    ACTION_QUEUE.put()
 
 MISSING_CLIENT_SECRETS_MESSAGE = """
 <h1>Warning: Please configure OAuth 2.0</h1>
