@@ -61,6 +61,25 @@
     font-family: arial, helvetica, sans-serif;
 }
 
+#divRefContext {
+    margin: 30px auto 0;
+    position: absolute;
+    width: 500px;
+    height: auto;
+    /*overflow: hidden;*/
+    display: block;
+    z-index: 9999;
+    left: 50%;
+    margin-left: -250px;
+    background-color: #fff;
+
+    border: 1px #ccc solid;
+    border-radius: 6px;
+    box-shadow: #333 2px 2px 4px;
+    padding: 15px;
+    font-family: arial, helvetica, sans-serif;
+}
+
 /*#nodeTitle {
     margin-top: 0px;
     width: 100%;

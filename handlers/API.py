@@ -39,7 +39,7 @@ def node_collapse(node):
             current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
         if ref.type == EXT_TYPE:
             current_url=r.url
-        current_thumbs.append({"url": current_url, "msg": current_description, "blob":str(ref.blobkey)})
+        current_thumbs.append({"url": current_url, "msg": current_description, "blob":str(ref.blobkey), "id":r})
 
     if len(node.childrenIDs) == 0:
         return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
@@ -316,6 +316,19 @@ class CreateRoot(webapp2.RequestHandler):
 
         self.redirect('/graph')
         return
+
+class DeleteRefHandler(webapp2.RequestHandler):
+    def post(self):
+        ref_id = self.request.get("ref_ID")
+        node_id = self.request.get("node_ID")
+        cRef = Reference.get_by_id(int(ref_id))
+        cNode = Node.get_by_id(int(node_id))
+
+        blobstore.delete(cRef.blobkey)
+        cNode.reference.remove(ref_id)
+        cNode.put()
+        self.redirect('/')
+
 
 
 class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):

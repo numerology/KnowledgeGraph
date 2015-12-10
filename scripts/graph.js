@@ -3,6 +3,7 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
+var refContextShowing = false;
 var addRootShowing = false;
 var shareShowing = false;
 var currentClass;
@@ -1036,7 +1037,7 @@ function loadDivRef(d){
             .attr("style", "height:100px");*/
     d.thumbnails.forEach(function(thumb){
         //console.log("adding");
-        divRef.append("a").attr("class", "thumbnail")
+        cThumbnail = divRef.append("a").attr("class", "thumbnail")
 			//.data([{"src": thumb.url}],0)
             .attr("style", "height:100px")
             .attr("href", "/serve_reference/"+thumb.blob)
@@ -1053,7 +1054,27 @@ function loadDivRef(d){
             .on("mouseout",function(){
                 $("#divReftip").css("display", "none");
                 console.log("Close triggered");
-            }).append("img").attr("src", thumb.url)
+            })
+            .on("contextmenu", function(){
+                if (d3.event){
+                    d3.event.preventDefault();
+                }
+                if(refContextShowing){
+                    closeRefContext();
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+                }else{
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                }
+                d3.select("#refIDInput").attr("value", thumb.id);
+                d3.select("#refNodeIDInput").attr("value", d.id);
+                d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                refContextShowing = true;
+
+            });
+        cThumbnail.append("img").attr("src", thumb.url)
             .attr("alt", thumb.msg)
             .attr("style", "height:100px");
 
@@ -1094,6 +1115,10 @@ function loadDivRef(d){
         }
 
     });
+}
+
+function closeRefContext(){
+    $("#divRefContext").css("display", "none");
 }
 
 function showMsgCase(e){

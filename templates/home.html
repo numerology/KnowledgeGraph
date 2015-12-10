@@ -140,6 +140,19 @@
         <div class="tip2"></div>
     </div>
 
+    <div id="divRefContext" class="popup" style="display:none;padding:0;">
+        <div class="col-md-12" style="padding:0;">
+            <div class="well bs-component" style="margin:0;">
+                <h2>Do you really want to delete this ref?</h2>
+                <form class="form-horizontal" id="formDelteRef" action = "/delete_ref" method="post" autocomplete="off">
+                    <input id="refIDInput" type="hidden" name="ref_ID" value = "">
+                    <input id="refNodeIDInput" type="hidden" name="node_ID" value = "">
+                    <button id="btnConfirmDelete" type="submit" class="btn btn-primary" value = "Create Root">Yes</button>
+                    <a id="btnCancelDelete" type="reset" class="btn btn-default">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
     <div id="divNodeDetail" class="popup popup-window" style="display:none">
 
         <div class="col-md-12">
