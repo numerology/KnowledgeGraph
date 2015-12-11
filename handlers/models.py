@@ -26,6 +26,7 @@ class Node(ndb.Model):
     trending = ndb.IntegerProperty(repeated=True)
     reference = ndb.StringProperty(repeated=True)
 
+
 class Action(ndb.Model):
     plusid = ndb.StringProperty()
     nodeid = ndb.StringProperty()

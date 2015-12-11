@@ -27,21 +27,10 @@ var svg = d3.select("#graphcanvas").append("svg")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var key_dict = [];
 var _this = null;
 var flag = true;
-var uploaded = []
 
 
-
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds){
-            break;
-        }
-    }
-}
 
 $(document).ready(function() {
     var cache = {};
@@ -108,6 +97,7 @@ function getSharedGraphTab(){
     loadSharedGraphTab();
     d3.json("/get_shared_list/" + userID, function(result) {
         list = result;
+        //console.log(result);
         //console.log("getting shared list");
         tabSharedSelector =d3.select("#divClipboardNode");
         list.shared_list.forEach(function(d){

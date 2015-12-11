@@ -26,7 +26,7 @@
 
     var target = this;
     var edit = {};
-
+    if(trigger !== target) trigger.show();
     edit.start = function(e){
       trigger.unbind(action === 'clickhold' ? 'mousedown' : action);
       if(trigger !== target) trigger.hide();
@@ -35,7 +35,7 @@
           target.text().replace(/<br( \/)?>/gm, '\n').replace(/&gt;/gm, '>').replace(/&lt;/gm, '<') :
           target.text()
       ).replace(/^\s+/,'').replace(/\s+$/,'');
-
+      //console.log("editor: "+old_value);
       var input = type === 'textarea' ? $('<textarea>') : $('<input>');
       input.val(old_value).
         css('width', type === 'textarea' ? '100%' : target.width()+target.height() ).

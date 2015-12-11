@@ -186,7 +186,7 @@
             <div class="row" id="nodeReference">
                 <h4>References:</h4>
                 <div class = "div-empty " id="divReference"></div>
-                <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+                <a id="btnShowAddReference" class="btn btn-primary btn-sm">Add Reference</a>
                 <div id="divUploadReference" style="display:none">
                     <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
                         <div class="dropzone-previews"></div>
@@ -247,5 +247,6 @@
     <script src="/scripts/referenceDropzone.js" type = "text/javascript"></script>
     <script src="/scripts/nodeDetail.reference.js" type = "text/javascript"></script>
     <script src="/scripts/validateTagEmail.js" type = "text/javascript"></script>
+    <script src="/scripts/getTagHtml.js" type = "text/javascript"></script>
     <script src="/scripts/graph.js" type = "text/javascript"></script>
 {% endblock body_script %}
