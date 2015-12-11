@@ -23,7 +23,7 @@
     max-height: 200px;
 }
 #divReference {
-    max-height: 350px;
+    max-height: 650px;
 }
 #divAddRoot {
     margin: 30px auto 0;
@@ -61,6 +61,25 @@
     font-family: arial, helvetica, sans-serif;
 }
 
+#divRefContext {
+    margin: 30px auto 0;
+    position: absolute;
+    width: 500px;
+    height: auto;
+    /*overflow: hidden;*/
+    display: block;
+    z-index: 9999;
+    left: 50%;
+    margin-left: -250px;
+    background-color: #fff;
+
+    border: 1px #ccc solid;
+    border-radius: 6px;
+    box-shadow: #333 2px 2px 4px;
+    padding: 15px;
+    font-family: arial, helvetica, sans-serif;
+}
+
 /*#nodeTitle {
     margin-top: 0px;
     width: 100%;
@@ -83,6 +102,12 @@
     top: 25px;
     right: 60px;
 }
+#divBtnCopyToClipboard{
+    display:inline-block;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+}
 #btnEditNodeTitle {
     width: 24px;
     height: 24px;
@@ -95,7 +120,24 @@
     right:0px;
     bottom: 0px;
 }
+#btnCopyToClipboard{
+    width: 75px;
+    height: 75px;
+    border: none;
+    margin-left: 0px;
+    padding: 0px;
+    cursor: pointer;
+    display: inline-block;
+    position: absolute;
+    right:0px;
+    top: 0px;
+}
 #btnEditNodeTitle img {
+    width: 100%;
+    height: auto;
+    background-color: #fff;
+}
+#btnCopyToClipboard img{
     width: 100%;
     height: auto;
     background-color: #fff;

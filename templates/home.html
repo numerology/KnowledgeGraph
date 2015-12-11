@@ -140,6 +140,19 @@
         <div class="tip2"></div>
     </div>
 
+    <div id="divRefContext" class="popup" style="display:none;padding:0;">
+        <div class="col-md-12" style="padding:0;">
+            <div class="well bs-component" style="margin:0;">
+                <h2>Do you really want to delete this ref?</h2>
+                <form class="form-horizontal" id="formDelteRef" action = "/delete_ref" method="post" autocomplete="off">
+                    <input id="refIDInput" type="hidden" name="ref_ID" value = "">
+                    <input id="refNodeIDInput" type="hidden" name="node_ID" value = "">
+                    <button id="btnConfirmDelete" type="submit" class="btn btn-primary" value = "Create Root">Yes</button>
+                    <a id="btnCancelDelete" type="reset" class="btn btn-default">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
     <div id="divNodeDetail" class="popup popup-window" style="display:none">
 
         <div class="col-md-12">
@@ -173,7 +186,7 @@
             <div class="row" id="nodeReference">
                 <h4>References:</h4>
                 <div class = "div-empty " id="divReference"></div>
-                <a id="btnAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+                <a id="btnShowAddReference" class="btn btn-primary btn-sm">Add Reference</a>
                 <div id="divUploadReference" style="display:none">
                     <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
                         <div class="dropzone-previews"></div>
@@ -182,8 +195,9 @@
                         </div>
                         <input id="nodeIDInput" type="hidden" name="node_ID" value = "">
                         <input id="typeInput" type="hidden" name="type_name" value = "">
-                        <input id="descriptionInput" type="text" name="description" placeholder = "describe your file briefly" value = "">
+
                     </form>
+                    <input id="descriptionInput" type="text" name="description" placeholder = "describe your file briefly" value = "">
                     <button id = "uploadBtn" class="btn btn-default">Upload</button>
                     <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
                 </div>
@@ -233,5 +247,6 @@
     <script src="/scripts/referenceDropzone.js" type = "text/javascript"></script>
     <script src="/scripts/nodeDetail.reference.js" type = "text/javascript"></script>
     <script src="/scripts/validateTagEmail.js" type = "text/javascript"></script>
+    <script src="/scripts/getTagHtml.js" type = "text/javascript"></script>
     <script src="/scripts/graph.js" type = "text/javascript"></script>
 {% endblock body_script %}

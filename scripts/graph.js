@@ -3,6 +3,7 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
+var refContextShowing = false;
 var addRootShowing = false;
 var shareShowing = false;
 var currentClass;
@@ -26,37 +27,15 @@ var svg = d3.select("#graphcanvas").append("svg")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var key_dict = [];
 var _this = null;
 var flag = true;
-var uploaded = []
 
 
-
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds){
-            break;
-        }
-    }
-}
 
 $(document).ready(function() {
     var cache = {};
 
-    $("#uploadBtn").click(function() {
-        flag = false;
-        console.log('refreshing');
-        sleep(200);
-        if(this!=null){
-            _this.removeAllFiles();
-        }
-        uploaded = [];
-        key_dict = [];
-        $('#content').load('/refresh/{{stream.key.id()}}/1');
-        flag = true; //the flag is used to prevent the backend actually deleting my img
-    });
+
 
      
 });
@@ -118,6 +97,7 @@ function getSharedGraphTab(){
     loadSharedGraphTab();
     d3.json("/get_shared_list/" + userID, function(result) {
         list = result;
+        //console.log(result);
         //console.log("getting shared list");
         tabSharedSelector =d3.select("#divClipboardNode");
         list.shared_list.forEach(function(d){
@@ -1047,7 +1027,7 @@ function loadDivRef(d){
             .attr("style", "height:100px");*/
     d.thumbnails.forEach(function(thumb){
         //console.log("adding");
-        divRef.append("a").attr("class", "thumbnail")
+        cThumbnail = divRef.append("a").attr("class", "thumbnail")
 			//.data([{"src": thumb.url}],0)
             .attr("style", "height:100px")
             .attr("href", "/serve_reference/"+thumb.blob)
@@ -1064,7 +1044,27 @@ function loadDivRef(d){
             .on("mouseout",function(){
                 $("#divReftip").css("display", "none");
                 console.log("Close triggered");
-            }).append("img").attr("src", thumb.url)
+            })
+            .on("contextmenu", function(){
+                if (d3.event){
+                    d3.event.preventDefault();
+                }
+                if(refContextShowing){
+                    closeRefContext();
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+                }else{
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                }
+                d3.select("#refIDInput").attr("value", thumb.id);
+                d3.select("#refNodeIDInput").attr("value", d.id);
+                d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                refContextShowing = true;
+
+            });
+        cThumbnail.append("img").attr("src", thumb.url)
             .attr("alt", thumb.msg)
             .attr("style", "height:100px");
 
@@ -1105,6 +1105,10 @@ function loadDivRef(d){
         }
 
     });
+}
+
+function closeRefContext(){
+    $("#divRefContext").css("display", "none");
 }
 
 function showMsgCase(e){

@@ -10,6 +10,7 @@ var original_parent_node_id=0; //record the original parent node
 var new_parent_node_id = 0;
 var current_node_id = 0;
 var moved_node_id;
+var clipboard_id;
 var selected_node; //default selected node is set to the root node of tree
 var root_node;
 var currentNode;
@@ -32,6 +33,8 @@ $(document).ready(function() {
     var cache = {};
     loadMyIndex();
     loadSharedIndex();
+    $("#tabBtnMyGraphIndex").bind("click", function(){closeIndexNodeDetail();});
+    $("#tabBtnSharedGraphIndex").bind("click", function(){closeIndexNodeDetail();});
 });
 
 $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
@@ -40,10 +43,6 @@ $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
 });
 function isOnMyTab(){
     return currentTab=="#myGraphIndex";
-}
-
-function loadSharedIndex(){
-
 }
 
 function loadMyIndex(){
@@ -154,6 +153,7 @@ function loadMyIndex(){
             function(event) {
                 // The clicked node is 'event.node'
                 event.preventDefault();
+                indexTree.tree("selectNode", null);
                 var node = event.node;
                 if (node.id == selected_node.id){
                     selected_node = root_node;
@@ -197,6 +197,74 @@ function loadMyIndex(){
             }
         });
 
+    });
+}
+
+
+function loadSharedIndex(){
+    d3.json("/get_index_data/" + userID, function(response) {
+        if(response.status != "success"){
+            console.log(response.message);
+            return;
+        }
+        sharedGraphData = response.sharedNode;
+        clipboard_id = response.clipboard.id;
+        if (!sharedIndexTree.tree("getTree")){
+            sharedIndexTree.tree({
+                data: sharedGraphData,
+                dragAndDrop: true,
+                onCreateLi: function(node, $li){
+                    $li.find('.jqtree-title').css({"color":"#FF9966", "font-weight":"bold"} ); // color for shared data
+                },
+                onCanMove: function(node){
+                    if(!node.parent.parent){
+                        return true;
+                    }else{
+                        return false;
+                    }
+                },
+                onCanMoveTo: function(moved_node, target_node, position){
+                    if(!target_node.parent.parent){
+                        return (position == 'before' | position == 'after');
+                    }else{
+                        return false;
+                    }
+                },
+                onDragStop: function(){
+                    postRootList("SHARED_ROOT",{}); // update root list
+                },
+            });
+        }else{
+
+            sharedIndexTree.tree("loadData", sharedGraphData);
+        }
+
+        selected_node = sharedIndexTree.tree('getTree');
+        root_node = sharedIndexTree.tree('getTree');
+        closeIndexNodeDetail();
+        closeAddRoot();
+        closeShare();
+        sharedIndexTree.bind(
+            'tree.click',
+            function(event) {
+                // The clicked node is 'event.node'
+                event.preventDefault();
+                sharedIndexTree.tree("selectNode", null);
+                var node = event.node;
+                if (node.id == selected_node.id){
+                    selected_node = root_node;
+                    sharedIndexTree.tree('selectNode', selected_node);
+                    $("#indexNodeDetail").hide();
+                }
+                else{
+                    selected_node = node;
+                    sharedIndexTree.tree('selectNode', selected_node);
+                    $('.index-page').hide();
+                    $("#indexNodeDetail").show();
+                    showIndexNodeDetail(node);
+                }
+            }
+        );
     });
 }
 
@@ -286,6 +354,7 @@ function postRootList(rootType, options){
 
         })
     }
+    //new_root_list = [clipboard_id];
     $.ajax({
         type: 'post',
         url: '/api/update_root',
@@ -308,6 +377,7 @@ function postRootList(rootType, options){
 function showIndexNodeDetail(node) {
     currentNode = node;
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeIndexNodeDetail();");
+    loadCopyBtn(node);
     loadTitle(node);
     loadTag(node); // load the Tags of node
     loadChild(node);
@@ -322,47 +392,82 @@ function closeIndexNodeDetail(){
     indexTree.tree('selectNode', indexTree.tree('getTree')); // select root node if detail window is closed
 }
 
+function loadCopyBtn(node){
+    if(node.is_shared){
+        $("#divBtnCopyToClipboard").show();
+        $("#divBtnCopyToClipboard").on("click", function(){
+            $.ajax({
+                type: 'post',
+                url: '/api/copy_to_node',
+                data: {"userID": userID,
+                       "copiedNodeID": node.id.toString(),
+                       "targetNodeID": clipboard_id.toString()},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in copy node "+node.name + " to clipboard");
+                },
+            });
+        });
+    }else{
+        $("#divBtnCopyToClipboard").hide();
+        $("#divBtnCopyToClipboard").on("click", function(){});
+    }
+}
+
 function loadTitle(node){
     var temp_title = node.title;
     if(!temp_title){temp_title = node.name;}
-    d3.select("#spanNodeTitle").text(temp_title);
+    $("#spanNodeTitle").text(temp_title);
+    if(node.is_clipboard || node.is_shared){
+        $("#btnEditNodeTitle").hide();
+        return;
+    }
+    //console.log($("#spanNodeTitle").text());
     $("#spanNodeTitle").editable({trigger: $("#btnEditNodeTitle"), action:"click"},
-    function(e){
-        //console.log(node);
-        //console.log(e);
-        if (e.value === node.title){
-            //window.alert(e.value+"=="+node.name);
-            return;
+        function(e){
+            //console.log(node);
+            //console.log($("#spanNodeTitle").text());
+            console.log(e.old_value);
+            if (e.value.length==0){
+                window.alert("New title empty");
+                e.target.html(e.old_value);
+                return;
+            }
+            if (e.value === node.title){
+                //window.alert(e.value+"=="+node.name);
+                return;
+            }
+            if (e.value.length > TITLE_MAX_LENGTH){
+                window.alert("New title is too long, length >"+TITLE_MAX_LENGTH);
+                e.target.html(e.old_value);
+                return;
+            }
+            $.ajax({
+                type: 'post',
+                url: '/api/update_node',
+                data: {"nodeID": node.id.toString(), "new_title": e.value},
+                dataType: "json",
+                success: function(response){
+                    //console.log(response.status);
+                    if(response.status === "success"){
+                        node.name = e.value;
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                        $("#spanNodeTitle").value(node.name);
+                    }},
+                failure: function(){
+                    window.alert("ajax error in index create new root");
+                    $("#spanNodeTitle").value(node.name);},
+            });
+            window.alert(e.value);
         }
-        if (e.value.length==0){
-            window.alert("New title empty");
-            e.target.html(e.old_value);
-            return;
-        }
-        if (e.value.length > TITLE_MAX_LENGTH){
-            window.alert("New title is too long, length >"+TITLE_MAX_LENGTH);
-            e.target.html(e.old_value);
-            return;
-        }
-        $.ajax({
-            type: 'post',
-            url: '/api/update_node',
-            data: {"nodeID": node.id.toString(), "new_title": e.value},
-            dataType: "json",
-            success: function(response){
-                //console.log(response.status);
-                if(response.status === "success"){
-                    node.name = e.value;
-                }else if(response.status === "error"){
-                    window.alert(response.message);
-                    $("#spanNodeTitle").value(node.name);
-                }},
-            failure: function(){
-                window.alert("ajax error in index create new root");
-                $("#spanNodeTitle").value(node.name);},
-        });
-        window.alert(e.value);
-    });
+    );
 }
 
 function loadTag(node){
@@ -370,29 +475,40 @@ function loadTag(node){
     //$("#nodeTag .tag-editor").remove();
     $("#tagEditor").empty();
     $("#tagEditor").tagEditor("destroy");
-    $("#tagEditor").tagEditor({
-        initialTags:node.tags,
-        maxTags: 10,
-        removeDuplicates: true,
-        placeholder: "Add a tag",
-        autocomplete: null, // { 'source': '/url/', minLength: 3 }
-        onChange: function(original_field, current_editor, new_tags){
-            $.ajax({
-                    type: 'post',
-                    url: '/api/update_node',
-                    data: {"nodeID": node.id.toString(), "new_tag_list": JSON.stringify(new_tags)},
-                    dataType: "json",
-                    success: function(response){
-                        //console.log(response.status);
-                        if(response.status === "success"){
-                            //node.tags = new_tags;
-                        }else if(response.status === "error"){
-                            window.alert(response.message);
-                        }},
-                    failure: function(){window.alert("ajax error in updating tags")},
-            }); //TODO: show alert if failed? sequence of ajax?
-        },
-    });
+    $("#tagEditor").removeClass("tag-subscribed");
+    Sortable = true;
+    if(node.is_shared){
+        $("#tagEditor").hide();
+        //tags = ["''",'" \' \' "'];
+        $("#nodeTag").append(getTagHtml(node.tags));
+    }
+    else{
+        $("#tagEditor").tagEditor({
+            initialTags:node.tags,
+            maxTags: 10,
+            removeDuplicates: true,
+            sortable: Sortable,
+            placeholder: "Add a tag",
+            autocomplete: null, // { 'source': '/url/', minLength: 3 }
+            onChange: function(original_field, current_editor, new_tags){
+                $.ajax({
+                        type: 'post',
+                        url: '/api/update_node',
+                        data: {"nodeID": node.id.toString(), "new_tag_list": JSON.stringify(new_tags)},
+                        dataType: "json",
+                        success: function(response){
+                            //console.log(response.status);
+                            if(response.status === "success"){
+                                node.tags = new_tags;
+                                console.log(new_tags);
+                            }else if(response.status === "error"){
+                                window.alert(response.message);
+                            }},
+                        failure: function(){window.alert("ajax error in updating tags")},
+                }); //TODO: show alert if failed? sequence of ajax?
+            },
+        });
+    }
 }
 
 function loadChild(node){ // load children in ContextMenu
@@ -413,6 +529,10 @@ function loadChild(node){ // load children in ContextMenu
 
 function loadDivAddChild(node){
     closeDivAddChild();
+    if (node.is_shared){
+        //console.log("ShowAddChild btn hidden");
+        $("#btnShowAddChild").hide();
+    }
     addElementNode = node;
     btnShowAddChild = d3.select("#btnShowAddChild");
     //currentClass = node.id;
