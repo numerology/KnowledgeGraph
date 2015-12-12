@@ -6,9 +6,10 @@ function loadDivRef(d){
     if(d.is_shared){
         $("#btnShowAddReference").hide();
     }
+    console.log("from node detail:" + d.name);
     d3.select("#btnShowAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
-    d3.select("#nodeNameInput").attr("value", d.name);
+    d3.select("#nodeIDInput").attr("value", d.id);
     divRef = d3.select("#divReference");
     d.thumbnails.forEach(function(thumb){
         divRef.append("a").attr("class", "thumbnail")
@@ -17,7 +18,7 @@ function loadDivRef(d){
                 $("#RefTipContent").empty();
                 pos = $(this).offset();
                 console.log(pos);
-                $("#divReftip").css({"top": pos.top + 20 , "left": pos.left +20 });
+                $("#divReftip").css({"top": pos.top - 200 , "left": pos.left +20 });
                 d3.select("#RefTipContent").append("h4").text(thumb.msg);
                 $("#divReftip").css("display","inline");
             })

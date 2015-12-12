@@ -376,6 +376,7 @@ function postRootList(rootType, options){
 
 function showIndexNodeDetail(node) {
     currentNode = node;
+    console.log(currentNode);
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeIndexNodeDetail();");
     loadCopyBtn(node);
     loadTitle(node);
