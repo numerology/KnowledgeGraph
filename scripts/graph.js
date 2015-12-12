@@ -468,8 +468,6 @@ function loadMyGraphTab(){ // call the json function to load the roots for graph
 }
 function loadSharedGraphTab(){
 	var nodeData = {"node_text":"Node1", "node_data":{"title":"Shared Node Test", "msg": "Shared node test"}};
-    nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
-    addSingleNode(d3.select("#contentSharedGraph"), nodeData, clickSharedTabNode);
     $("#contentSharedGraph").sortable({
         tolerance: 'pointer',
         forceHelperSize: true,
