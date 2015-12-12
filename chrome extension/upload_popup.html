@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<!-- This is the page shown when upload in menu is hit-->
+<html>
+<head>
+    <title>Upload to Connexus</title>
+    <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=true"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.map.js"></script>
+    <!--script type="text/javascript" src="js/jquery.ui.map.services.js"></script>
+    <script type="text/javascript" src="js/jquery.ui.map.extensions.js"></script-->
+
+    <script type="text/javascript" src="upload_popup.js"></script>
+    <link rel="stylesheet" type="text/css" href="popup.css">
+</head>
+<body>
+    <div id="loader">
+        Loading... <img src="images/loader.gif">
+    </div>
+    <div id = "output">
+        <div id="title">
+            <p><h1>Connexus Extension</h1></p>
+        </div>
+        <div id="image">
+            <canvas id="thumbnail"></canvas>
+        </div>
+        <div id="url"></div>
+        <div id="upload">
+            <form action="" method="post" id="upload_form" autocomplete="off">
+                <div id="stream_info">
+                    <br>
+                    <input type="text" name="stream_name" id="stream_name" placeholder="Stream to add to">
+                    <br>
+                    <br>
+                    <textarea type="text" name="comment" id="comment" placeholder="Comments"></textarea>
+                </div>
+                <br>
+                <div id="geo">
+                    <div id="map_canvas"></div>
+                    <br>
+                    <input type="text" name="geo_location" id="geo_location" readonly>
+                    <br><br>
+                </div>
+                <div id="submit_div">
+                    <input align="left" type="submit" id="submit_btn" value="Submit">
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

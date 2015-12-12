@@ -9,13 +9,13 @@ routes = [
   #  webapp2.Route(r'/api/stream_list', handler = ListStreamHandler, name = 'list_api'),
     webapp2.Route(r'/', handler=MainPage),
     webapp2.Route(r'/get_rooted_data/<user_id:[\w-]+>', handler=ReturnJSON),
-    webapp2.Route(r'/get_root_list/<user_id:[\w-]+>', handler = ReturnRoots),
-    webapp2.Route(r'/get_shared_list/<user_id:[\w-]+>', handler = ReturnShares),
+    webapp2.Route(r'/get_root_list/<user_id:[\w-]+>', handler=ReturnRoots),
+    webapp2.Route(r'/get_shared_list/<user_id:[\w-]+>', handler=ReturnSharedNodes),
     webapp2.Route(r'/get_clipboard/<user_id:[\w-]+>', handler=ReturnClipboard),
     webapp2.Route(r'/get_action_list/<user_id:[\w-]+>', handler=ReturnActions),
     webapp2.Route(r'/get_individual_action_list/<user_id:[\w-]+>/<target_plus_id:[\w-]+>', handler=ReturnIndividualActions),
-    webapp2.Route(r'/get_index_data/<user_id:[\w-]+>', handler=getIndexData),
-    webapp2.Route(r'/serve_reference/<blobkey:[\s\S-]+>', handler = ServeReference),
+    webapp2.Route(r'/get_index_data/<user_id:[\w-]+>', handler=ReturnIndexData),
+    webapp2.Route(r'/serve_reference/<blobkey:[\s\S-]+>', handler=ServeReference),
 
     webapp2.Route(r'/graph', handler=GraphHandler),
     webapp2.Route(r'/createroot', handler=CreateRootHandler),
@@ -28,7 +28,7 @@ routes = [
     webapp2.Route(r'/api/createroot', handler=CreateRoot),
     # webapp2.Route(r'/api/addtag/<node_name:[\s\S-]+>', handler = AddTag),
     webapp2.Route(r'/api/delete_fig_partial/<id:[\w-]+>/<fig_key:[\S-]+>', handler = MiniDeleteFigHandler, name = 'delete_api'),
-
+    webapp2.Route(r'/api/copy_to_node', handler=CopyToNode),
 
     webapp2.Route(r'/generate_upload_url/<node_id:[\s\S-]+>', handler=GenerateUploadUrlHandler),
     webapp2.Route(r'/upload_file', handler=FileUploadHandler),

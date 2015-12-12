@@ -25,6 +25,7 @@ class Node(ndb.Model):
     childrenIDs = ndb.StringProperty(repeated=True)
     reference = ndb.StringProperty(repeated=True)
 
+
 class Action(ndb.Model):
     plusid = ndb.StringProperty()
     nodeid = ndb.StringProperty()

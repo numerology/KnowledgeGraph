@@ -1,5 +1,17 @@
 // contain the dropzone.option.uploader for reference dropzone
 
+var uploaded = [];
+var key_dict = [];
+
+function sleep(milliseconds) {
+    var start = new Date().getTime();
+    for (var i = 0; i < 1e7; i++) {
+        if ((new Date().getTime() - start) > milliseconds){
+            break;
+        }
+    }
+}
+
 Dropzone.options.uploader = {
     url: uploadUrl,
     autoProcessQueue: false,

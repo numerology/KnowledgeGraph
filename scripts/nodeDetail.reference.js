@@ -3,7 +3,10 @@
 function loadDivRef(d){
     $("#divReference").empty();
     closeDivAddRef();
-    d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
+    if(d.is_shared){
+        $("#btnShowAddReference").hide();
+    }
+    d3.select("#btnShowAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeNameInput").attr("value", d.name);
     divRef = d3.select("#divReference");
@@ -26,6 +29,9 @@ function loadDivRef(d){
             .attr("style", "height:100px");
 
 	});
+    if (d.is_shared){
+        $("#btnShowAddReference").hide();
+    }
 	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
         //cancel: "#nodeAddRoot", //exclude add root node
@@ -65,11 +71,11 @@ function loadDivRef(d){
 }
 
 function closeDivAddRef(){
-    d3.select("#btnAddReference").style("display", "inline");
+    d3.select("#btnShowAddReference").style("display", "inline");
     d3.select("#divUploadReference").style("display","none");
 }
 
 function showAddRef(){
     d3.select("#divUploadReference").style("display", "inline");
-    d3.select("#btnAddReference").style("display","none");
+    d3.select("#btnShowAddReference").style("display","none");
 }

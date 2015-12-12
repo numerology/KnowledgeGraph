@@ -102,6 +102,12 @@
     top: 25px;
     right: 60px;
 }
+#divBtnCopyToClipboard{
+    display:inline-block;
+    position: absolute;
+    top: 10px;
+    right: 50px;
+}
 #btnEditNodeTitle {
     width: 24px;
     height: 24px;
@@ -114,7 +120,24 @@
     right:0px;
     bottom: 0px;
 }
+#btnCopyToClipboard{
+    width: 75px;
+    height: 75px;
+    border: none;
+    margin-left: 0px;
+    padding: 0px;
+    cursor: pointer;
+    display: inline-block;
+    position: absolute;
+    right:0px;
+    top: 0px;
+}
 #btnEditNodeTitle img {
+    width: 100%;
+    height: auto;
+    background-color: #fff;
+}
+#btnCopyToClipboard img{
     width: 100%;
     height: auto;
     background-color: #fff;
