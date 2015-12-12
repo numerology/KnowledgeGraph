@@ -60,13 +60,14 @@ def node_deep_copy(target_node):
                   definition = target_node.definition,
                   tags = target_node.tags, #TODO: check the copy of array is shallow or deep
                   childrenIDs = [],
-                  trending = target_node.trending,
                   reference = target_node.reference) #Since users are not allowed to delete or edit a reference item,
                                                     # i think it is okay to do shallow copy here
     for c in target_node.childrenIDs:
         child = Node.get_by_id(int(c))
         new_child = node_deep_copy(child)
         result.childrenIDs.append(str(new_child.key.id()))
+
+    result.put()
 
     return result
 
@@ -267,7 +268,12 @@ class UpdateClipboardSocial(webapp2.RequestHandler):
                         target_node = Node.get_by_id(int(cuser.clipboardID))
                         new_node = node_deep_copy(target_node)
 
-                clip_node.childrenIDs = new_child_list
+                id = new_child_list[-1]
+                target_node = Node.get_by_id(int(id))
+                new_node = node_deep_copy(target_node)
+
+
+                clip_node.childrenIDs.append(str(new_node.key.id()))
                 response["message"] += " children updated"
             '''
                 # DO not need reference stuff

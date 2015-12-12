@@ -23,7 +23,6 @@ class Node(ndb.Model):
     definition = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
     childrenIDs = ndb.StringProperty(repeated=True)
-    trending = ndb.IntegerProperty(repeated=True)
     reference = ndb.StringProperty(repeated=True)
 
 class Action(ndb.Model):
