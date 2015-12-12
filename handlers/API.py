@@ -688,9 +688,10 @@ class ServeReference(blobstore_handlers.BlobstoreDownloadHandler):
 
 class ShareRoot(webapp2.RequestHandler):
     def post(self, root_id, user_id):
-        mail_string = self.request.get("target_mail")
+        mail_string = self.request.get("target_email")
         share_message = self.request.get("share_message") # TODO: can somehow use share message
         mail_list = parseEmailString(mail_string)
+        print("mailstring is "+ str(mail_list))
         cuser = User.get_by_id(int(user_id))
         # print "Share Root"
         # print mail_list
@@ -698,15 +699,17 @@ class ShareRoot(webapp2.RequestHandler):
                     "message": "node shared to"}
         shared_num = 0
         for target_mail in mail_list:
-            target_user = User.query(User.email == str(target_mail)).get()
+            print(target_mail[:-1])
+            target_user = User.query(User.email == str(target_mail[:-1])).get()
             if target_user:
                 target_user.sharedID.append(root_id)
-                target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
+         #       target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
                 target_user.put()
                 shared_num  = shared_num+1
         response["message"] = response["message"] + " " + str(shared_num) + " users"
         # self.redirect(self.request.uri)
         self.response.out.write(json.dumps(response))
+    #    assert(1==0)
         return
 
 """

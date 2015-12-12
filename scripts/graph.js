@@ -99,7 +99,7 @@ function getSharedGraphTab(){
         list = result;
         //console.log(result);
         //console.log("getting shared list");
-        tabSharedSelector =d3.select("#divClipboardNode");
+        tabSharedSelector =d3.select("#contentSharedGraph");
         list.shared_list.forEach(function(d){
             //console.log(d);
             nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
@@ -190,6 +190,7 @@ function shareMenu(e){
             error.insertAfter($("#formShareRoot ul")); // <- the default
         },
         submitHandler:function(){
+            console.log("sending:"+ $('#inputEmail').val());
             $.ajax({
                 type: 'post',
                 url: shareUrl,
@@ -1015,7 +1016,7 @@ function closeDivAddChild(){
 
 function loadDivRef(d){
     $("#divReference").empty(); //TODO: 
-    d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
+    d3.select("#btnShowAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeIDInput").attr("value", d.id);
     divRef = d3.select("#divReference");
