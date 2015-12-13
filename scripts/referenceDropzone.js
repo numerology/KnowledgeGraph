@@ -20,7 +20,7 @@ Dropzone.options.uploader = {
     addRemoveLinks: true,
     dictRemoveFile: 'Remove file',
     acceptedFiles: 'image/*, application/pdf',
-    maxFiles: 10,
+    maxFiles: 1,
 
     accept: function(file, done){
         var ext = file.name.substr((file.name.lastIndexOf('.') + 1));
@@ -63,6 +63,7 @@ Dropzone.options.uploader = {
             });
             this.options.url = upurl;
             myDropzone.removeFile(file);
+            updateGraph(root);
         });
         this.on("sending", function(file, xhr, formData){
             console.log("sending");

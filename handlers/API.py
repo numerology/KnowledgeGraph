@@ -563,8 +563,8 @@ class ReturnActions(webapp2.RequestHandler):
         for a in ACTION_QUEUE.actions:
             if a.plusid in friend_name.keys():
                 cnode = Node.get_by_id(int(a.nodeid))
-
-                output_actions.append({'node_name': cnode.name,
+                if cnode is not None:
+                    output_actions.append({'node_name': cnode.name,
                                        'node_id': a.nodeid,
                                        'user_name': friend_name[a.plusid],
                                        'plusID':a.plusid,
