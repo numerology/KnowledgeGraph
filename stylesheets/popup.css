@@ -10,17 +10,13 @@
 .div-empty {
     width: 100%;
     border-radius: 5px;
-    min-height: 20px;
-    background-color: #F0F8FF;
+    min-height: 50px;
+    background-color: #e1f1ff;
     margin-bottom: 10px;
 }
 
 #divNodeChild {
-    max-height: 200px;
-}
-
-#divNodeChild {
-    max-height: 200px;
+    max-height: 250px;
 }
 #divReference {
     max-height: 650px;
@@ -223,6 +219,14 @@
     box-shadow: #333 2px 2px 4px;
     padding: 15px;
     font-family: arial, helvetica, sans-serif;
+}
+
+#divNodeDetail .thumbnail {
+    display: inline-block;
+    margin: 10px;
+    background-color: transparent;
+    width: auto;
+    height: auto;
 }
 
 #divNodeTooltip .tip1{

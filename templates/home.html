@@ -58,8 +58,8 @@
         </ul>
         <div id="myTabContent" class="tab-content myTabContent">
             <div class="tab-pane fade active in" id="mygraph">
-                <h2>List of  My Graphs</h2>
-                <div class="tabContentNodeDiv " id="contentMyGraph">
+                <h4>List of  My Graphs</h4>
+                <div class="tabContentNodeDiv" id="contentMyGraph">
                     <svg width="110" height="110" id="svgAddRoot" >
                         <g class="node" id="nodeAddRoot">
                             <circle cx="50" cy="50" r="50"/>
@@ -70,7 +70,7 @@
                 </div>
             </div>
             <div class="tab-pane fade" id="sharedgraph">
-                <h2>List of Graphs shared with me</h2>
+                <h4>List of Graphs shared with me</h4>
                 <div class="tabContentNodeDiv" id="contentSharedGraph">
                 </div>
             </div>
@@ -132,7 +132,7 @@
         <a href="javascript: void(0)" id="btnCloseAddRoot" class="btn btn-primary btn-xs btn-close">&times;</a>
     </div>
 
-    <div id="divReftip" class="popup" style="display:none">
+    <div id="divReftip" class="popup draggable" style="display:none">
         <div id="RefTipContent">
             <h2>POPUP for Tooltip!</h2>
         </div>
@@ -171,10 +171,10 @@
             </div>
             <div class="row" id="nodeChildren">
                 <h4>Children:</h4>
-                <div class = "div-empty myTabContent" id="divNodeChild"></div>
-                <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
+                <div class = "div-empty myTabContent scrollbar-light" id="divNodeChild"></div>
+                <button id="btnShowAddChild" class="btn btn-primary " value="Add Child">Add Child</button>
             </div>
-            <div class="" id="divAddChild" style="display:none">
+            <div class="row" id="divAddChild" style="display:none">
                 <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
                     <div class="row" style="margin-left: 0; margin-right:0">
                         <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
@@ -185,8 +185,8 @@
             </div>
             <div class="row" id="nodeReference">
                 <h4>References:</h4>
-                <div class = "div-empty " id="divReference"></div>
-                <a id="btnShowAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+                <div class = "div-empty scrollbar-light" id="divReference"></div>
+                <a id="btnShowAddReference" class="btn btn-primary ">Add Reference</a>
                 <div id="divUploadReference" style="display:none">
                     <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
                         <div class="dropzone-previews"></div>
@@ -197,7 +197,7 @@
                         <input id="typeInput" type="hidden" name="type_name" value = "">
 
                     </form>
-                    <input id="descriptionInput" type="text" name="description" placeholder = "describe your file briefly" value = "">
+                    <input id="descriptionInput" class="form-control" style="margin-top:5px; margin-bottom: 5px;" type="text" name="description" placeholder = "describe your file briefly" value = "">
                     <button id = "uploadBtn" class="btn btn-default">Upload</button>
                     <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
                 </div>
@@ -211,12 +211,12 @@
                 <h3>Expanded Clipboard</h3>
             </div>
             <div class="row no-gutter">
-                <span>Nodes:</span>
+                <h4><span>Nodes:</span></h4>
                 <div id="divClipboardNode" class="clipboard-display-div div-clipboard myTabContent">
                 </div>
             </div>
             <div class="row no-gutter">
-                <span>References:</span>
+                <h4><span>References:</span></h4>
                 <div id="divClipboardReference" class="clipboard-display-div div-clipboard">
                 </div>
             </div>

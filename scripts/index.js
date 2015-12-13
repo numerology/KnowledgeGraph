@@ -606,11 +606,13 @@ function addSingleNodeNoclick(div_selector, data){ // add single node to selecte
 
 function showDivAddChild(){
     d3.select("#btnShowAddChild").style("display", "none");
-    d3.select("#divAddChild").style("display","inline");
+    //d3.select("#divAddChild").style("display","inline");
+    $("#divAddChild").show();
 }
 
 function closeDivAddChild(){
-    d3.select("#btnShowAddChild").style("display", "inline");
+    $("#btnShowAddChild").show();
+    //d3.select("#btnShowAddChild").style("display", "inline");
     d3.select("#divAddChild").style("display","none");
     d3.select("#inputAddChild").property("value","");
 }
@@ -624,7 +626,8 @@ function showBriefNodeInfo(e){
     placeDivTooltip(new_pos);
     d3.select("#tooltipContent").append("h4").text(e.msg);
     //console.log(pos);
-    $("#divNodeTooltip").css("display","inline");
+    //$("#divNodeTooltip").css("display","inline");
+    $("#divNodeTooltip").show();
     console.log("Show triggered");
 }
 

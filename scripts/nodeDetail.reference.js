@@ -72,11 +72,13 @@ function loadDivRef(d){
 }
 
 function closeDivAddRef(){
-    d3.select("#btnShowAddReference").style("display", "inline");
+    $("#btnShowAddReference").show();
+    //d3.select("#btnShowAddReference").style("display", "inline");
     d3.select("#divUploadReference").style("display","none");
 }
 
 function showAddRef(){
-    d3.select("#divUploadReference").style("display", "inline");
+    $("#divUploadReference").show();
+    //d3.select("#divUploadReference").style("display", "inline");
     d3.select("#btnShowAddReference").style("display","none");
 }

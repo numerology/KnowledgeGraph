@@ -13,9 +13,16 @@
 .div-clipboard {
     border-radius: 5px;
     min-height: 40px;
-    background-color: #F0F8FF;
+    background-color: #e1f1ff;
     margin-top: 5px;
     margin-bottom: 10px;
+}
+.div-clipboard .thumbnail{
+    display: inline-block;
+    margin: 10px;
+    background-color: transparent;
+    width: auto;
+    height: auto;
 }
 #divExpandedClipboard {
     width: 100%;

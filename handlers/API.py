@@ -33,6 +33,8 @@ def node_collapse(node, default_data={}):
     for r in node.reference:
         ref = Reference.get_by_id(int(r))
         current_description = ref.description
+        if not current_description:
+            current_description = "No description"
         if ref.type == IN_TYPE_IMG:
             current_url = images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
         if ref.type == IN_TYPE_PDF:
@@ -625,6 +627,8 @@ class ReturnRoots(webapp2.RequestHandler):
             current_root = Node.get_by_id(int(r))
             pair = {'msg': current_root.title,
                     'rootID': r, 'root_name': current_root.name}
+            if not current_root.title:
+                pair["msg"] = current_root.name
             out_list.append(pair)
 
         self.response.headers['Content-Type'] = 'text/plain'
