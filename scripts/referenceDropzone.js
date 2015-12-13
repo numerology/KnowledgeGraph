@@ -47,6 +47,8 @@ Dropzone.options.uploader = {
         });
         this.on("complete", function(file) {
             var upurl = '0';
+            var ref_owner_id = d3.select("#nodeIDInput").attr("value");
+    //        var ref_id = d3.select("#refIDInput").attr("value");
             //console.log('Triggering');
             $.ajax({
                 type: 'get',
@@ -58,12 +60,52 @@ Dropzone.options.uploader = {
                     var jsdata = JSON.parse(data);
                     upurl = jsdata['upload_url'];
                     console.log("set");
+                 //   this.options.url = upurl;
+                },
+            });
+            $.ajax({
+                type: 'post',
+                url: "/update_ref",
+                data: {"node_ID": ref_owner_id},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        console.log(response.message);
 
+                        original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                            .filter(function(d){
+                                console.log(d.id + " "+ref_owner_id);
+                                return d.id == ref_owner_id;
+                            });
+                        //console.log(original_nodes)[0];
+                        if (original_nodes.length >0){
+                            original_nodes.each(function(d){
+                                d.reference = response.new_data.reference;
+                                d.thumbnails = response.new_data.thumbnails;
+                                if (currentNode.id == ref_owner_id){
+                                    console.log("reload div on update");
+                                    loadDivRef(d);
+                                }
+                            });
+                        }
+                        original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                            .filter(function(d){
+                                console.log(d.id + " "+ref_owner_id);
+                                return d.id == ref_owner_id;
+                            }).each(function(d){console.log(d.reference);});
+
+
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+
+                },
+                failure: function(){
+                    window.alert("ajax error in index sharing");
                 },
             });
             this.options.url = upurl;
             myDropzone.removeFile(file);
-            updateGraph(root);
         });
         this.on("sending", function(file, xhr, formData){
             console.log("sending");
@@ -81,6 +123,7 @@ Dropzone.options.uploader = {
                 console.log(ext);
             }
         });
+        /*
         this.on("removedfile", function(file) {
             console.log('removing');
             var index = 0;
@@ -104,7 +147,7 @@ Dropzone.options.uploader = {
                 });
                 }
             });
-
+        */
         _this = this;
     }
 };

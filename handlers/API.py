@@ -355,6 +355,22 @@ class DeleteRefHandler(webapp2.RequestHandler):
         self.response.out.write(json.dumps(response))
         return
 
+class UpdateRefHandler(webapp2.RequestHandler):
+    def post(self):
+
+        node_id = self.request.get("node_ID")
+
+        cNode = Node.get_by_id(int(node_id))
+        response = {"status":"success",
+                    "message": "Ref updated",}
+        if not cNode:
+            response["status"] = "error"
+            response["message"] = "can not find node " + str(node_id)
+        else:
+            time_sleep(NDB_UPDATE_SLEEP_TIME)
+            response["new_data"]=node_collapse(cNode)
+        self.response.out.write(json.dumps(response))
+        return
 
 
 class FileUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
@@ -422,7 +438,7 @@ class GenerateUploadUrlHandler(webapp2.RequestHandler):
         cnode = Node.get_by_id(int(node_id))
        # bkey = cnode.reference[0].blob_key
 
-        self.response.out.write(json.dumps({'upload_url':'/upload_file'}))
+        self.response.out.write(json.dumps({'upload_url':blobstore.create_upload_url('/upload_file')}))
 
 
 class getPDF(blobstore_handlers.BlobstoreDownloadHandler):
