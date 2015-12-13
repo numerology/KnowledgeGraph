@@ -45,12 +45,8 @@ getSharedGraphTab();
 getClipboard();
 getGraph();
 
-
-
-
-
 function done(){
- console.log("accepted called");
+    console.log("accepted called");
 }
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 function getGraph(){
@@ -164,6 +160,7 @@ function getClipboard(){
                     }
                     d3.select("#refIDInput").attr("value", thumb.id);
                     d3.select("#refNodeIDInput").attr("value", result.id);
+                    d3.select("#refOwnerType").attr("value", "CLIPBOARD");
                     d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
                     refContextShowing = true;
                 })
@@ -292,6 +289,7 @@ $("#divClipboardReference").sortable({
             }
             d3.select("#refIDInput").attr("value", thumb);
             d3.select("#refNodeIDInput").attr("value", currentClipboard.id);
+            d3.select("#refOwnerType").attr("value", "CLIPBOARD");
             d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
             refContextShowing = true;
         });
@@ -421,6 +419,56 @@ $("#btnClipboard").on("mousedown", function(e){
             },
         });*/
     }
+});
+
+$("#btnConfirmDelete").on("click", function(){
+    var ref_owner_type = d3.select("#refOwnerType").attr("value");
+    var ref_owner_id = d3.select("#refNodeIDInput").attr("value");
+    var ref_id = d3.select("#refIDInput").attr("value");
+    $.ajax({
+        type: 'post',
+        url: "/delete_ref",
+        data: {"ref_ID": ref_id, "node_ID": ref_owner_id},
+        dataType: "json",
+        success: function(response){
+            if(response.status === "success"){
+                console.log(response.message);
+                console.log(ref_owner_type);
+                if (ref_owner_type == "NODE"){
+                    original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                        .filter(function(d){
+                            console.log(d.id + " "+ref_owner_id);
+                            return d.id == ref_owner_id;
+                        });
+                    //console.log(original_nodes)[0];
+                    if (original_nodes.length >0){
+                        original_nodes.each(function(d){
+                            d.reference = response.new_data.reference;
+                            d.thumbnails = response.new_data.thumbnails;
+                            if (currentNode.id == ref_owner_id){
+                                console.log("reload div on delete");
+                                loadDivRef(d);
+                            }
+                        });
+                    }
+                    original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                        .filter(function(d){
+                            console.log(d.id + " "+ref_owner_id);
+                            return d.id == ref_owner_id;
+                        }).each(function(d){console.log(d.reference);});
+                }else{
+                    getClipboard();
+                }
+                closeRefContext();
+            }else if(response.status === "error"){
+                window.alert(response.message);
+            }
+
+        },
+        failure: function(){
+            window.alert("ajax error in index sharing");
+        },
+    });
 });
 
 function windowOffset(selector){ // return offset relative to current window
@@ -1107,6 +1155,7 @@ function loadDivRef(d){
                 }
                 d3.select("#refIDInput").attr("value", thumb.id);
                 d3.select("#refNodeIDInput").attr("value", d.id);
+                d3.select("#refOwnerType").attr("value", "NODE");
                 d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
                 refContextShowing = true;
 
@@ -1114,7 +1163,6 @@ function loadDivRef(d){
         cThumbnail.append("img").attr("src", thumb.url)
             .attr("alt", thumb.msg)
             .attr("style", "height:100px;width:auto;");
-
 	});
 	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
@@ -1151,6 +1199,7 @@ function loadDivRef(d){
                 //console.log(currentNode.id);
                 d3.select("#refIDInput").attr("value", thumb);
                 d3.select("#refNodeIDInput").attr("value", currentNode.id);
+                d3.select("#refOwnerType").attr("value", "NODE");
                 d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
                 refContextShowing = true;
             });

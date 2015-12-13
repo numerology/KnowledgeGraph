@@ -144,10 +144,11 @@
         <div class="col-md-12" style="padding:0;">
             <div class="well bs-component" style="margin:0;">
                 <h2>Do you really want to delete this ref?</h2>
-                <form class="form-horizontal" id="formDelteRef" action = "/delete_ref" method="post" autocomplete="off">
+                <form class="form-horizontal" id="formDelteRef" action = "javascript: void(0);" method="post" autocomplete="off">
                     <input id="refIDInput" type="hidden" name="ref_ID" value = "">
                     <input id="refNodeIDInput" type="hidden" name="node_ID" value = "">
-                    <button id="btnConfirmDelete" type="submit" class="btn btn-primary" value = "Create Root">Yes</button>
+                    <input id="refOwnerType" type="hidden" name="ref_owner" value = "">
+                    <button id="btnConfirmDelete" type="submit" class="btn btn-primary" value = "DELETE_ROOT">Yes</button>
                     <a id="btnCancelDelete" type="reset" class="btn btn-default">Cancel</a>
                 </form>
             </div>
@@ -195,7 +196,6 @@
                         </div>
                         <input id="nodeIDInput" type="hidden" name="node_ID" value = "">
                         <input id="typeInput" type="hidden" name="type_name" value = "">
-
                     </form>
                     <input id="descriptionInput" class="form-control" style="margin-top:5px; margin-bottom: 5px;" type="text" name="description" placeholder = "describe your file briefly" value = "">
                     <button id = "uploadBtn" class="btn btn-default">Upload</button>

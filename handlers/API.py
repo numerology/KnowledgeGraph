@@ -339,11 +339,21 @@ class DeleteRefHandler(webapp2.RequestHandler):
         node_id = self.request.get("node_ID")
         cRef = Reference.get_by_id(int(ref_id))
         cNode = Node.get_by_id(int(node_id))
-
-        blobstore.delete(cRef.blobkey)
-        cNode.reference.remove(ref_id)
-        cNode.put()
-        self.redirect('/')
+        response = {"status":"success",
+                    "message": "Ref deleted",}
+        if not cRef:
+            response["status"] = "error"
+            response["message"] = "can not find reference " + str(ref_id)
+        elif not cNode:
+            response["status"] = "error"
+            response["message"] = "can not find node " + str(node_id)
+        else:
+            blobstore.delete(cRef.blobkey)
+            cNode.reference.remove(ref_id)
+            cNode.put()
+            response["new_data"]=node_collapse(cNode)
+        self.response.out.write(json.dumps(response))
+        return
 
 
 
