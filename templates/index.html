@@ -109,8 +109,8 @@
 
                             <div class="form-group">
                               <div class="col-lg-10 col-lg-offset-2">
-                                <button type="submit" class="btn btn-primary" value = "Create Root">Submit</button>
-                                <button type="reset" class="btn btn-default">Cancel</button>
+                                <button type="submit" class="btn btn-primary " value = "Create Root">Submit</button>
+                                <button type="reset" class="btn btn-default ">Cancel</button>
                               </div>
                             </div>
                         </fieldset>
@@ -167,21 +167,21 @@
                     <div class="row" id="nodeChildren">
                         <h4>Children:</h4>
                         <div class = "div-empty myTabContent scrollbar-light" id="divNodeChild"></div>
-                        <button id="btnShowAddChild" class="btn btn-primary btn-sm" value="Add Child">Add Child</button>
-                    </div>
-                    <div class="" id="divAddChild" style="display:none">
-                        <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
-                            <div class="row">
-                                <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
-                                <button class="btn btn-primary" type="submit" value="Add">Add</button>
-                                <button id="btnCancelAddChild" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
-                            </div>
-                        </form>
+                        <button id="btnShowAddChild" class="btn btn-primary " value="Add Child">Add Child</button>
+                        <div class="" id="divAddChild" style="display:none">
+                            <form class="form-horizontal" id="formAddChild" method="post" autocomplete="off">
+                                <div class="">
+                                    <input id="inputAddChild" type="text" class="form-control" placeholder="Enter Child Name" name="childName">
+                                    <button class="btn btn-primary" type="submit" value="Add">Add</button>
+                                    <button id="btnCancelAddChild" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                     <div class="row" id="nodeReference">
                         <h4>References:</h4>
                         <div class = "div-empty scrollbar-light" id="divReference"></div>
-                        <a id="btnShowAddReference" class="btn btn-primary btn-sm">Add Reference</a>
+                        <a id="btnShowAddReference" class="btn btn-primary ">Add Reference</a>
                         <div id="divUploadReference" style="display:none">
                             <form class="dropzone" method = "POST" action = "/upload_file" enctype="multipart/form-data" id="uploader">
                                 <div class="dropzone-previews"></div>
@@ -192,9 +192,9 @@
                                 <input id="typeInput" type="hidden" name="type_name" value = "">
 
                              </form>
-                            <input id="descriptionInput" type="text" name="description" placeholder = "describe your file briefly" value = "">
-                            <button id = "uploadBtn" class="btn btn-default">Upload</button>
-                            <button id="btnCancelUpload" class="btn btn-primary" type="reset" value="Cancel">Cancel</button>
+                            <input id="descriptionInput" class="form-control" style="margin-top:5px; margin-bottom: 5px;" type="text" name="description" placeholder = "describe your file briefly" value = "">
+                            <button id = "uploadBtn" class="btn btn-default ">Upload</button>
+                            <button id="btnCancelUpload" class="btn btn-primary " type="reset" value="Cancel">Cancel</button>
                         </div>
                     </div>
                     <div id="divBtnCopyToClipboard" style="display:none;">

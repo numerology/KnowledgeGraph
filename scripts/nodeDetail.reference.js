@@ -13,12 +13,12 @@ function loadDivRef(d){
     divRef = d3.select("#divReference");
     d.thumbnails.forEach(function(thumb){
         divRef.append("a").attr("class", "thumbnail")
-            .attr("style", "height:100px")
+            .attr("style", "height:110px")
             .on("mouseover",function(){
                 $("#RefTipContent").empty();
                 pos = $(this).offset();
                 console.log(pos);
-                $("#divReftip").css({"top": pos.top - 200 , "left": pos.left +20 });
+                $("#divReftip").css({"top": pos.top - 100 , "left": pos.left - 70 });
                 d3.select("#RefTipContent").append("h4").text(thumb.msg);
                 $("#divReftip").css("display","inline");
             })
@@ -72,11 +72,13 @@ function loadDivRef(d){
 }
 
 function closeDivAddRef(){
-    d3.select("#btnShowAddReference").style("display", "inline");
+    $("#btnShowAddReference").show();
+    //d3.select("#btnShowAddReference").style("display", "inline");
     d3.select("#divUploadReference").style("display","none");
 }
 
 function showAddRef(){
+    $("#divUploadReference").show();
     d3.select("#divUploadReference").style("display", "inline");
     d3.select("#btnShowAddReference").style("display","none");
 }

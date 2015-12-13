@@ -8,6 +8,7 @@ var addRootShowing = false;
 var shareShowing = false;
 var currentClass;
 var currentNode;
+var currentClipboard;
 
 var i = 0,
     duration = 750,
@@ -44,12 +45,8 @@ getSharedGraphTab();
 getClipboard();
 getGraph();
 
-
-
-
-
 function done(){
- console.log("accepted called");
+    console.log("accepted called");
 }
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
 function getGraph(){
@@ -112,7 +109,8 @@ function getClipboard(){
     d3.json("/get_clipboard/" + userID, function(result){
     //console.log(result)
     //console.log(result)
-    divClipboardChild =d3.select("#divClipboardNode");
+    divClipboardChild = d3.select("#divClipboardNode");
+    currentClipboard = result;
     $("#divClipboardNode").empty();
     if (result.children){
         children = result.children;
@@ -130,19 +128,45 @@ function getClipboard(){
         result.thumbnails.forEach(function(thumb){
             //console.log("adding");
             divClipRef.append("a").attr("class", "thumbnail")
-			    .append("img").attr("src", thumb.url)
-                .attr("alt", thumb.msg)
-                .attr("style", "height:100px")
-                .on("mouseover",function(){
-                    $("#tooltipContent").empty();
+                .attr("style", "height:110px; width:auto;")
+                .attr("href", "/serve_reference/"+thumb.blob)
+			    .on("mouseover",function(){
+                    $("#RefTipContent").empty();
                     pos = $(this).offset();
                     //console.log(pos);
-                    placeDivTooltip(pos);
-                    d3.select("#tooltipContent").append("h4").text(thumb.msg);
-                    $("#divNodeTooltip").attr("style","display:inline");
-                    //console.log("Show triggered");
+                    console.log("mouseover");
+                    console.log(this.width);
+                    $("#divReftip").css({"top": pos.top + 120 , "left": pos.left + 0 });
+                    d3.select("#RefTipContent").append("h4").text(thumb.msg);
+        //console.log(pos);
+                    $("#divReftip").show();//css("display","inline");
+                    console.log("Show triggered");
                 })
-                .on("mouseout",closeMsgCase);
+                .on("mouseout",function(){
+                    $("#divReftip").css("display", "none");
+                    console.log("Close triggered");
+                }).on("contextmenu", function(){
+                    if (d3.event){
+                        d3.event.preventDefault();
+                    }
+                    if(refContextShowing){
+                        closeRefContext();
+                        pos = $(this).offset();
+                        $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+                    }else{
+                        pos = $(this).offset();
+                        $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                    }
+                    d3.select("#refIDInput").attr("value", thumb.id);
+                    d3.select("#refNodeIDInput").attr("value", result.id);
+                    d3.select("#refOwnerType").attr("value", "CLIPBOARD");
+                    d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                    refContextShowing = true;
+                })
+			    .append("img").attr("src", thumb.url)
+                .attr("alt", thumb.msg)
+                .attr("style", "height:100px");
 	    });
 	    divClipRef.selectAll("a").data(result.reference);
     }
@@ -248,9 +272,26 @@ $("#divClipboardReference").sortable({
     },
     update: function(event, ui){
         var new_reference_list = [];
-        d3.selectAll("#divClipboardReference a").each(function(d){
-            //console.log(d);        
-            new_reference_list.push(d.toString());
+        d3.selectAll("#divClipboardReference a").each(function(thumb){
+            new_reference_list.push(thumb.toString());
+        }).on("contextmenu", function(thumb){
+            if (d3.event){
+                d3.event.preventDefault();
+            }
+            if(refContextShowing){
+                closeRefContext();
+                pos = $(this).offset();
+                $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+            }else{
+                pos = $(this).offset();
+                $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+            }
+            d3.select("#refIDInput").attr("value", thumb);
+            d3.select("#refNodeIDInput").attr("value", currentClipboard.id);
+            d3.select("#refOwnerType").attr("value", "CLIPBOARD");
+            d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+            refContextShowing = true;
         });
         $.ajax({
             type: 'post',
@@ -378,6 +419,56 @@ $("#btnClipboard").on("mousedown", function(e){
             },
         });*/
     }
+});
+
+$("#btnConfirmDelete").on("click", function(){
+    var ref_owner_type = d3.select("#refOwnerType").attr("value");
+    var ref_owner_id = d3.select("#refNodeIDInput").attr("value");
+    var ref_id = d3.select("#refIDInput").attr("value");
+    $.ajax({
+        type: 'post',
+        url: "/delete_ref",
+        data: {"ref_ID": ref_id, "node_ID": ref_owner_id},
+        dataType: "json",
+        success: function(response){
+            if(response.status === "success"){
+                console.log(response.message);
+                console.log(ref_owner_type);
+                if (ref_owner_type == "NODE"){
+                    original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                        .filter(function(d){
+                            console.log(d.id + " "+ref_owner_id);
+                            return d.id == ref_owner_id;
+                        });
+                    //console.log(original_nodes)[0];
+                    if (original_nodes.length >0){
+                        original_nodes.each(function(d){
+                            d.reference = response.new_data.reference;
+                            d.thumbnails = response.new_data.thumbnails;
+                            if (currentNode.id == ref_owner_id){
+                                console.log("reload div on delete");
+                                loadDivRef(d);
+                            }
+                        });
+                    }
+                    original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                        .filter(function(d){
+                            console.log(d.id + " "+ref_owner_id);
+                            return d.id == ref_owner_id;
+                        }).each(function(d){console.log(d.reference);});
+                }else{
+                    getClipboard();
+                }
+                closeRefContext();
+            }else if(response.status === "error"){
+                window.alert(response.message);
+            }
+
+        },
+        failure: function(){
+            window.alert("ajax error in index sharing");
+        },
+    });
 });
 
 function windowOffset(selector){ // return offset relative to current window
@@ -595,8 +686,8 @@ function addRoot(e){
     if(addRootShowing){
         closeAddRoot();
     }
-
-    d3.select("#divAddRoot").style("display","inline")
+    $("#divAddRoot").show();
+    d3.select("#divAddRoot")//.style("display","inline")
         .style("top", (e.x + 200)+"px");
     //console.log(e);
     d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
@@ -677,7 +768,8 @@ function showBriefNodeInfo(e){
     placeDivTooltip(new_pos);
     d3.select("#tooltipContent").append("h4").text(e.msg);
     //console.log(pos);   
-    $("#divNodeTooltip").css("display","inline");
+    //$("#divNodeTooltip").css("display","inline");
+    $("#divNodeTooltip").show();
     //console.log("Show triggered");
 }
 
@@ -795,9 +887,11 @@ function contextmenu(d) {
     var _currentClass = d.name;
     if(contextMenuShowing){
         closeContextMenu();
-        d3.select("#divNodeDetail").style("display","inline");
+        $("#divNodeDetail").show();
+        //d3.select("#divNodeDetail").style("display","inline");
     }else{
-        d3.select("#divNodeDetail").style("display","inline")
+        $("#divNodeDetail").show();
+        d3.select("#divNodeDetail")//.style("display","inline")
             .style("top", (d.x+200)+"px")
             .style("left", (d.y+400)+"px");
     }
@@ -958,7 +1052,8 @@ function loadChild(d){ // load children in ContextMenu
 
 function showDivAddChild(){
     d3.select("#btnShowAddChild").style("display", "none");
-    d3.select("#divAddChild").style("display","inline");
+    $("#divAddChild").show();
+//    d3.select("#divAddChild").style("display","inline");
 }
 
 function loadDivAddChild(d){
@@ -1007,7 +1102,8 @@ function loadDivAddChild(d){
 
 
 function closeDivAddChild(){
-    d3.select("#btnShowAddChild").style("display", "inline");
+    $("#btnShowAddChild").show();
+//    d3.select("#btnShowAddChild").style("display", "inline");
     d3.select("#divAddChild").style("display","none");
     d3.select("#inputAddChild").property("value","");
 }
@@ -1028,21 +1124,21 @@ function loadDivRef(d){
         //console.log("adding");
         cThumbnail = divRef.append("a").attr("class", "thumbnail")
 			//.data([{"src": thumb.url}],0)
-            .attr("style", "height:100px")
+            .attr("style", "height:110px; width:auto;")
             .attr("href", "/serve_reference/"+thumb.blob)
             .on("mouseover",function(){
                 $("#RefTipContent").empty();
                 pos = $(this).offset();
-                console.log(pos);
-                $("#divReftip").css({"top": pos.top + 20 , "left": pos.left +20 });
+                //console.log(pos);
+                $("#divReftip").css({"top": pos.top + 120 , "left": pos.left + 0 });
                 d3.select("#RefTipContent").append("h4").text(thumb.msg);
     //console.log(pos);
-                $("#divReftip").css("display","inline");
-                console.log("Show triggered");
+                $("#divReftip").show();//css("display","inline");
+                //console.log("Show triggered");
             })
             .on("mouseout",function(){
                 $("#divReftip").css("display", "none");
-                console.log("Close triggered");
+                //console.log("Close triggered");
             })
             .on("contextmenu", function(){
                 if (d3.event){
@@ -1059,14 +1155,14 @@ function loadDivRef(d){
                 }
                 d3.select("#refIDInput").attr("value", thumb.id);
                 d3.select("#refNodeIDInput").attr("value", d.id);
+                d3.select("#refOwnerType").attr("value", "NODE");
                 d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
                 refContextShowing = true;
 
             });
         cThumbnail.append("img").attr("src", thumb.url)
             .attr("alt", thumb.msg)
-            .attr("style", "height:100px");
-
+            .attr("style", "height:100px;width:auto;");
 	});
 	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
@@ -1083,9 +1179,29 @@ function loadDivRef(d){
             var new_reference_list = [];
             //console.log(event);
             //console.log(ui);
-            d3.selectAll("#divReference .thumbnail").each(function(d, i){
-                //console.log(d);
-                new_reference_list.push(d.toString());
+            d3.selectAll("#divReference .thumbnail").each(function(thumb, i){
+                //console.log(thumb);
+                new_reference_list.push(thumb.toString());
+            }).on("contextmenu", function(thumb){
+                if (d3.event){
+                    d3.event.preventDefault();
+                }
+                if(refContextShowing){
+                    closeRefContext();
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+                }else{
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                }
+                //console.log(thumb);
+                //console.log(currentNode.id);
+                d3.select("#refIDInput").attr("value", thumb);
+                d3.select("#refNodeIDInput").attr("value", currentNode.id);
+                d3.select("#refOwnerType").attr("value", "NODE");
+                d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                refContextShowing = true;
             });
             $.ajax({
                 type: 'post',
@@ -1120,7 +1236,7 @@ function showMsgCase(e){
     d3.select("#tooltipContent").append("h4").text(e.attr("alt"));
     //console.log(pos);
     placeDivTooltip(new_pos);
-    $("#divNodeTooltip").css("display","inline");
+    $("#divNodeTooltip").show();//css("display","inline");
     //console.log("Show triggered");
 }
 

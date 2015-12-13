@@ -13,6 +13,7 @@ body {
     height: 30px;
     bottom: 10px;
     width: 100%;
+    z-index: -9999;
 }
 .form-group{
     overflow: hidden;

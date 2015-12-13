@@ -76,3 +76,10 @@ body{
     width: auto;
     background-color: #fff;
 }
+#divReference .thumbnail {
+    display: inline-block;
+    margin: 10px;
+    background-color: transparent;
+    width: auto;
+    height: auto;
+}

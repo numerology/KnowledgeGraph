@@ -33,6 +33,8 @@ def node_collapse(node, default_data={}):
     for r in node.reference:
         ref = Reference.get_by_id(int(r))
         current_description = ref.description
+        if not current_description:
+            current_description = "No description"
         if ref.type == IN_TYPE_IMG:
             current_url = images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
         if ref.type == IN_TYPE_PDF:
@@ -337,11 +339,21 @@ class DeleteRefHandler(webapp2.RequestHandler):
         node_id = self.request.get("node_ID")
         cRef = Reference.get_by_id(int(ref_id))
         cNode = Node.get_by_id(int(node_id))
-
-        blobstore.delete(cRef.blobkey)
-        cNode.reference.remove(ref_id)
-        cNode.put()
-        self.redirect('/')
+        response = {"status":"success",
+                    "message": "Ref deleted",}
+        if not cRef:
+            response["status"] = "error"
+            response["message"] = "can not find reference " + str(ref_id)
+        elif not cNode:
+            response["status"] = "error"
+            response["message"] = "can not find node " + str(node_id)
+        else:
+            blobstore.delete(cRef.blobkey)
+            cNode.reference.remove(ref_id)
+            cNode.put()
+            response["new_data"]=node_collapse(cNode)
+        self.response.out.write(json.dumps(response))
+        return
 
 
 
@@ -625,6 +637,8 @@ class ReturnRoots(webapp2.RequestHandler):
             current_root = Node.get_by_id(int(r))
             pair = {'msg': current_root.title,
                     'rootID': r, 'root_name': current_root.name}
+            if not current_root.title:
+                pair["msg"] = current_root.name
             out_list.append(pair)
 
         self.response.headers['Content-Type'] = 'text/plain'
