@@ -2634,7 +2634,7 @@ JqTreeWidget = (function(superClass) {
       loadDataFromUrl('/my_data', node1);
       loadDataFromUrl('/my_data', node1, function() { console.log('finished'); });
       loadDataFromUrl('/my_data', null, function() { console.log('finished'); });
-
+  
   - loadDataFromUrl(parent_node=null, on_finished=null)
       loadDataFromUrl();
       loadDataFromUrl(node1);

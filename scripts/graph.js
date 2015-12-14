@@ -3,10 +3,12 @@ var margin = {top: 20, right: 120, bottom: 20, left: 120},
     height = 800 - margin.top - margin.bottom;
 
 var contextMenuShowing = false;
+var refContextShowing = false;
 var addRootShowing = false;
 var shareShowing = false;
 var currentClass;
 var currentNode;
+var currentClipboard;
 
 var i = 0,
     duration = 750,
@@ -26,101 +28,89 @@ var svg = d3.select("#graphcanvas").append("svg")
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var key_dict = [];
 var _this = null;
 var flag = true;
-var uploaded = []
 
 
-
-function sleep(milliseconds) {
-    var start = new Date().getTime();
-    for (var i = 0; i < 1e7; i++) {
-        if ((new Date().getTime() - start) > milliseconds){
-            break;
-        }
-    }
-}
 
 $(document).ready(function() {
     var cache = {};
 
-    $("#uploadBtn").click(function() {
-        flag = false;
-        console.log('refreshing');
-        sleep(200);
-        if(this!=null){
-            _this.removeAllFiles();
-        }
-        uploaded = [];
-        key_dict = [];
-        $('#content').load('/refresh/{{stream.key.id()}}/1');
-        flag = true; //the flag is used to prevent the backend actually deleting my img
-    });
+
 
      
 });
-
-
-
-
-
+getMyGraphTab();
+getSharedGraphTab();
+getClipboard();
+getGraph();
 
 function done(){
- console.log("accepted called");
+    console.log("accepted called");
 }
 //var myjson = '{"name": "flare","children": [{"name": "analytics","children": [{"name": "cluster","children": [{"name": "MergeEdge" }]}]}]}';
-d3.json("/get_rooted_data/" + userID, function(flare) {
+function getGraph(){
+    d3.json("/get_rooted_data/" + userID, function(flare) {
+          //  if (error) throw error;
+            root = flare;
+            //  root = JSON.parse(myjson);
+            root.x0 = height / 2;
+            root.y0 = 0;
 
-  //  if (error) throw error;
-    root = flare;
-    //  root = JSON.parse(myjson);
-    root.x0 = height / 2;
-    root.y0 = 0;
-
-    function collapse(d) {
-    if (d.children) {
-      d._children = d.children;
-      d._children.forEach(collapse);
-      d.children = null;
-    }
-    }
-    if(root.children){
-    root.children.forEach(collapse);
-    }
-    update(root);
-    loadGraphTab();
-});
+            function collapse(d) {
+            if (d.children) {
+              d._children = d.children;
+              d._children.forEach(collapse);
+              d.children = null;
+            }
+            }
+            if(root.children){
+            root.children.forEach(collapse);
+            }
+            update(root);
+        }
+    );
+}
 
 //write out the root list
-d3.json("/get_root_list/" + userID, function(result) {
-    list = result;
-    tabContentSelector = d3.select("#contentMyGraph");
-    list.root_list.forEach(function(d){
-        //console.log(d);
-        nodeData = {"node_text":d.root_name,"node_data":{"name":d.root_name,"msg": String(d.msg), "id": d.rootID}};
-        addNodeWithContext(tabContentSelector, nodeData, shareMenu);
-    });
-	if (list.root_list.length == 1){
-		tabContentSelector.selectAll("g").classed("lastNode", true);
-	}
-})
+function getMyGraphTab(){
+    d3.selectAll("#contentMyGraph .svg-node").remove();
+    loadMyGraphTab();
+    d3.json("/get_root_list/" + userID, function(result) {
+        list = result;
+        tabContentSelector = d3.select("#contentMyGraph");
+        list.root_list.forEach(function(d){
+            //console.log(d);
+            nodeData = {"node_text":d.root_name,"node_data":{"name":d.root_name,"msg": String(d.msg), "id": d.rootID}};
+            addNodeWithContext(tabContentSelector, nodeData, clickMyTabNode, shareMenu);
+        });
+        if (list.root_list.length == 1){
+            tabContentSelector.selectAll("g").classed("lastNode", true);
+        }
+    })
+}
 
-d3.json("/get_shared_list/" + userID, function(result) {
-    list = result;
-    //console.log("getting shared list");
-    tabSharedSelector =d3.select("#contentSharedGraph");
-    list.shared_list.forEach(function(d){
-        //console.log(d);
-        nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
-        addSingleNode(tabSharedSelector, nodeData);
-    });
-})
+function getSharedGraphTab(){
+    loadSharedGraphTab();
+    d3.json("/get_shared_list/" + userID, function(result) {
+        list = result;
+        //console.log(result);
+        //console.log("getting shared list");
+        tabSharedSelector =d3.select("#contentSharedGraph");
+        list.shared_list.forEach(function(d){
+            //console.log(d);
+            nodeData = {"node_text":d.root_name, "node_data":{"name":d.root_name, "msg": String(d.msg), "id": d.rootID}};
+            addSingleNode(tabSharedSelector, nodeData, clickSharedTabNode);
+        });
+    })
+}
 
-d3.json("/get_clipboard/" + userID, function(result){
+function getClipboard(){
+    d3.json("/get_clipboard/" + userID, function(result){
     //console.log(result)
     //console.log(result)
-    divClipboardChild =d3.select("#divClipboardNode");
+    divClipboardChild = d3.select("#divClipboardNode");
+    currentClipboard = result;
     $("#divClipboardNode").empty();
     if (result.children){
         children = result.children;
@@ -138,44 +128,116 @@ d3.json("/get_clipboard/" + userID, function(result){
         result.thumbnails.forEach(function(thumb){
             //console.log("adding");
             divClipRef.append("a").attr("class", "thumbnail")
-			    .append("img").attr("src", thumb.url)
-                .attr("alt", thumb.msg)
-                .attr("style", "height:100px")
-                .on("mouseover",function(){
-                    $("#tooltipContent").empty();
+                .attr("style", "height:110px; width:auto;")
+                .attr("href", "/serve_reference/"+thumb.blob)
+			    .on("mouseover",function(){
+                    $("#RefTipContent").empty();
                     pos = $(this).offset();
                     //console.log(pos);
-                    placeDivTooltip(pos);
-                    d3.select("#tooltipContent").append("h4").text(thumb.msg);
-                    $("#divNodeTooltip").attr("style","display:inline");
-                    //console.log("Show triggered");
+                    console.log("mouseover");
+                    console.log(this.width);
+                    $("#divReftip").css({"top": pos.top + 120 , "left": pos.left + 0 });
+                    d3.select("#RefTipContent").append("h4").text(thumb.msg);
+        //console.log(pos);
+                    $("#divReftip").show();//css("display","inline");
+                    console.log("Show triggered");
                 })
-                .on("mouseout",closeMsgCase);
+                .on("mouseout",function(){
+                    $("#divReftip").css("display", "none");
+                    console.log("Close triggered");
+                }).on("contextmenu", function(){
+                    if (d3.event){
+                        d3.event.preventDefault();
+                    }
+                    if(refContextShowing){
+                        closeRefContext();
+                        pos = $(this).offset();
+                        $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+                    }else{
+                        pos = $(this).offset();
+                        $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                    }
+                    d3.select("#refIDInput").attr("value", thumb.id);
+                    d3.select("#refNodeIDInput").attr("value", result.id);
+                    d3.select("#refOwnerType").attr("value", "CLIPBOARD");
+                    d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                    refContextShowing = true;
+                })
+			    .append("img").attr("src", thumb.url)
+                .attr("alt", thumb.msg)
+                .attr("style", "height:100px");
 	    });
 	    divClipRef.selectAll("a").data(result.reference);
     }
 });
+}
 
 function shareMenu(e){
-    var shareUrl = "/shareroot/" + e.id + '/' + String(userID);
-    d3.event.preventDefault();
-    //console.log(e);
     if(shareShowing){
         closeShare();
     }
-    $("#shareNodeName").text(e.name);
-    console.log(e);
+    var node = e;
+    $("#formShareRoot")[0].reset();
+    var shareUrl = "/shareroot/" + node.id + '/' + String(userID);
+    d3.event.preventDefault();
+    d3.select("#btnCancelShareRoot").attr("href", "javascript: closeShare();");
+    $("#shareNodeName").text(node.name);
+
     d3.select("#divShare").style("display","inline")
         .style("top", (e.x + 200)+"px");
-
-    d3.select("#btnCancelShareRoot").attr("href", "javascript: closeShare();");
-    //Load tag section
-    d3.select("#formShareRoot").attr("action", shareUrl);
     addRootShowing = true;
+
+    $("#divInputEmail .tag-editor").remove();
+    $("#inputEmail").empty();
+    $("#inputEmail").tagEditor({
+        initialTags:[],
+        maxTags: 10,
+        removeDuplicates: true,
+        sortable: false,
+        placeholder: "Add email",
+        autocomplete: null, // { 'source': '/url/', minLength: 3 }
+        onChange: validateTagEmail,
+    });
+    $("#formShareRoot").validate({
+        rules: {
+            target_mail: {
+                required: true,
+
+            },
+            title_name: {
+                required: false,
+                maxlength: TITLE_MAX_LENGTH,
+            }
+        },
+        errorPlacement: function(error, element) {
+            error.insertAfter($("#formShareRoot ul")); // <- the default
+        },
+        submitHandler:function(){
+            console.log("sending:"+ $('#inputEmail').val());
+            $.ajax({
+                type: 'post',
+                url: shareUrl,
+                data: {"target_email": $('#inputEmail').val(), "share_message": $("#shareMessage").val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        closeShare();
+                        console.log(response.message);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in index sharing");},
+            });
+        }
+    });
 }
 
 function closeShare(){
-    d3.select("#divShare").style("display","none");
+    $("#divShare").hide();
+    $("#formShareRoot")[0].reset();
     shareShowing = false;
 }
 
@@ -210,9 +272,26 @@ $("#divClipboardReference").sortable({
     },
     update: function(event, ui){
         var new_reference_list = [];
-        d3.selectAll("#divClipboardReference a").each(function(d){
-            //console.log(d);        
-            new_reference_list.push(d.toString());
+        d3.selectAll("#divClipboardReference a").each(function(thumb){
+            new_reference_list.push(thumb.toString());
+        }).on("contextmenu", function(thumb){
+            if (d3.event){
+                d3.event.preventDefault();
+            }
+            if(refContextShowing){
+                closeRefContext();
+                pos = $(this).offset();
+                $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+            }else{
+                pos = $(this).offset();
+                $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+            }
+            d3.select("#refIDInput").attr("value", thumb);
+            d3.select("#refNodeIDInput").attr("value", currentClipboard.id);
+            d3.select("#refOwnerType").attr("value", "CLIPBOARD");
+            d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+            refContextShowing = true;
         });
         $.ajax({
             type: 'post',
@@ -262,13 +341,12 @@ $("#divClipboardNode").sortable({
         var new_children = [];
 
         d3.selectAll("#divClipboardNode .node")
-          .each(function(e){
+            .each(function(e,i){
             console.log(e);
             new_child_list.push(e.id.toString());
             new_children.push(e.child);
+        }).on('click', function(e){});// remove click function for nodes in clipboard
 
-            //
-          });
         
         $.ajax({
             type: 'post',
@@ -278,6 +356,7 @@ $("#divClipboardNode").sortable({
             success: function(response){
                 //console.log(response.status);
                 if(response.status === "success"){
+
                 }else if(response.status === "error"){
                     window.alert(response.message);
                 }},
@@ -342,6 +421,56 @@ $("#btnClipboard").on("mousedown", function(e){
     }
 });
 
+$("#btnConfirmDelete").on("click", function(){
+    var ref_owner_type = d3.select("#refOwnerType").attr("value");
+    var ref_owner_id = d3.select("#refNodeIDInput").attr("value");
+    var ref_id = d3.select("#refIDInput").attr("value");
+    $.ajax({
+        type: 'post',
+        url: "/delete_ref",
+        data: {"ref_ID": ref_id, "node_ID": ref_owner_id},
+        dataType: "json",
+        success: function(response){
+            if(response.status === "success"){
+                console.log(response.message);
+                console.log(ref_owner_type);
+                if (ref_owner_type == "NODE"){
+                    original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                        .filter(function(d){
+                            console.log(d.id + " "+ref_owner_id);
+                            return d.id == ref_owner_id;
+                        });
+                    //console.log(original_nodes)[0];
+                    if (original_nodes.length >0){
+                        original_nodes.each(function(d){
+                            d.reference = response.new_data.reference;
+                            d.thumbnails = response.new_data.thumbnails;
+                            if (currentNode.id == ref_owner_id){
+                                console.log("reload div on delete");
+                                loadDivRef(d);
+                            }
+                        });
+                    }
+                    original_nodes = d3.selectAll("#graphcanvas svg g.node")
+                        .filter(function(d){
+                            console.log(d.id + " "+ref_owner_id);
+                            return d.id == ref_owner_id;
+                        }).each(function(d){console.log(d.reference);});
+                }else{
+                    getClipboard();
+                }
+                closeRefContext();
+            }else if(response.status === "error"){
+                window.alert(response.message);
+            }
+
+        },
+        failure: function(){
+            window.alert("ajax error in index sharing");
+        },
+    });
+});
+
 function windowOffset(selector){ // return offset relative to current window
     var ans={};
     ans.top = selector.offset().top - $(window).scrollTop();
@@ -353,7 +482,7 @@ function windowOffset(selector){ // return offset relative to current window
 
 $("#btnEditNodeTitle").tooltip();
 
-function loadGraphTab(){ // call the json function to load the roots for graph tab
+function loadMyGraphTab(){ // call the json function to load the roots for graph tab
     addRootData = {"msg": "Click to add new Root"}; // cannot use jquery on d3 object ...
     nodeaddroot = d3.select("#nodeAddRoot")
                     .on("click", addRoot)
@@ -366,7 +495,7 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
   //  nodeData = {"node_text":"Node1", "node_data":{"title":"Data - Title", "msg": "Data Msg"}};
     tabContentSelector = d3.select("#contentMyGraph");
  //   addSingleNode(tabContentSelector, nodeData);
-    nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
+   // nodeData.node_text="Testtttttttt  for aaaaaaaaaaaaa aaaa vvvvvvvery long Title";
   //  addSingleNode(d3.select("#contentSharedGraph"), nodeData);
     //console.log(helperTspan.node().textContent);
     //console.log(helperTspan.node().getComputedTextLength());
@@ -388,8 +517,8 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
               .each(function(e){
 				nodeNum++;
                 temp_node_list.push(e.id.toString());
-                console.log(e);
-              });
+                //console.log(e);
+              }).on("click", clickMyTabNode);// add click function to node in my graph tab
 			//console.log("my graph update: nodeNum is " + nodeNum);
 			// IMPORTANT: YW: 11/28/2015 dont use $(this) inside other functions....
 					// jquery does not add class to d3 element ...
@@ -415,6 +544,9 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 					success: function(response){
 						//console.log(response.status);
 						if(response.status === "success"){
+						    if (response.current_root_changed){ //update graph if current root changed
+						        getGraph();
+						    }
 						}else if(response.status === "error"){
 							window.alert(response.message);
 						}},
@@ -422,9 +554,11 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 						window.alert("ajax error in updating my node list");},
 				});
 			}
-            
         }
     });
+}
+function loadSharedGraphTab(){
+	var nodeData = {"node_text":"Node1", "node_data":{"title":"Shared Node Test", "msg": "Shared node test"}};
     $("#contentSharedGraph").sortable({
         tolerance: 'pointer',
         forceHelperSize: true,
@@ -463,12 +597,15 @@ function loadGraphTab(){ // call the json function to load the roots for graph t
 
 
 
-function addSingleNode(div_selector, data){ // add single node to selected div
-    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+
+function addSingleNode(div_selector, data, clickFunction){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"})
+             .attr("class", "svg-node")
+             .append("g")
              .attr("class", "node")
              //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
-             .on("click", updateGraph)
+             .on("click", clickFunction)
              .on("mouseover", showBriefNodeInfo)
              .on("mouseout", closeBriefNodeInfo);
     tempNode.data([data.node_data], 0);   
@@ -484,7 +621,9 @@ function addSingleNode(div_selector, data){ // add single node to selected div
 }
 
 function addSingleNodeNoclick(div_selector, data){ // add single node to selected div
-    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"})
+             .attr("class", "svg-node")
+             .append("g")
              .attr("class", "node")
              //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
@@ -503,12 +642,14 @@ function addSingleNodeNoclick(div_selector, data){ // add single node to selecte
     //console.log("data of node"+d3.select("#contentMyGraph g .node").data);
 }
 
-function addNodeWithContext(div_selector, data, contextFunction){ // add single node to selected div
-    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+function addNodeWithContext(div_selector, data, clickFunction, contextFunction){ // add single node to selected div
+    tempNode = div_selector.append("svg").attr({"width":"110px", "height": "110px"})
+             .attr("class", "svg-node")
+             .append("g")
              .attr("class", "node")
              //.attr("transform", function(d){return "translate("+source.x0+","+source.y0+")";})
              .style("cursor", "pointer")
-             .on("click", updateGraph)
+             .on("click", clickFunction)
              .on("mouseover", showBriefNodeInfo)
              .on("mouseout", closeBriefNodeInfo)
              .on("contextmenu", contextFunction);
@@ -525,6 +666,19 @@ function addNodeWithContext(div_selector, data, contextFunction){ // add single 
 }
 
 
+function clickMyTabNode(e){
+    console.log("Click node of my tab");
+    closeContextMenu();
+    updateGraph(e);
+}
+
+function clickSharedTabNode(e){
+    //TODO: some behavior of shared node
+    closeContextMenu();
+    updateGraph(e);
+}
+
+
 function addRoot(e){
 
     var addRootUrl = "/addroot/" + String(userID);
@@ -532,8 +686,8 @@ function addRoot(e){
     if(addRootShowing){
         closeAddRoot();
     }
-
-    d3.select("#divAddRoot").style("display","inline")
+    $("#divAddRoot").show();
+    d3.select("#divAddRoot")//.style("display","inline")
         .style("top", (e.x + 200)+"px");
     //console.log(e);
     d3.select("#btnCloseAddRoot").attr("href", "javascript: closeAddRoot();");
@@ -550,11 +704,31 @@ function addRoot(e){
                 required: false,
                 maxlength: TITLE_MAX_LENGTH,
             }
-        }
+        },
+        submitHandler: function(form){
+            $.ajax({
+                type: 'post',
+                url: addRootUrl,
+                data: {"root_name": $('#inputRootName').val(), "title_name": $("#inputRootTitle").val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        closeAddRoot();
+                        getMyGraphTab();
+                        console.log(response.message);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        },
     });
 }
 
 function closeAddRoot(){
+    $("#formAddRoot")[0].reset();
     d3.select("#divAddRoot").style("display","none");
     addRootShowing = false;
 }
@@ -594,7 +768,8 @@ function showBriefNodeInfo(e){
     placeDivTooltip(new_pos);
     d3.select("#tooltipContent").append("h4").text(e.msg);
     //console.log(pos);   
-    $("#divNodeTooltip").css("display","inline");
+    //$("#divNodeTooltip").css("display","inline");
+    $("#divNodeTooltip").show();
     //console.log("Show triggered");
 }
 
@@ -705,17 +880,21 @@ function click(d) {
 }
 
 function contextmenu(d) {
-    d3.event.preventDefault();
-    if(contextMenuShowing){
-        closeContextMenu();
+    if (d3.event){
+        d3.event.preventDefault();
     }
     currentNode = d;
     var _currentClass = d.name;
-    d3.select("#divNodeDetail").style("display","inline")
-
-        .style("top", (d.x+200)+"px")
-        .style("left", (d.y+400)+"px");
-
+    if(contextMenuShowing){
+        closeContextMenu();
+        $("#divNodeDetail").show();
+        //d3.select("#divNodeDetail").style("display","inline");
+    }else{
+        $("#divNodeDetail").show();
+        d3.select("#divNodeDetail")//.style("display","inline")
+            .style("top", (d.x+200)+"px")
+            .style("left", (d.y+400)+"px");
+    }
     d3.select("#btnCloseNodeDetail").attr("href", "javascript: closeContextMenu();");
     loadTitle(d);
     //Load tag section
@@ -779,10 +958,16 @@ function loadTitle(d){
 
 function loadTag(d){
     // New tag editor to display tags
-    $("#nodeTag .tag-editor").remove();
+    //console.log(d.tags);
+    //var initTags = d.tags;
+    //console.log($("#nodeTag ul"));
+    //$("#nodeTag .tag-editor").empty();
+    //$("#nodeTag .tag-editor").remove();
+    //init = null;
     $("#tagEditor").empty();
+    $('#tagEditor').tagEditor('destroy');
     $("#tagEditor").tagEditor({
-        initialTags:d.tags,
+        initialTags: d.tags,
         maxTags: 10,
         removeDuplicates: true,
         placeholder: "Add a tag",
@@ -797,12 +982,12 @@ function loadTag(d){
                     success: function(response){
                         //console.log(response.status);
                         if(response.status === "success"){
-                            //d.tags = new_tags;
+                            d.tags = new_tags;
                         }else if(response.status === "error"){
                             window.alert(response.message);
                         }},
                     failure: function(){window.alert("ajax error in updating tags")},
-            }); //TODO: show alert if failed? sequence of ajax?
+            });
         },
     });
 }
@@ -818,8 +1003,8 @@ function loadChild(d){ // load children in ContextMenu
 	}
     if (children){
         children.forEach(function(child){
-            console.log(child);
-            console.log(child.id);
+            //console.log(child);
+            //console.log(child.id);
             var msg = child.name
             if (child.title){
                 msg = child.title;
@@ -864,14 +1049,20 @@ function loadChild(d){ // load children in ContextMenu
             });
         }});
 }
+
+function showDivAddChild(){
+    d3.select("#btnShowAddChild").style("display", "none");
+    $("#divAddChild").show();
+//    d3.select("#divAddChild").style("display","inline");
+}
+
 function loadDivAddChild(d){
+    $_this = d3.select(this);
     btnShowAddChild = d3.select("#btnShowAddChild");
     currentClass = d.id;
-    btnShowAddChild.on("click", function(){
-            d3.select("#btnShowAddChild").style("display", "none");
-            d3.select("#divAddChild").style("display","inline");
-        });
-    d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
+    btnShowAddChild.on("click", showDivAddChild);
+    addChildUrl = "/api/addChild/"+currentClass;
+//    d3.select("#formAddChild").attr("action", "/api/addChild/"+currentClass);
     d3.select("#btnCancelAddChild").on("click", closeDivAddChild);
     $("#formAddChild").validate({
         rules: {
@@ -883,17 +1074,43 @@ function loadDivAddChild(d){
         errorPlacement: function(error, element) {
             error.insertAfter($("#btnCancelAddChild")); // <- the default
         },
+        submitHandler: function(form){
+            $.ajax({
+                type: 'post',
+                url: addChildUrl,
+                data: {"childName": $('#inputAddChild').val()},
+                dataType: "json",
+                success: function(response){
+                    if(response.status === "success"){
+                        console.log(response.message);
+                        //old_node = d3.selectAll("#graphcanvas svg g.node").filter(function(d){return d.id == response.new_node.id;});
+                        //console.log(old_node);
+                        //old_node.data([response.new_node], 0);
+                        //update(old_node[0]); //TODO: HOW TO UPDATE graph here?
+                        getGraph();
+                        contextmenu(response.new_node);
+                    }else if(response.status === "error"){
+                        window.alert(response.message);
+                    }
+                },
+                failure: function(){
+                    window.alert("ajax error in updating my node list");},
+            });
+        },
     });
 }
+
+
 function closeDivAddChild(){
-    d3.select("#btnShowAddChild").style("display", "inline");
+    $("#btnShowAddChild").show();
+//    d3.select("#btnShowAddChild").style("display", "inline");
     d3.select("#divAddChild").style("display","none");
     d3.select("#inputAddChild").property("value","");
 }
 
 function loadDivRef(d){
     $("#divReference").empty(); //TODO: 
-    d3.select("#btnAddReference").attr("href", "javascript: showAddRef()");
+    d3.select("#btnShowAddReference").attr("href", "javascript: showAddRef()");
     d3.select("#btnCancelUpload").on("click", closeDivAddRef);
     d3.select("#nodeIDInput").attr("value", d.id);
     divRef = d3.select("#divReference");
@@ -905,27 +1122,47 @@ function loadDivRef(d){
             .attr("style", "height:100px");*/
     d.thumbnails.forEach(function(thumb){
         //console.log("adding");
-        divRef.append("a").attr("class", "thumbnail")
+        cThumbnail = divRef.append("a").attr("class", "thumbnail")
 			//.data([{"src": thumb.url}],0)
-            .attr("style", "height:100px")
+            .attr("style", "height:110px; width:auto;")
             .attr("href", "/serve_reference/"+thumb.blob)
             .on("mouseover",function(){
                 $("#RefTipContent").empty();
                 pos = $(this).offset();
-                console.log(pos);
-                $("#divReftip").css({"top": pos.top + 20 , "left": pos.left +20 });
+                //console.log(pos);
+                $("#divReftip").css({"top": pos.top + 120 , "left": pos.left + 0 });
                 d3.select("#RefTipContent").append("h4").text(thumb.msg);
     //console.log(pos);
-                $("#divReftip").css("display","inline");
-                console.log("Show triggered");
+                $("#divReftip").show();//css("display","inline");
+                //console.log("Show triggered");
             })
             .on("mouseout",function(){
                 $("#divReftip").css("display", "none");
-                console.log("Close triggered");
-            }).append("img").attr("src", thumb.url)
-            .attr("alt", thumb.msg)
-            .attr("style", "height:100px");
+                //console.log("Close triggered");
+            })
+            .on("contextmenu", function(){
+                if (d3.event){
+                    d3.event.preventDefault();
+                }
+                if(refContextShowing){
+                    closeRefContext();
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
 
+                }else{
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                }
+                d3.select("#refIDInput").attr("value", thumb.id);
+                d3.select("#refNodeIDInput").attr("value", d.id);
+                d3.select("#refOwnerType").attr("value", "NODE");
+                d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                refContextShowing = true;
+
+            });
+        cThumbnail.append("img").attr("src", thumb.url)
+            .attr("alt", thumb.msg)
+            .attr("style", "height:100px;width:auto;");
 	});
 	divRef.selectAll("a").data(d.reference);
     $("#divReference").sortable({
@@ -942,9 +1179,29 @@ function loadDivRef(d){
             var new_reference_list = [];
             //console.log(event);
             //console.log(ui);
-            d3.selectAll("#divReference .thumbnail").each(function(d, i){
-                //console.log(d);
-                new_reference_list.push(d.toString());
+            d3.selectAll("#divReference .thumbnail").each(function(thumb, i){
+                //console.log(thumb);
+                new_reference_list.push(thumb.toString());
+            }).on("contextmenu", function(thumb){
+                if (d3.event){
+                    d3.event.preventDefault();
+                }
+                if(refContextShowing){
+                    closeRefContext();
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+
+                }else{
+                    pos = $(this).offset();
+                    $("#divRefContext").css({"display":"inline", "top":pos.top + 20, "left":pos.left +200});
+                }
+                //console.log(thumb);
+                //console.log(currentNode.id);
+                d3.select("#refIDInput").attr("value", thumb);
+                d3.select("#refNodeIDInput").attr("value", currentNode.id);
+                d3.select("#refOwnerType").attr("value", "NODE");
+                d3.select("#btnCancelDelete").attr("href", "javascript: closeRefContext();");
+                refContextShowing = true;
             });
             $.ajax({
                 type: 'post',
@@ -965,6 +1222,10 @@ function loadDivRef(d){
     });
 }
 
+function closeRefContext(){
+    $("#divRefContext").css("display", "none");
+}
+
 function showMsgCase(e){
     //console.log(e);
     $("#tooltipContent").empty();
@@ -975,7 +1236,7 @@ function showMsgCase(e){
     d3.select("#tooltipContent").append("h4").text(e.attr("alt"));
     //console.log(pos);
     placeDivTooltip(new_pos);
-    $("#divNodeTooltip").css("display","inline");
+    $("#divNodeTooltip").show();//css("display","inline");
     //console.log("Show triggered");
 }
 
@@ -992,13 +1253,7 @@ function closeDivRef(){
 
 
 
-function trimString(str, len, str_omit_sign){ // shorten
-    if(str.length <= len){
-        return str;
-    }
-    var trimmed = str.substring(0, len-str_omit_sign.length)+str_omit_sign;
-    return trimmed;
-}
+
 
 function placeDivTooltip(position){ // move divNodeTooltip pointer to new location
     var y = position.top - 25;

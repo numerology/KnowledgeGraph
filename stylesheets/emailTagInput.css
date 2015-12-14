@@ -1,0 +1,25 @@
+/*CSS file for email with tag-editor*/
+.tag-input ul{
+    padding-top:5px;
+    padding-bottom: 5px;
+    padding-left:5px;
+    padding-right: 5px;
+    font-size: 15px;
+    border: 1px solid #dce4ec;
+    border-radius: 4px;
+}
+.tag-input li {
+    padding: 0px;
+}
+.tag-input li div{
+    margin: 0px;
+    padding: 5px;
+}
+
+.red-tag .tag-editor-tag{
+    background-color: #ffd7d7 !important;
+    color: #c65353 !important;
+}
+.red-tag .tag-editor-delete{
+    background-color: #ffd7d7!important;
+}

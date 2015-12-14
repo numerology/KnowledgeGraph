@@ -15,6 +15,7 @@ import webapp2
 import jinja2
 import json
 import os
+import re
 
 from googleapiclient import discovery
 from oauth2client import appengine
@@ -23,7 +24,7 @@ from lib import httplib2
 from google.appengine.api import memcache
 
 
-def node_collapse(node):
+def node_collapse(node, default_data={}):
     '''
     :param node: a Node obj
     :return: formatted dict based on NDB data
@@ -32,40 +33,50 @@ def node_collapse(node):
     for r in node.reference:
         ref = Reference.get_by_id(int(r))
         current_description = ref.description
+        if not current_description:
+            current_description = "No description"
         if ref.type == IN_TYPE_IMG:
-            current_url=images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
+            current_url = images.get_serving_url(ref.blobkey) + '=s' + str(THUMBNAIL_SIZE)
         if ref.type == IN_TYPE_PDF:
-            current_url='http://cs.brown.edu/courses/cs015/images/pdf.png'
+            current_url = '/img/pdf.png'
+            # current_url = 'http://cs.brown.edu/courses/cs015/images/pdf.png'
         if ref.type == EXT_TYPE:
-            current_url=r.url
-        current_thumbs.append({"url": current_url, "msg": current_description, "blob":str(ref.blobkey)})
+            current_url = r.url
+        current_thumbs.append({"url": current_url, "msg": current_description, "blob":str(ref.blobkey), "id":r})
 
-    if len(node.childrenIDs) == 0:
-        return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
-                "tags": node.tags, "thumbnails": current_thumbs, 
-                "reference": node.reference, "childrenIDs": node.childrenIDs}
-    else:
+    result = {"name": node.name, "label": node.name, "title": node.title, "id": str(node.key.id()),
+              "tags": node.tags, "thumbnails": current_thumbs,
+              "reference": node.reference, "childrenIDs": node.childrenIDs}
+    result.update(default_data.copy())
+
+    if len(node.childrenIDs) > 0:
         children = []
         for childID in node.childrenIDs:
             cchild = node.get_by_id(int(childID))
-            children.append(node_collapse(cchild))
-        return {"name": node.name, "label":node.name, "title": node.title, "id": str(node.key.id()),
-                "tags": node.tags, "thumbnails": current_thumbs, "children": children, 
-                "reference": node.reference, "childrenIDs": node.childrenIDs}
+            children.append(node_collapse(cchild, default_data))
+        result["children"] = children
+    return result
+
 
 def node_deep_copy(target_node):
+
     result = Node(name = target_node.name,
                   title = target_node.title,
                   definition = target_node.definition,
                   tags = target_node.tags, #TODO: check the copy of array is shallow or deep
                   childrenIDs = [],
-                  trending = target_node.trending,
                   reference = target_node.reference) #Since users are not allowed to delete or edit a reference item,
+
+
                                                     # i think it is okay to do shallow copy here
     for c in target_node.childrenIDs:
         child = Node.get_by_id(int(c))
         new_child = node_deep_copy(child)
         result.childrenIDs.append(str(new_child.key.id()))
+
+
+    result.put()
+
 
     return result
 
@@ -97,22 +108,32 @@ class AddChildHandler(webapp2.RequestHandler):
 
         ACTION_QUEUE.put()
 
-
-        self.redirect('/')
+        # self.redirect('/')
+        response = {"status":"success",
+                    "message": (child_node.name + " added to " + cnode.name),
+                    "new_node": node_collapse(cnode)}
+        self.response.headers['Content-Type'] = 'text/plain'
+        self.response.out.write(json.dumps(response))
+        return
 
 
 class AddRoot(webapp2.RequestHandler):
     def post(self, user_id):
+        print "ADD ROOT"
+        root_name = self.request.get('root_name')
+        title = self.request.get('title_name')
+
+        print "AddRoot: "+root_name+" title: " + title
+
         cuser = User.get_by_id(int(user_id))
 
         plus_id = cuser.plusid
-        root_name = self.request.get('root_name')
-        title = self.request.get('title')
         new_root = Node(name=root_name, title=title ,childrenIDs=[], reference=[])
         new_root.put()
         cuser.rootID.append(str(new_root.key.id()))
         # cuser.titles.append(title)
         cuser.put()
+
 
         caction = Action(nodeid = str(new_root.key.id()), plusid = plus_id)
         caction.put()
@@ -128,65 +149,10 @@ class AddRoot(webapp2.RequestHandler):
 
         ACTION_QUEUE.put()
 
-
-
-        self.redirect('/')
-
-
-"""class AddTag(webapp2.RequestHandler):
-    def post(self, node_name):
-        cnode = Node.query(Node.name == node_name).get()
-        tagstring = self.request.get('tagString')
-        tag_list = tagstring.split(';')
-        for tag in tag_list:
-            cnode.tags.append(tag)
-
-        cnode.put()
-        self.redirect('/')
-"""
-
-"""
-class UpdateTag(webapp2.RequestHandler):
-    def post(self):
-        node_name = self.request.get("name")
-        new_tags = json.loads(self.request.get("new_tags"))
-        # print "updata tag for " + node_name
-        # print new_tags
-        if not new_tags:
-            new_tags = []
-        cnode = Node.query(Node.name == node_name).get()
-        response = {"status": "success", "message": "added"}
-        if cnode:
-            # print "node found"
-            cnode.tags = new_tags
-            cnode.put()
-        else:
-            response["status"] = "error"
-            response["message"] = "Node not found"
+        response = {"status":"success", "message": root_name+" created"}
         self.response.out.write(json.dumps(response))
-"""
-
-"""
-class UpdateTitle(webapp2.RequestHandler):
-    def post(self):
-        node_name = self.request.get("name")
-        new_title = self.request.get("new_title")
-        response = {"status": "success", "message": "title changed"}
-        if not new_title:
-            response["status"] = "error"
-            response["message"] = "New title is empty"
-            print "Update title: empty title"
-        else:
-            cnode = Node.query(Node.name == node_name).get()
-            if cnode:
-                print "Updata title: " + new_title
-                # TODO: change title here ...
-                # cnode.put()
-            else: 
-                response["status"] = "error"
-                response["message"] = "Node not found"
-        self.response.write(json.dumps(response))
-"""
+        # self.redirect('/')
+        return
 
 
 class UpdateRootList(webapp2.RequestHandler):
@@ -207,6 +173,7 @@ class UpdateRootList(webapp2.RequestHandler):
                         print "update root: current root empty!"
                     user.currentrootID = new_my_node_list[0]
                     print "update root: change current root id"
+                    response["current_root_changed"] = True
                 user.put()
             elif root_type == "SHARED_ROOT":
                 user.sharedID = new_my_node_list
@@ -214,7 +181,7 @@ class UpdateRootList(webapp2.RequestHandler):
             else:
                 response["status"] = "error"
                 response["message"] = "Add type not found"
-        self.response.write(json.dumps(response))
+        self.response.out.write(json.dumps(response))
 
 
 class UpdateNode(webapp2.RequestHandler):
@@ -253,11 +220,13 @@ class UpdateNode(webapp2.RequestHandler):
                 cnode.reference = new_reference_list
                 response["message"] += " reference changed"
             cnode.put()
-        self.response.write(json.dumps(response))
+        self.response.out.write(json.dumps(response))
 
 
 class UpdateClipboard(webapp2.RequestHandler):
     def post(self):
+        print self.request.get("userID")
+        print int(self.request.get("userID"))
         user_id = int(self.request.get("userID"))
         response = {"status": "success", "message": "Clipboard updated"}
         cuser = User.get_by_id(user_id)
@@ -281,7 +250,7 @@ class UpdateClipboard(webapp2.RequestHandler):
             clip_node.put()
             # user.rootID = new_reference_list
             # user.put()
-        self.response.write(json.dumps(response))
+        self.response.out.write(json.dumps(response))
 
 
 class UpdateClipboardSocial(webapp2.RequestHandler):
@@ -308,7 +277,12 @@ class UpdateClipboardSocial(webapp2.RequestHandler):
                         target_node = Node.get_by_id(int(cuser.clipboardID))
                         new_node = node_deep_copy(target_node)
 
-                clip_node.childrenIDs = new_child_list
+                id = new_child_list[-1]
+                target_node = Node.get_by_id(int(id))
+                new_node = node_deep_copy(target_node)
+
+
+                clip_node.childrenIDs.append(str(new_node.key.id()))
                 response["message"] += " children updated"
             '''
                 # DO not need reference stuff
@@ -354,7 +328,48 @@ class CreateRoot(webapp2.RequestHandler):
         new_user_prof = User(email=user_email, plusid = plus_id , rootID=rtIDlist, currentrootID=rtIDlist[0], clipboardID=str(new_clipboard.key.id()))
         new_user_prof.put()
         time_sleep(NDB_UPDATE_SLEEP_TIME)
+
         self.redirect('/graph')
+        return
+
+
+class DeleteRefHandler(webapp2.RequestHandler):
+    def post(self):
+        ref_id = self.request.get("ref_ID")
+        node_id = self.request.get("node_ID")
+        cRef = Reference.get_by_id(int(ref_id))
+        cNode = Node.get_by_id(int(node_id))
+        response = {"status":"success",
+                    "message": "Ref deleted",}
+        if not cRef:
+            response["status"] = "error"
+            response["message"] = "can not find reference " + str(ref_id)
+        elif not cNode:
+            response["status"] = "error"
+            response["message"] = "can not find node " + str(node_id)
+        else:
+            blobstore.delete(cRef.blobkey)
+            cNode.reference.remove(ref_id)
+            cNode.put()
+            response["new_data"]=node_collapse(cNode)
+        self.response.out.write(json.dumps(response))
+        return
+
+class UpdateRefHandler(webapp2.RequestHandler):
+    def post(self):
+
+        node_id = self.request.get("node_ID")
+
+        cNode = Node.get_by_id(int(node_id))
+        response = {"status":"success",
+                    "message": "Ref updated",}
+        if not cNode:
+            response["status"] = "error"
+            response["message"] = "can not find node " + str(node_id)
+        else:
+            time_sleep(NDB_UPDATE_SLEEP_TIME)
+            response["new_data"]=node_collapse(cNode)
+        self.response.out.write(json.dumps(response))
         return
 
 
@@ -423,7 +438,7 @@ class GenerateUploadUrlHandler(webapp2.RequestHandler):
         cnode = Node.get_by_id(int(node_id))
        # bkey = cnode.reference[0].blob_key
 
-        self.response.out.write(json.dumps({'upload_url':'/upload_file'}))
+        self.response.out.write(json.dumps({'upload_url':blobstore.create_upload_url('/upload_file')}))
 
 
 class getPDF(blobstore_handlers.BlobstoreDownloadHandler):
@@ -469,6 +484,8 @@ class MiniDeleteFigHandler(webapp2.RequestHandler):
 
         return
 '''
+
+
 class RefreshHandler(webapp2.RequestHandler):
     def get(self, node_id):
         cnode = Node.get_by_id(int(node_id))
@@ -525,13 +542,13 @@ class ReturnJSON(webapp2.RequestHandler):
         return
 
 
-class getIndexData(webapp2.RequestHandler): # return all the nodes for index view
+class ReturnIndexData(webapp2.RequestHandler): # return all the nodes for index view
     def get(self,user_id):
         response = {'status':"success", "message": "get index nodes succeed"}
         current_user = User.get_by_id(int(user_id))
         if not current_user:
-            response["status"]="error"
-            response["message"]="user not found"
+            response["status"] = "error"
+            response["message"] = "user not found"
         else:
             response['myNode'] = []
             response['sharedNode'] = []
@@ -540,7 +557,8 @@ class getIndexData(webapp2.RequestHandler): # return all the nodes for index vie
                 response['myNode'].append(node_collapse(root_node))
             for root_id in current_user.sharedID:
                 root_node = Node.get_by_id(int(root_id))
-                response["sharedNode"].append(node_collapse(root_node))
+                temp_data = node_collapse(root_node, {"is_shared": True})
+                response["sharedNode"].append(temp_data)
             clipboard_data = node_collapse(Node.get_by_id(int(current_user.clipboardID)))
             clipboard_data["is_clipboard"] = True
             clipboard_data["label"] = "Clipboard"
@@ -548,6 +566,7 @@ class getIndexData(webapp2.RequestHandler): # return all the nodes for index vie
         self.response.headers['Content-Type'] = 'text/plain'
         self.response.out.write(json.dumps(response))
         return
+
 
 class ReturnActions(webapp2.RequestHandler):
     @decorator.oauth_required
@@ -572,8 +591,8 @@ class ReturnActions(webapp2.RequestHandler):
         for a in ACTION_QUEUE.actions:
             if a.plusid in friend_name.keys():
                 cnode = Node.get_by_id(int(a.nodeid))
-
-                output_actions.append({'node_name': cnode.name,
+                if cnode is not None:
+                    output_actions.append({'node_name': cnode.name,
                                        'node_id': a.nodeid,
                                        'user_name': friend_name[a.plusid],
                                        'plusID':a.plusid,
@@ -634,6 +653,8 @@ class ReturnRoots(webapp2.RequestHandler):
             current_root = Node.get_by_id(int(r))
             pair = {'msg': current_root.title,
                     'rootID': r, 'root_name': current_root.name}
+            if not current_root.title:
+                pair["msg"] = current_root.name
             out_list.append(pair)
 
         self.response.headers['Content-Type'] = 'text/plain'
@@ -641,17 +662,20 @@ class ReturnRoots(webapp2.RequestHandler):
         return
 
 
-class ReturnShares(webapp2.RequestHandler):
+class ReturnSharedNodes(webapp2.RequestHandler):
     def get(self, user_id):
         current_user = User.get_by_id(int(user_id))
         out_list = []
         for r in current_user.sharedID:
             current_root = Node.get_by_id(int(r))
-            pair = {'msg': current_user.sharedtitles[current_user.sharedID.index(r)], 'rootID':r, 'root_name':current_root.name}
+            temp_msg = current_root.title
+            if not temp_msg:
+                temp_msg = current_root.name
+            pair = {'msg': temp_msg, 'rootID': r, 'root_name':current_root.name}
             out_list.append(pair)
 
         self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write(json.dumps({'shared_list':out_list}))
+        self.response.out.write(json.dumps({'shared_list': out_list}))
         return
 
 
@@ -680,6 +704,7 @@ class UpdateRoot(webapp2.RequestHandler):
 
         return
 
+
 class ServeReference(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self,blobkey):
         key = BlobKey(blobkey)
@@ -690,16 +715,31 @@ class ServeReference(blobstore_handlers.BlobstoreDownloadHandler):
         '''
         self.send_blob(key)
 
+
 class ShareRoot(webapp2.RequestHandler):
-    def post(self,root_id,user_id):
-        target_mail = self.request.get("target_mail")
+    def post(self, root_id, user_id):
+        mail_string = self.request.get("target_email")
+        share_message = self.request.get("share_message") # TODO: can somehow use share message
+        mail_list = parseEmailString(mail_string)
+        print("mailstring is "+ str(mail_list))
         cuser = User.get_by_id(int(user_id))
-        target_user = User.query(User.email == target_mail).get()
-        target_user.sharedID.append(root_id)
-        croot = Node.get_by_id(int(root_id))
-        target_user.sharedtitles.append(croot.title)
-        target_user.put()
-        self.redirect('/')
+        # print "Share Root"
+        # print mail_list
+        response = {"status": "success",
+                    "message": "node shared to"}
+        shared_num = 0
+        for target_mail in mail_list:
+            print(target_mail[:-1])
+            target_user = User.query(User.email == str(target_mail[:-1])).get()
+            if target_user:
+                target_user.sharedID.append(root_id)
+         #       target_user.sharedtitles.append(cuser.titles[cuser.rootID.index(root_id)])
+                target_user.put()
+                shared_num  = shared_num+1
+        response["message"] = response["message"] + " " + str(shared_num) + " users"
+        # self.redirect(self.request.uri)
+        self.response.out.write(json.dumps(response))
+    #    assert(1==0)
         return
 
 """
@@ -722,3 +762,42 @@ class UpdateTag(webapp2.RequestHandler):
             response["message"] = "Node not found"
         self.response.out.write(json.dumps(response))
 """
+
+
+class CopyToNode(webapp2.RequestHandler):
+    def post(self):
+        response = {'status': "error", "message": "ERROR"}
+        user_id = self.request.get("userID")
+        copied_node_id = self.request.get("copiedNodeID")
+        target_node_id = self.request.get("targetNodeID")
+        if not user_id:
+            response["message"] = "No user id sent to server"
+        elif not copied_node_id:
+            response["message"] = "No copy node id sent to server"
+        elif not target_node_id:
+            response["message"] = "No target node id sent to server"
+        elif copied_node_id == target_node_id:
+            response["message"] = "Cannot copy node to itself"
+        else:
+            current_user = User.get_by_id(int(user_id))
+            copied_node = Node.get_by_id(int(copied_node_id))
+            target_node = Node.get_by_id(int(target_node_id))
+            if not current_user:
+                response["message"] = "Fail to find user"
+            elif not copied_node:
+                response["message"] = "Fail to find copied node"
+            elif not target_node:
+                response["message"] = "Fail to find target node"
+            else:
+                new_copied_node = node_deep_copy(copied_node)
+                new_copied_node.put()
+                target_node.childrenIDs.append(str(new_copied_node.key.id()))
+                response["message"] = "success"
+                response["message"] = "Copy " + new_copied_node.name + " to " + target_node.name
+        self.response.out.write(json.dumps(response))
+        return
+
+
+def parseEmailString(mail_string):
+    mail_list = filter(None, mail_string.split(r'[,;]'))
+    return mail_list

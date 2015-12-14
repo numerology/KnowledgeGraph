@@ -23,8 +23,8 @@ class Node(ndb.Model):
     definition = ndb.StringProperty()
     tags = ndb.StringProperty(repeated=True)
     childrenIDs = ndb.StringProperty(repeated=True)
-   # trending = ndb.IntegerProperty(repeated=True)
     reference = ndb.StringProperty(repeated=True)
+
 
 class Action(ndb.Model):
     plusid = ndb.StringProperty()
@@ -42,5 +42,6 @@ class User(ndb.Model):
     currentrootID = ndb.StringProperty()
     clipboardID = ndb.StringProperty()
 
+
 class Actionqueue(ndb.Model):
-    actions = ndb.StructuredProperty(Action,repeated = True)
+    actions = ndb.StructuredProperty(Action,repeated=True)

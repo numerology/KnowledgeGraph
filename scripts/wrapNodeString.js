@@ -1,7 +1,7 @@
 //This file contain the function to wrap string for node in d3
 
 //YW: used to place tspan and measure text width
-var helperTspan = d3.select(".helper").append("div")
+var helperTspan = d3.select(".text-helper").append("div")
                   .append("svg").attr({"height": 100, "width": 100})
                   .append("g").attr("class","node").append("text").append("tspan");
 
@@ -65,4 +65,12 @@ function wrap(text, width) { // function copied from bl.ocks.org/mbostock/755532
             //console.log(my_dy + dy_offset);
         });
     });
+}
+
+function trimString(str, len, str_omit_sign){ // shorten
+    if(str.length <= len){
+        return str;
+    }
+    var trimmed = str.substring(0, len-str_omit_sign.length)+str_omit_sign;
+    return trimmed;
 }
