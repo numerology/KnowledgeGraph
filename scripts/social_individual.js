@@ -32,7 +32,7 @@ d3.json("/get_individual_action_list/" + userID + "/" + targetPlusID, function(r
 function addActionItem(divSelector, data, id){
     // add single node to selected div
 
-    tempTextRow = d3.select("#divText").append("div").attr("class","row")
+    tempTextRow = d3.select("#divText").append("div").attr("class","breadcrumb")
         .attr("align", "center")
         .attr("id", id + "text")
         .attr("style", "height:113px");
@@ -40,7 +40,7 @@ function addActionItem(divSelector, data, id){
     tempTextRow.append("img").attr("src", data.fig);
 
 
-    tempNode = divSelector.append("svg").attr({"width":"110px", "height": "110px"}).append("g")
+    tempNode = divSelector.append("svg").attr({"width":"110px", "height": "129px"}).append("g")
              .attr("class", "node")
              .style("cursor", "pointer");
 //    divSelector.append("br");

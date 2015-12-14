@@ -117,6 +117,7 @@ $("#divActions").sortable({
                 console.log(e);
               });
             console.log("temp node list: "+JSON.stringify(temp_node_list) );
+            /*
             $.ajax({
                 type: 'post',
                 url: '/api/update_root',
@@ -131,6 +132,7 @@ $("#divActions").sortable({
                 failure: function(){
                     window.alert("ajax error in updating shared node list");},
             });
+            */
         }
     });
 
